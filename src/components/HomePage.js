@@ -38,14 +38,28 @@ function HomePage() {
 
     return (
         <div className="HomePage">
+            {/* Показываем страницу автора, если showAuthorPage true */}
             {showAuthorPage ? (
-                <AuthorPage authorData={authorData} onSelectPainting={setSelectedPainting} onClose={closeAuthorPage} />
+                <AuthorPage
+                    authorData={authorData}
+                    onSelectPainting={setSelectedPainting}
+                    onClose={closeAuthorPage}
+                />
             ) : (
-                <Gallery paintings={paintings} onSelectPainting={setSelectedPainting} onSelectAuthor={loadAuthorPage} />
+                <Gallery
+                    paintings={paintings}
+                    onSelectPainting={setSelectedPainting}
+                    onSelectAuthor={loadAuthorPage}
+                />
             )}
-            {selectedPainting && (
-                    <PaintingDetailsModal painting={selectedPainting} onClose={() => setSelectedPainting(null)} />
-            )}
+
+            {/* Показываем модалку картины, только если selectedPainting не null */}
+            {selectedPainting ? (
+                <PaintingDetailsModal
+                    painting={selectedPainting}
+                    onClose={() => setSelectedPainting(null)}
+                />
+            ) : null}
         </div>
     );
 }
