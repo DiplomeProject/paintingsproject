@@ -1,5 +1,5 @@
 const express = require('express');
-const mysql = require('mysql');
+const mysql = require('mysql2');
 const cors = require('cors');
 const bcrypt = require('bcrypt');
 const multer = require('multer');
@@ -36,7 +36,7 @@ const upload = multer({ storage: storage });
 const con = mysql.createConnection({
     host: "localhost",
     user: "root",
-    password: "11111",
+    password: "root",
     database: "artgallery"
 });
 
