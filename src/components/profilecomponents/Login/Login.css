@@ -1,7 +1,7 @@
 .login-form {
     width: 18vw;
     margin: 0 auto;
-    height:  44.4vh;
+    height:  47.4vh;
     padding: 20px;
     padding-bottom: 50px;
     border: 1px solid #ddd;
@@ -81,7 +81,9 @@
     position: relative;
     left: 4%;
     cursor: pointer;
+    border-radius:10px;
     margin-top: 4%;
+    box-shadow: 0 6px 14px rgba(111,96,240,0.3);
 }
 
 

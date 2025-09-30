@@ -1,44 +1,147 @@
-.register-form {
-  max-width: 450px;
-  margin: 30px auto;
-  padding: 25px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  background-color: #fefefe;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-  font-family: Arial, sans-serif;
+
+.register-container{
+  max-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background:transparent;
+  padding: 40px;
+  margin-top: 13vh;
 }
 
-.register-form h2 {
+.register-card{
+  width: 360px;
+  background: #f3f3f6;
+  border-radius: 12px;
+  padding: 22px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.4);
   text-align: center;
-  margin-bottom: 20px;
-  color: #333;
 }
 
-.form-group {
-  margin-bottom: 15px;
+.reg-via{
+  font-weight: 600;
+  color: #222;
+  margin-bottom: 10px;
 }
 
-.form-label {
-  display: block;
-  margin-bottom: 5px;
-  font-weight: bold;
-  font-size: 14px;
-  color: #555;
+/* Соц-кнопки */
+.social-row{
+  display:flex;
+  gap:12px;
+  justify-content:center;
+  margin-bottom:14px;
+}
+.social{
+  width:56px;
+  height:56px;
+  border-radius:10px;
+  border:none;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+}
+.social.twitter{ background:#1DA1F2; }
+.social.facebook{ background:#1877F2; }
+.social.mail{ background:#FF5A5F; }
+
+
+.reg-email{
+  font-weight:700;
+  margin-top:10px;
+  margin-bottom:14px;
+  color:#222;
 }
 
-.form-input {
-  width: 100%;
-  padding: 8px 12px;
-  font-size: 14px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  box-sizing: border-box;
+.field{
+  position:relative;
+  margin-bottom:12px;
+}
+.field input{
+  width:90%;
+  padding:12px 14px;
+  border-radius:20px;
+  border: none;
+  outline: none;
+  background: linear-gradient(0deg, #32183a, #3b214d);
+  color: #fff;
+  font-size:14px;
+  box-shadow: inset 0 -2px 0 rgba(0,0,0,0.25);
+}
+.field input::placeholder{ color: #d4bddf; }
+
+.calendar-placeholder{
+  position:absolute;
+  right:12px;
+  top:50%;
+  transform:translateY(-50%);
+  pointer-events:none;
+  font-size:14px;
+  color:#f3e7ff;
+}
+
+.pw-field .eye-btn{
+  position:absolute;
+  right:8px;
+  top:50%;
+  transform:translateY(-50%);
+  height:32px;
+  width:32px;
+  border-radius:8px;
+  border:none;
+  background:transparent;
+  display:flex;
+  align-items:center;
+  gap:60px;
+  justify-content:center;
+  cursor:pointer;
 }
 
 
-p {
-  font-size: 14px;
-  color: #555;
-  margin-bottom: 15px;
+.btn-next{
+  margin-top:10px;
+  width:30%;
+  padding:10px;
+  border-radius:10px;
+  border:none;
+  cursor:pointer;
+  background: linear-gradient(90deg,#6f60f0,#7f6bf8);
+  color:white;
+  font-weight:600;
+  transition: ease-in-out 0.3s;
+  box-shadow: 0 6px 14px rgba(111,96,240,0.3);
+}
+
+.btn-login{
+  margin-top:10px;
+  width:30%;
+  padding:10px;
+  border-radius:10px;
+  border:none;
+  cursor:pointer;
+  background: transparent;
+  color:black;
+  font-weight:600;
+  transition: ease-in-out 0.3s;
+  box-shadow: 0 6px 14px rgba(111,96,240,0.3);
+}
+
+
+.btn-next:hover {
+  transform: scale(1.1);
+}
+
+.btn-login:hover {
+  transform: scale(1.1);
+}
+
+
+.btn-next,
+.btn-login {
+  margin-right: 42px;
+}
+
+.btn-login {
+  margin-right: 0;
 }

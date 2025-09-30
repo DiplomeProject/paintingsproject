@@ -26,7 +26,7 @@ function Login({ handleLogin, handleInputChange, toggleForm }) {
                 />
             </div>
             <div className="button-group">
-                <button type="submit" className="btn btn-primary">Увійти</button>
+                <button type="submit" className="btn-next">Увійти</button>
                 <button type="button" onClick={toggleForm} className="btn btn-secondary">
                     Зареєструватися
                 </button>

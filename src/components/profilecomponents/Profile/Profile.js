@@ -93,22 +93,28 @@ function Profile() {
         }
     };
 
-    const handleRegister = async (e) => {
-        e.preventDefault();
-        try {
-            const response = await axios.post('http://localhost:8080/register', {
-                name: formData.name,
-                surname: formData.surname,
-                email: formData.email,
-                password: formData.password,
-            }, { withCredentials: true });
-            setUser(response.data.user);
-            alert("Реєстрація успішна");
-        } catch (error) {
-            console.error('Registration failed:', error);
-            alert('Ошибка при регистрации');
-        }
+    const handleRegister = async (e, formData) => {
+    e.preventDefault();
+    try {
+        const response = await axios.post(
+        "http://localhost:8080/register",
+        {
+            name: formData.name,
+            surname: formData.surname,
+            email: formData.email,
+            password: formData.password,
+        },
+        { withCredentials: true }
+        );
+
+        alert("Реєстрація успішна, увійдіть у свій акаунт");
+        setIsLogin(true);
+    } catch (error) {
+        console.error("Registration failed:", error);
+        alert("Помилка при реєстрації");
+    }
     };
+
 
     const toggleForm = () => setIsLogin(!isLogin);
 
@@ -166,10 +172,14 @@ function Profile() {
                 ) : (
                     <div className="container">
                         {isLogin ? (
-                            <Login handleLogin={handleLogin} handleInputChange={handleInputChange} toggleForm={toggleForm} />
-                        ) : (
-                            <Register toggleForm={toggleForm} />
-                        )}
+                            <Login
+                                handleLogin={handleLogin}
+                                handleInputChange={handleInputChange}
+                                toggleForm={toggleForm}
+                            />
+                            ) : (
+                            <Register handleRegister={handleRegister} toggleForm={toggleForm} />
+                            )}
                     </div>
                 )}
 
