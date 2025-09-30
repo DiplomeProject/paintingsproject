@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import Gallery from './Gallery';
-import AuthorPage from './AuthorPage';
-import PaintingDetailsModal from './PaintingDetailsModal';
+import Gallery from '../Gallery/Gallery';
+import AuthorPage from './AuthorPage/AuthorPage';
+import PaintingDetailsModal from './PaintingsDetailsModal/PaintingsDetailsModal';
 
-function HomePage() {
+function HomePage() {   
     const [paintings, setPaintings] = useState([]);
     const [selectedPainting, setSelectedPainting] = useState(null);
     const [showAuthorPage, setShowAuthorPage] = useState(false);
