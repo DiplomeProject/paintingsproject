@@ -1,42 +1,14 @@
-import express from 'express';
-import sqlite3 from 'sqlite3';
-import cors from 'cors';
-import bcrypt from 'bcrypt';
-import multer from 'multer';
-import path from 'path';
-import fs from 'fs';
-import session from 'express-session';
-import crypto from 'crypto';
+const express = require('express');
+const mysql = require('mysql2');
+const cors = require('cors');
+const bcrypt = require('bcrypt');
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
 
 const app = express();
 const port = process.env.PORT || 8080;
-const db = new sqlite3.Database('./artgallery.db');
-
-db.serialize(() => {
-    db.run(`
-        CREATE TABLE IF NOT EXISTS creators (
-            Creator_ID INTEGER PRIMARY KEY AUTOINCREMENT,
-            Name TEXT NOT NULL,
-            Surname TEXT NOT NULL,
-            Email TEXT UNIQUE NOT NULL,
-            Password TEXT NOT NULL,
-            Other_Details TEXT,
-            Image TEXT
-        )
-    `);
-
-    db.run(`
-        CREATE TABLE IF NOT EXISTS Paintings (
-            Painting_ID INTEGER PRIMARY KEY AUTOINCREMENT,
-            Title TEXT NOT NULL,
-            Description TEXT NOT NULL,
-            Creator_ID INTEGER NOT NULL,
-            Creation_Date TEXT DEFAULT CURRENT_TIMESTAMP,
-            Image TEXT,
-            FOREIGN KEY (Creator_ID) REFERENCES creators (Creator_ID)
-        )
-    `);
-});
+const session = require('express-session');
 
 const createDirectory = (dir) => {
     if (!fs.existsSync(dir)) {
@@ -45,24 +17,31 @@ const createDirectory = (dir) => {
 };
 
 const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
+    destination: function (req, file, cb) {
         if (!req.session.user || !req.session.user.email) {
             return cb(new Error('User not authenticated or email not found'), null);
         }
         const email = req.session.user.email;
-        const userDir = path.join('public', email.split('@')[0]);
+        const userDir = path.join(__dirname, 'public', email.split('@')[0]);
         createDirectory(userDir);
         cb(null, userDir);
     },
-    filename: (req, file, cb) => {
+    filename: function (req, file, cb) {
         cb(null, Date.now() + path.extname(file.originalname));
     }
 });
 
-const upload = multer({ storage });
+const upload = multer({ storage: storage });
+
+const con = mysql.createConnection({
+    host: "localhost",
+    user: "root",
+    password: "root",
+    database: "artgallery"
+});
 
 app.use(session({
-    secret: crypto.randomBytes(64).toString('hex'),
+    secret: require('crypto').randomBytes(64).toString('hex'),
     resave: false,
     saveUninitialized: false,
     cookie: {
@@ -72,30 +51,49 @@ app.use(session({
     }
 }));
 
+app.use(express.json());
+
 app.use(cors({
     origin: 'http://localhost:3000',
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'x-ijt', 'Authorization'],
-    credentials: true
+    credentials: true 
 }));
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+
+const start = async () => {
+    try {
+        await con.connect(err => {
+            if (err) {
+                console.error('Ошибка подключения к базе данных:', err);
+                return;
+            }
+            console.log('Подключение к базе данных успешно установлено');
+        });
+        app.listen(port, () => console.log(`Server started on port ${port}`));
+    } catch (e) {
+        console.log(e);
+    }
+};
+
+start();
 
 
 app.get('/api/paintings', (req, res) => {
     const sql = `
-        SELECT p.Painting_ID, p.Title, p.Image, p.Description,
-               p.Creator_ID, c.Name AS author_name, c.Surname AS author_surname
-        FROM Paintings p
-        JOIN creators c ON p.Creator_ID = c.Creator_ID
+        SELECT
+            Paintings.Painting_ID, Paintings.title, Paintings.Image, paintings.Description ,
+            Paintings.Creator_ID, creators.name AS author_name, creators.surname AS author_surname
+        FROM Paintings
+                 JOIN creators ON Paintings.Creator_ID = creators.Creator_ID
     `;
-    db.all(sql, [], (err, rows) => {
+    con.query(sql, (err, results) => {
         if (err) {
-            console.error(err);
-            return res.status(500).send('Error fetching paintings');
+            console.error('Ошибка при выполнении SQL запроса:', err);
+            res.status(500).send('Error fetching paintings');
+            return;
         }
-        res.json(rows);
+        res.json(results);
     });
 });
 
@@ -104,68 +102,120 @@ app.post('/register', (req, res) => {
     const saltRounds = 10;
 
     bcrypt.hash(password, saltRounds, (err, hash) => {
-        if (err) return res.status(500).json({ error: 'Ошибка хэширования' });
+        if (err) {
+            console.error('Ошибка хэширования:', err);
+            return res.status(500).json({ error: 'Ошибка при хэшировании пароля' });
+        }
+
+        console.log('Данные для регистрации:', name, surname, email, hash);
+        console.log('SQL query values:', [name, surname, email, hash]);
 
         const sql = `INSERT INTO creators (Name, Surname, Email, Password) VALUES (?, ?, ?, ?)`;
-        db.run(sql, [name, surname, email, hash], function (err) {
+        con.query(sql, [name, surname, email, hash], (err, result) => {
             if (err) {
-                console.error(err);
-                return res.status(500).json({ error: 'Ошибка при регистрации' });
+                console.error('Ошибка SQL:', err);
+                return res.status(500).json({ error: 'Ошибка базы данных при регистрации пользователя' });
             }
-            res.status(201).json({ success: true, message: 'User registered' });
+            res.status(201).json({ success: true, message:'User registered'});
         });
     });
 });
 
 app.post('/checkEmail', (req, res) => {
     const { email } = req.body;
-    db.get('SELECT Email FROM creators WHERE Email = ?', [email], (err, row) => {
-        if (err) return res.status(500).json({ error: 'DB error' });
-        res.json({ exists: !!row });
+
+    const sql = 'SELECT Email FROM creators WHERE Email = ?';
+    con.query(sql, [email], (err, results) => {
+        if (err) {
+            console.error('Ошибка при выполнении запроса на проверку электронной почты:', err);
+            return res.status(500).json({ error: 'Ошибка базы данных при проверке электронной почты' });
+        }
+
+        if (results.length > 0) {
+            res.json({ exists: true });
+        } else {
+            res.json({ exists: false });
+        }
     });
 });
 
+app.get('/some-page', (req, res) => {
+    if (req.session.user) {
+        res.send('This is some page with session');
+    } else {
+        res.send('No session available');
+    }
+});
+
+
 app.post('/login', (req, res) => {
     const { email, password } = req.body;
-    db.get('SELECT * FROM creators WHERE Email = ?', [email], (err, user) => {
-        if (err) return res.status(500).send('DB error');
-        if (!user) return res.status(401).json({ success: false, message: 'User not found' });
-
-        bcrypt.compare(password, user.Password, (err, result) => {
-            if (err) return res.status(500).send('Error comparing passwords');
-            if (!result) return res.status(401).json({ success: false, message: 'Password mismatch' });
-
-            req.session.user = {
-                id: user.Creator_ID,
-                name: user.Name,
-                surname: user.Surname,
-                email: user.Email,
-                bio: user.Other_Details || '',
-                profileImage: user.Image || 'img/icons/profile.jpg'
-            };
-            res.json({ success: true, message: 'Login successful', user: req.session.user });
+    console.log("Login attempt for email:", email);
+    const sql = 'SELECT * FROM creators WHERE Email = ?';
+    con.query(sql, [email], (err, results) => {
+        if (err) {
+            console.error('Error executing SQL:', err);
+            return res.status(500).send('Internal Server Error');
+        }
+        console.log("SQL query successful, number of results:", results.length);
+        if (results.length === 0) {
+            return res.status(401).json({ success: false, message: 'Authentication failed' });
+        }
+        bcrypt.compare(password, results[0].Password, (err, result) => {
+            console.log("Attempting to compare passwords", { inputPassword: password, storedHash: results[0].Password });
+            if (!results[0].Password) {
+                console.error('No password hash available in the database for the user.');
+                return res.status(500).json({ success: false, message: 'No password hash available.' });
+            }
+            if (err) {
+                console.error('Error comparing passwords:', err);
+                return res.status(500).json({ success: false, message:'Error checking password'});
+            }
+            console.log("Password comparison result:", result);
+            if (result) {
+                req.session.user = {
+                    id: results[0].Creator_ID,
+                    name: results[0].Name,
+                    surname: results[0].Surname,
+                    email: results[0].Email,
+                    bio: results[0].Other_Details,
+                    profileImage: results[0].Image || 'img/icons/profile.jpg'
+                };
+                res.json({ success: true, message: 'Login successful', user: req.session.user });
+            } else {
+                res.status(401).json({ success: false, message: 'Password mismatch' });
+            }
         });
     });
 });
 
 app.get('/check-session', (req, res) => {
-    if (!req.session.user) return res.json({ loggedIn: false });
-    const { id } = req.session.user;
-
-    db.get('SELECT * FROM creators WHERE Creator_ID = ?', [id], (err, user) => {
-        if (err) return res.status(500).json({ loggedIn: false });
-        if (!user) return res.json({ loggedIn: false });
-
-        req.session.user = {
-            id: user.Creator_ID,
-            name: user.Name,
-            surname: user.Surname,
-            email: user.Email,
-            bio: user.Other_Details || '',
-            profileImage: user.Image || 'img/icons/profile.jpg'
-        };
-        res.json({ loggedIn: true, user: req.session.user });
-    });
+    if (req.session.user) {
+        const userId = req.session.user.id;
+        const sql = 'SELECT * FROM creators WHERE Creator_ID = ?';
+        con.query(sql, [userId], (err, result) => {
+            if (err) {
+                console.error('Ошибка при выполнении SQL запроса:', err);
+                return res.status(500).json({ loggedIn: false, message: 'Error fetching user data' });
+            }
+            if (result.length > 0) {
+                const user = result[0];
+                req.session.user = {
+                    id: user.Creator_ID,
+                    name: user.Name,
+                    surname: user.Surname,
+                    email: user.Email,
+                    bio: user.Other_Details || '',
+                    profileImage: user.Image || 'img/icons/profile.jpg' 
+                };
+                res.json({ loggedIn: true, user: req.session.user });
+            } else {
+                res.json({ loggedIn: false });
+            }
+        });
+    } else {
+        res.json({ loggedIn: false });
+    }
 });
 
 app.put('/paintings/:id', upload.single('image'), (req, res) => {
@@ -280,23 +330,6 @@ app.post('/update-profile', upload.single('profileImage'), (req, res) => {
         req.session.user = { ...req.session.user, name, surname, bio, email, profileImage: newProfileImage || oldProfileImage };
         res.json({ success: true, message: 'Profile updated successfully', user: req.session.user });
     });
-});
-
-
-app.post("/addPainting", (req, res) => {
-  const { userId, image } = req.body;
-
-  if (!userId || !image) {
-    return res.status(400).json({ error: "User ID and profile picture are required." });
-  }
-
-  db.run("UPDATE Paintings SET Image = ? WHERE Creator_ID = ?", [image, userId], (err) => {
-    if (err) {
-      console.error("Error updating profile picture:", err.message);
-      return res.status(500).json({ error: "Error updating profile picture in database." });
-    }
-    res.json({ message: "Profile picture updated successfully." });
-  });
 });
 
 app.get('/loadPaintAuthor', (req, res) => {
@@ -437,9 +470,4 @@ app.delete('/paintings/:id', (req, res) => {
             res.json({ success: true, message: 'Картина успешно удалена' });
         });
     });
-});
-
-
-app.listen(port, () => {
-    console.log(`Server running on http://localhost:${port}`);
 });
