@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import emailjs from "@emailjs/browser";
 import "./Register.css";
 
-// ==== SVG иконки ====
 const TwitterIcon = ({ size = 18 }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg">
     <path d="M22 5.8c-.6.3-1.2.5-1.9.6.7-.4 1.2-1 1.4-1.8-.6.4-1.4.7-2.1.9C18.8 4.7 17.9 4 17 4c-1.7 0-3 1.4-3 3 0 .2 0 .4.1.6-2.5-.1-4.7-1.3-6.2-3C7 4.1 6.5 5.1 6.5 6.3c0 1 .5 1.8 1.3 2.3-.5 0-1-.2-1.4-.4v.1c0 1.6 1.1 2.9 2.6 3.2-.4.1-.8.2-1.3.2-.3 0-.6 0-.9-.1.6 1.8 2.4 3.1 4.5 3.1-1.7 1.3-3.8 2-6.1 2-.4 0-.8 0-1.2-.1 2.2 1.4 4.8 2.2 7.6 2.2 9.1 0 14.1-7.5 14.1-14 0-.2 0-.5 0-.7.9-.7 1.6-1.6 2.1-2.6-.8.4-1.7.7-2.6.8z" />
@@ -33,7 +32,6 @@ const EyeSlashIcon = ({ size = 18 }) => (
   </svg>
 );
 
-// ==== Компонент регистрации ====
 function Register({ toggleForm }) {
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
@@ -46,69 +44,107 @@ function Register({ toggleForm }) {
   const [step, setStep] = useState(1);
   const [generatedCode, setGeneratedCode] = useState("");
   const [userCode, setUserCode] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  // Генерация 6-значного кода
   const generateCode = () =>
     Math.floor(100000 + Math.random() * 900000).toString();
 
-  // Отправка письма
+
   const sendVerificationEmail = async (name, email, code) => {
     try {
-      await emailjs.send(
-        "service_fv0f2qo", // ⚠️ твой service ID
-        "template_zn93brw", // ⚠️ твой template ID
+      
+      console.log("Attempting to send email with EmailJS...");
+      const result = await emailjs.send(
+        "service_fv0f2qo",
+        "template_zn93brw",
         {
           name: name,
           verification_code: code,
           to_email: email,
           reply_to: email,
         },
-        "7Gw-RPTO7wMAtHcSb" // ⚠️ твой public key
+        "7Gw-RPTO7wMAtHcSb"
       );
-      console.log("Verification code sent.");
+      console.log("EmailJS response:", result);
+      console.log("Verification code sent successfully");
+      
+      
+      return true;
     } catch (error) {
       console.error("Email sending failed:", error);
-      alert("Не вдалося надіслати код підтвердження");
+      console.error("Error details:", error.text || error.message);
+      return false;
     }
   };
 
   // Обработка шага 1 (отправка кода)
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const code = generateCode();
-    setGeneratedCode(code);
-    await sendVerificationEmail(formData.username, formData.email, code);
-    setStep(2);
-  };
-
-  // Обработка шага 2 (проверка кода + регистрация на сервере)
-  const handleVerifyCode = async (e) => {
-    e.preventDefault();
-    if (userCode !== generatedCode) {
-      alert("Невірний код підтвердження");
-      return;
-    }
+    setLoading(true);
 
     try {
-      const response = await fetch("http://localhost:8080/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify(formData),
-      });
-
-      const data = await response.json();
-      if (!response.ok) {
-        alert(data.error || "Помилка реєстрації");
-      } else {
-        alert("Реєстрація успішна");
-        toggleForm(); // ✅ переключение на Login
+      console.log("Starting registration process...");
+      
+      const code = generateCode();
+      console.log("Generated code:", code);
+      
+      console.log("Sending verification email to:", formData.email);
+      
+      const emailSent = await sendVerificationEmail(formData.username, formData.email, code);
+      
+      console.log("Email sent result:", emailSent);
+      
+      if (emailSent) {
+        setGeneratedCode(code);
+        setStep(2);
+        console.log("Moving to step 2");
       }
     } catch (error) {
-      console.error("Registration failed:", error);
-      alert("Сталася помилка сервера");
+      console.error("Error during submission:", error);
+      alert("Сталася помилка: " + error.message);
+    } finally {
+      console.log("Setting loading to false");
+      setLoading(false);
     }
   };
+
+const handleVerifyCode = async (e) => {
+  e.preventDefault();
+  setLoading(true);
+
+  try {
+    console.log("User entered code:", userCode);
+    console.log("Generated code:", generatedCode);
+    console.log("Form data to submit:", formData);
+
+    if (userCode.trim() !== generatedCode.trim()) {
+      alert("Невірний код підтвердження");
+    }
+
+    const response = await fetch("http://localhost:8080/register", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify(formData),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      console.error("Registration error:", data);
+      alert(data.error || data.message || "Помилка реєстрації");
+    } else {
+      alert("Реєстрація успішна! Тепер ви можете увійти.");
+      toggleForm();
+    }
+  } catch (error) {
+    console.error("Registration failed:", error);
+    alert("Сталася помилка сервера. Перевірте з'єднання.");
+  } finally {
+    setLoading(false); 
+  }
+};
+
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -139,6 +175,7 @@ function Register({ toggleForm }) {
                 onChange={handleChange}
                 placeholder="Username"
                 required
+                disabled={loading}
               />
             </div>
 
@@ -150,6 +187,7 @@ function Register({ toggleForm }) {
                 onChange={handleChange}
                 placeholder="Email"
                 required
+                disabled={loading}
               />
             </div>
 
@@ -160,6 +198,7 @@ function Register({ toggleForm }) {
                 value={formData.birthday}
                 onChange={handleChange}
                 required
+                disabled={loading}
               />
             </div>
 
@@ -171,35 +210,56 @@ function Register({ toggleForm }) {
                 onChange={handleChange}
                 placeholder="Password"
                 required
+                disabled={loading}
+                minLength="6"
               />
               <button
                 type="button"
                 className="eye-btn"
                 onClick={() => setShowPassword((s) => !s)}
+                disabled={loading}
               >
                 {showPassword ? <EyeIcon /> : <EyeSlashIcon />}
               </button>
             </div>
 
-            <button type="submit" className="btn-next">Next</button>
-            <button type="button" className="btn-login" onClick={toggleForm}>
+            <button type="submit" className="btn-next" disabled={loading}>
+              {loading ? "Відправка..." : "Next"}
+            </button>
+            <button type="button" className="btn-login" onClick={toggleForm} disabled={loading}>
               Login
             </button>
           </>
         ) : (
           <>
             <h2 style={{ color: "black" }}>Підтвердження email</h2>
-            <p style={{ color: "black" }}>Ми надіслали 6-значний код на вашу пошту.</p>
+            <p style={{ color: "black" }}>
+              Ми надіслали 6-значний код на <strong>{formData.email}</strong>
+            </p>
             <div className="field">
               <input
                 type="text"
-                placeholder="Введіть код"
+                placeholder="Введіть код (6 цифр)"
                 value={userCode}
                 onChange={(e) => setUserCode(e.target.value)}
                 required
+                maxLength="6"
+                pattern="\d{6}"
+                disabled={loading}
               />
             </div>
-            <button type="submit" className="btn-next" style={{ justifySelf: "center",marginRight:"0px" }}>Підтвердити</button>
+            <button type="submit" className="btn-next" style={{ justifySelf: "center", marginRight: "10px" }} disabled={loading}>
+              {loading ? "Перевірка..." : "Підтвердити"}
+            </button>
+            <button 
+              type="button" 
+              className="btn-login" 
+              onClick={() => setStep(1)}
+              disabled={loading}
+              style={{ marginTop: "10px" }}
+            >
+              Назад
+            </button>
           </>
         )}
       </form>

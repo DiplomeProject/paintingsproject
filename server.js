@@ -37,9 +37,24 @@ const con = mysql.createConnection({
     host: "localhost",
     user: "root",
     password: "root",
-    database: "artgallery"
+    database: "PaintingsDB"
 });
 
+const pool = mysql.createPool({
+  host: "localhost",
+  user: "root",
+  password: "your_password",
+  database: "your_db",
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0
+});
+
+// Promise wrapper
+const db = pool.promise();
+
+module.exports = db;
+    
 app.use(session({
     secret: require('crypto').randomBytes(64).toString('hex'),
     resave: false,
@@ -98,28 +113,49 @@ app.get('/api/paintings', (req, res) => {
 });
 
 app.post('/register', (req, res) => {
-    const { name, surname, email, password } = req.body;
-    const saltRounds = 10;
+    const { username, email, password, birthday } = req.body;
 
+    console.log("📩 Incoming registration request:", { username, email, password, birthday });
+
+    const saltRounds = 10;
     bcrypt.hash(password, saltRounds, (err, hash) => {
         if (err) {
-            console.error('Ошибка хэширования:', err);
-            return res.status(500).json({ error: 'Ошибка при хэшировании пароля' });
+            console.error('❌ Password hashing error:', err);
+            return res.status(500).json({ error: 'Error hashing password' });
         }
 
-        console.log('Данные для регистрации:', name, surname, email, hash);
-        console.log('SQL query values:', [name, surname, email, hash]);
+        console.log("🔑 Password successfully hashed:", hash);
 
-        const sql = `INSERT INTO creators (Name, Surname, Email, Password) VALUES (?, ?, ?, ?)`;
-        con.query(sql, [name, surname, email, hash], (err, result) => {
-            if (err) {
-                console.error('Ошибка SQL:', err);
-                return res.status(500).json({ error: 'Ошибка базы данных при регистрации пользователя' });
+        // Ensure birthday is a valid DATE string
+        let formattedBirthday = null;
+        if (birthday) {
+            if (/^\d{4}-\d{2}-\d{2}$/.test(birthday)) {
+                formattedBirthday = birthday; // Already in YYYY-MM-DD
+                console.log("🎂 Birthday formatted:", formattedBirthday);
+            } else {
+                console.error("⚠️ Invalid birthday format received:", birthday);
+                return res.status(400).json({ error: "Invalid birthday format" });
             }
-            res.status(201).json({ success: true, message:'User registered'});
+        } else {
+            console.log("ℹ️ No birthday provided");
+        }
+
+        const sql = `INSERT INTO creators (Name, Email, Password, Birthday) VALUES (?, ?, ?, ?)`;
+        console.log("📤 Executing SQL:", sql);
+        console.log("📦 Values:", [username, email, hash, formattedBirthday]);
+
+        con.query(sql, [username, email, hash, formattedBirthday], (err, result) => {
+            if (err) {
+                console.error('❌ SQL error:', err.sqlMessage);
+                console.error('🔍 Full error object:', err);
+                return res.status(500).json({ error: 'Database error during registration' });
+            }
+            console.log("✅ Inserted new user, MySQL result:", result);
+            res.status(201).json({ success: true, message: 'User registered' });
         });
     });
 });
+
 
 app.post('/checkEmail', (req, res) => {
     const { email } = req.body;
