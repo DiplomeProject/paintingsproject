@@ -98,7 +98,7 @@ app.get('/api/paintings', (req, res) => {
     const sql = `
         SELECT
             Paintings.Painting_ID, Paintings.title, Paintings.Image, paintings.Description ,
-            Paintings.Creator_ID, creators.name AS author_name, creators.surname AS author_surname
+            Paintings.Creator_ID, creators.name AS author_name
         FROM Paintings
                  JOIN creators ON Paintings.Creator_ID = creators.Creator_ID
     `;
@@ -126,14 +126,13 @@ app.post('/register', (req, res) => {
 
         console.log("🔑 Password successfully hashed:", hash);
 
-        // Ensure birthday is a valid DATE string
         let formattedBirthday = null;
         if (birthday) {
             if (/^\d{4}-\d{2}-\d{2}$/.test(birthday)) {
-                formattedBirthday = birthday; // Already in YYYY-MM-DD
-                console.log("🎂 Birthday formatted:", formattedBirthday);
+                formattedBirthday = birthday; 
+                console.log("Birthday formatted:", formattedBirthday);
             } else {
-                console.error("⚠️ Invalid birthday format received:", birthday);
+                console.error("Invalid birthday format received:", birthday);
                 return res.status(400).json({ error: "Invalid birthday format" });
             }
         } else {
@@ -187,36 +186,56 @@ app.get('/some-page', (req, res) => {
 app.post('/login', (req, res) => {
     const { email, password } = req.body;
     console.log("Login attempt for email:", email);
+    
     const sql = 'SELECT * FROM creators WHERE Email = ?';
     con.query(sql, [email], (err, results) => {
         if (err) {
             console.error('Error executing SQL:', err);
             return res.status(500).send('Internal Server Error');
         }
+        
         console.log("SQL query successful, number of results:", results.length);
+        
         if (results.length === 0) {
             return res.status(401).json({ success: false, message: 'Authentication failed' });
         }
+        
+        if (!results[0].Password) {
+            console.error('No password hash available in the database for the user.');
+            return res.status(500).json({ success: false, message: 'No password hash available.' });
+        }
+        
         bcrypt.compare(password, results[0].Password, (err, result) => {
-            console.log("Attempting to compare passwords", { inputPassword: password, storedHash: results[0].Password });
-            if (!results[0].Password) {
-                console.error('No password hash available in the database for the user.');
-                return res.status(500).json({ success: false, message: 'No password hash available.' });
-            }
+            console.log("Attempting to compare passwords");
+            
             if (err) {
                 console.error('Error comparing passwords:', err);
-                return res.status(500).json({ success: false, message:'Error checking password'});
+                return res.status(500).json({ success: false, message: 'Error checking password' });
             }
+            
             console.log("Password comparison result:", result);
+            
             if (result) {
+                const imageData = results[0].Image;
+                let profileImage;
+                
+                if (Buffer.isBuffer(imageData)) {
+                    profileImage = `data:image/jpeg;base64,${imageData.toString('base64')}`;
+                } else if (typeof imageData === 'string') {
+                    profileImage = imageData;
+                } else {
+                    profileImage = 'img/icons/profile.jpg';
+                }
+                
                 req.session.user = {
                     id: results[0].Creator_ID,
                     name: results[0].Name,
-                    surname: results[0].Surname,
                     email: results[0].Email,
                     bio: results[0].Other_Details,
-                    profileImage: results[0].Image || 'img/icons/profile.jpg'
+                    profileImage: profileImage,
+                    _imageBlob: Buffer.isBuffer(imageData) ? imageData : null
                 };
+                
                 res.json({ success: true, message: 'Login successful', user: req.session.user });
             } else {
                 res.status(401).json({ success: false, message: 'Password mismatch' });
@@ -236,13 +255,29 @@ app.get('/check-session', (req, res) => {
             }
             if (result.length > 0) {
                 const user = result[0];
+                
+                // Handle profile image - check if it's a Buffer (BLOB) or string (file path)
+                const imageData = user.Image;
+                let profileImage;
+                
+                if (Buffer.isBuffer(imageData)) {
+                    // It's a BLOB - convert to base64
+                    profileImage = `data:image/jpeg;base64,${imageData.toString('base64')}`;
+                } else if (typeof imageData === 'string') {
+                    // It's a file path
+                    profileImage = imageData;
+                } else {
+                    // No image - use default
+                    profileImage = 'img/icons/profile.jpg';
+                }
+                
                 req.session.user = {
                     id: user.Creator_ID,
                     name: user.Name,
-                    surname: user.Surname,
                     email: user.Email,
                     bio: user.Other_Details || '',
-                    profileImage: user.Image || 'img/icons/profile.jpg' 
+                    profileImage: profileImage,
+                    _imageBlob: Buffer.isBuffer(imageData) ? imageData : null
                 };
                 res.json({ loggedIn: true, user: req.session.user });
             } else {
@@ -314,57 +349,56 @@ app.put('/paintings/:id', upload.single('image'), (req, res) => {
     });
 });
 
-app.post('/update-profile', upload.single('profileImage'), (req, res) => {
+const uploadMemory = multer({ storage: multer.memoryStorage() });
+
+app.post('/update-profile', uploadMemory.single('profileImage'), (req, res) => {
     if (!req.session.user) {
         return res.status(401).json({ success: false, message: 'Not authorized' });
     }
 
     const userId = req.session.user.id;
-    const { name, surname, bio, email } = req.body;
-    const userDir = path.join(req.session.user.email.split('@')[0]);
+    const { name, bio, email } = req.body;
 
-    if (!fs.existsSync(userDir)) {
-        fs.mkdirSync(userDir, { recursive: true });
-    }
-
-    const newProfileImage = req.file ? path.join(userDir, req.file.filename) : null;
-    const oldProfileImage = req.session.user.profileImage;
+    const newProfileImageBuffer = req.file ? req.file.buffer : null;
 
     const sql = `
         UPDATE creators
-        SET Name = ?, Surname = ?, Other_Details = ?, Email = ?, Image = ?
+        SET Name = ?, Other_Details = ?, Email = ?, Image = ?
         WHERE Creator_ID = ?
     `;
-    const values = [name, surname, bio, email, newProfileImage || oldProfileImage, userId];
+    const values = [
+        name,
+        bio,
+        email,
+        newProfileImageBuffer || req.session.user._imageBlob || null,
+        userId
+    ];
 
-    con.query(sql, values, (err, result) => {
+    con.query(sql, values, (err) => {
         if (err) {
             console.error('Ошибка при обновлении профиля:', err);
             return res.status(500).json({ success: false, message: 'Error updating profile' });
         }
 
-        if (newProfileImage && oldProfileImage && oldProfileImage !== 'img/icons/profile.jpg') {
-            const oldProfileImagePath = path.join(__dirname, oldProfileImage.replace(/^[\/\\]/, ''));
+        // Convert to base64 for frontend display
+        const profileImageBase64 = newProfileImageBuffer
+            ? `data:image/jpeg;base64,${newProfileImageBuffer.toString('base64')}`
+            : req.session.user.profileImage;
 
-            console.log('New profile image path:', newProfileImage);
-            console.log('Old profile image path:', oldProfileImage);
-            console.log('Old profile image full path:', oldProfileImagePath);
+        req.session.user = {
+            ...req.session.user,
+            name,
+            bio,
+            email,
+            profileImage: profileImageBase64,
+            _imageBlob: newProfileImageBuffer || req.session.user._imageBlob || null
+        };
 
-            if (fs.existsSync(oldProfileImagePath)) {
-                fs.unlink(oldProfileImagePath, (err) => {
-                    if (err) {
-                        console.error('Ошибка при удалении старого фото профиля:', err);
-                    } else {
-                        console.log('Старое фото профиля успешно удалено');
-                    }
-                });
-            } else {
-                console.error('Файл для удаления не найден:', oldProfileImagePath);
-            }
-        }
-
-        req.session.user = { ...req.session.user, name, surname, bio, email, profileImage: newProfileImage || oldProfileImage };
-        res.json({ success: true, message: 'Profile updated successfully', user: req.session.user });
+        res.json({
+            success: true,
+            message: 'Profile updated successfully',
+            user: req.session.user
+        });
     });
 });
 
@@ -377,7 +411,7 @@ app.get('/loadPaintAuthor', (req, res) => {
     const sql = `
         SELECT 
             Paintings.Painting_ID, Paintings.title, Paintings.Image, paintings.Description , 
-            Paintings.Creator_ID, creators.name AS author_name, creators.surname AS author_surname
+            Paintings.Creator_ID, creators.name AS author_name 
         FROM Paintings
         JOIN creators ON Paintings.Creator_ID = creators.Creator_ID
         WHERE Paintings.Creator_ID = ?;
@@ -444,6 +478,18 @@ app.get('/api/creator/:id', (req, res) => {
         }
 
         const creator = creatorResults[0];
+        
+        // Handle profile image
+        const imageData = creator.Image;
+        let profileImage;
+        
+        if (Buffer.isBuffer(imageData)) {
+            profileImage = `data:image/jpeg;base64,${imageData.toString('base64')}`;
+        } else if (typeof imageData === 'string') {
+            profileImage = imageData;
+        } else {
+            profileImage = 'img/icons/profile.jpg';
+        }
 
         con.query(sqlPaintings, [creatorId], (err, paintingResults) => {
             if (err) {
@@ -453,10 +499,9 @@ app.get('/api/creator/:id', (req, res) => {
 
             res.json({
                 name: creator.Name,
-                surname: creator.Surname,
                 bio: creator.Other_Details,
                 email: creator.Email,
-                profileImage: creator.Image || 'img/icons/profile.jpg',
+                profileImage: profileImage,
                 paintings: paintingResults
             });
         });

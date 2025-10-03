@@ -49,10 +49,16 @@ function Register({ toggleForm }) {
   const generateCode = () =>
     Math.floor(100000 + Math.random() * 900000).toString();
 
-
   const sendVerificationEmail = async (name, email, code) => {
     try {
+      console.log("=== SKIPPING EMAIL FOR TESTING ===");
+      console.log("Name:", name);
+      console.log("Email:", email);  
+      console.log("Code:", code);
+      console.log("=================================");
       
+      // TODO: Uncomment this when EmailJS is working
+      /*
       console.log("Attempting to send email with EmailJS...");
       const result = await emailjs.send(
         "service_fv0f2qo",
@@ -67,9 +73,9 @@ function Register({ toggleForm }) {
       );
       console.log("EmailJS response:", result);
       console.log("Verification code sent successfully");
+      */
       
-      
-      return true;
+      return true; // Temporary: always return true
     } catch (error) {
       console.error("Email sending failed:", error);
       console.error("Error details:", error.text || error.message);
@@ -85,9 +91,11 @@ function Register({ toggleForm }) {
     try {
       console.log("Starting registration process...");
       
+      // Генерируем код
       const code = generateCode();
       console.log("Generated code:", code);
       
+      // Отправляем email с кодом
       console.log("Sending verification email to:", formData.email);
       
       const emailSent = await sendVerificationEmail(formData.username, formData.email, code);
