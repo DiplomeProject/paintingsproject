@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import emailjs from "@emailjs/browser";
 import "./Register.css";
 
 const TwitterIcon = ({ size = 18 }) => (
@@ -41,235 +40,92 @@ function Register({ toggleForm }) {
     password: "",
   });
 
-  const [step, setStep] = useState(1);
-  const [generatedCode, setGeneratedCode] = useState("");
-  const [userCode, setUserCode] = useState("");
-  const [loading, setLoading] = useState(false);
-
-  const generateCode = () =>
-    Math.floor(100000 + Math.random() * 900000).toString();
-
-  const sendVerificationEmail = async (name, email, code) => {
-    try {
-      console.log("=== SKIPPING EMAIL FOR TESTING ===");
-      console.log("Name:", name);
-      console.log("Email:", email);  
-      console.log("Code:", code);
-      console.log("=================================");
-      
-      // TODO: Uncomment this when EmailJS is working
-      /*
-      console.log("Attempting to send email with EmailJS...");
-      const result = await emailjs.send(
-        "service_fv0f2qo",
-        "template_zn93brw",
-        {
-          name: name,
-          verification_code: code,
-          to_email: email,
-          reply_to: email,
-        },
-        "7Gw-RPTO7wMAtHcSb"
-      );
-      console.log("EmailJS response:", result);
-      console.log("Verification code sent successfully");
-      */
-      
-      return true; // Temporary: always return true
-    } catch (error) {
-      console.error("Email sending failed:", error);
-      console.error("Error details:", error.text || error.message);
-      return false;
-    }
-  };
-
-  // Обработка шага 1 (отправка кода)
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-
-    try {
-      console.log("Starting registration process...");
-      
-      // Генерируем код
-      const code = generateCode();
-      console.log("Generated code:", code);
-      
-      // Отправляем email с кодом
-      console.log("Sending verification email to:", formData.email);
-      
-      const emailSent = await sendVerificationEmail(formData.username, formData.email, code);
-      
-      console.log("Email sent result:", emailSent);
-      
-      if (emailSent) {
-        setGeneratedCode(code);
-        setStep(2);
-        console.log("Moving to step 2");
-      }
-    } catch (error) {
-      console.error("Error during submission:", error);
-      alert("Сталася помилка: " + error.message);
-    } finally {
-      console.log("Setting loading to false");
-      setLoading(false);
-    }
-  };
-
-const handleVerifyCode = async (e) => {
-  e.preventDefault();
-  setLoading(true);
-
-  try {
-    console.log("User entered code:", userCode);
-    console.log("Generated code:", generatedCode);
-    console.log("Form data to submit:", formData);
-
-    if (userCode.trim() !== generatedCode.trim()) {
-      alert("Невірний код підтвердження");
-    }
-
-    const response = await fetch("http://localhost:8080/register", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify(formData),
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      console.error("Registration error:", data);
-      alert(data.error || data.message || "Помилка реєстрації");
-    } else {
-      alert("Реєстрація успішна! Тепер ви можете увійти.");
-      toggleForm();
-    }
-  } catch (error) {
-    console.error("Registration failed:", error);
-    alert("Сталася помилка сервера. Перевірте з'єднання.");
-  } finally {
-    setLoading(false); 
-  }
-};
-
-
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    // заглушка
+    console.log("Submit", formData);
+    alert("Форма отправлена (проверь консоль)");
+  };
+
   return (
     <div className="register-container">
-      <form
-        className="register-card"
-        onSubmit={step === 1 ? handleSubmit : handleVerifyCode}
-      >
-        {step === 1 ? (
-          <>
-            <div className="reg-via">Registration via:</div>
-            <div className="social-row">
-              <button type="button" className="social twitter"><TwitterIcon /></button>
-              <button type="button" className="social facebook"><FacebookIcon /></button>
-              <button type="button" className="social mail"><MailIcon /></button>
-            </div>
+      <form className="register-card" onSubmit={handleSubmit}>
+        <div className="reg-via">Registration via:</div>
 
-            <div className="reg-email">Registration via email</div>
+        <div className="social-row">
+          <button type="button" className="social twitter" aria-label="Twitter">
+            <TwitterIcon />
+          </button>
+          <button type="button" className="social facebook" aria-label="Facebook">
+            <FacebookIcon />
+          </button>
+          <button type="button" className="social mail" aria-label="Mail">
+            <MailIcon />
+          </button>
+        </div>
 
-            <div className="field">
-              <input
-                name="username"
-                value={formData.username}
-                onChange={handleChange}
-                placeholder="Username"
-                required
-                disabled={loading}
-              />
-            </div>
+        <div className="reg-email">Registration via email</div>
 
-            <div className="field">
-              <input
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                placeholder="Email"
-                required
-                disabled={loading}
-              />
-            </div>
+        <div className="field">
+          <input
+            name="username"
+            value={formData.username}
+            onChange={handleChange}
+            placeholder="Username"
+            required
+          />
+        </div>
 
-            <div className="field">
-              <input
-                type="date"
-                name="birthday"
-                value={formData.birthday}
-                onChange={handleChange}
-                required
-                disabled={loading}
-              />
-            </div>
+        <div className="field">
+          <input
+            name="email"
+            type="email"
+            value={formData.email}
+            onChange={handleChange}
+            placeholder="Email"
+            required
+          />
+        </div>
 
-            <div className="field pw-field">
-              <input
-                name="password"
-                type={showPassword ? "text" : "password"}
-                value={formData.password}
-                onChange={handleChange}
-                placeholder="Password"
-                required
-                disabled={loading}
-                minLength="6"
-              />
-              <button
-                type="button"
-                className="eye-btn"
-                onClick={() => setShowPassword((s) => !s)}
-                disabled={loading}
-              >
-                {showPassword ? <EyeIcon /> : <EyeSlashIcon />}
-              </button>
-            </div>
+        <div className="field">
+          <input
+            type="date"
+            name="birthday"
+            value={formData.birthday}
+            onChange={handleChange}
+            required
+          />
+        </div>
 
-            <button type="submit" className="btn-next" disabled={loading}>
-              {loading ? "Відправка..." : "Next"}
-            </button>
-            <button type="button" className="btn-login" onClick={toggleForm} disabled={loading}>
-              Login
-            </button>
-          </>
-        ) : (
-          <>
-            <h2 style={{ color: "black" }}>Підтвердження email</h2>
-            <p style={{ color: "black" }}>
-              Ми надіслали 6-значний код на <strong>{formData.email}</strong>
-            </p>
-            <div className="field">
-              <input
-                type="text"
-                placeholder="Введіть код (6 цифр)"
-                value={userCode}
-                onChange={(e) => setUserCode(e.target.value)}
-                required
-                maxLength="6"
-                pattern="\d{6}"
-                disabled={loading}
-              />
-            </div>
-            <button type="submit" className="btn-next" style={{ justifySelf: "center", marginRight: "10px" }} disabled={loading}>
-              {loading ? "Перевірка..." : "Підтвердити"}
-            </button>
-            <button 
-              type="button" 
-              className="btn-login" 
-              onClick={() => setStep(1)}
-              disabled={loading}
-              style={{ marginTop: "10px" }}
-            >
-              Назад
-            </button>
-          </>
-        )}
+
+        <div className="field pw-field">
+          <input
+            name="password"
+            type={showPassword ? "text" : "password"}
+            value={formData.password}
+            onChange={handleChange}
+            placeholder="Password"
+            required
+          />
+          <button
+            type="button"
+            aria-label="toggle password"
+            className="eye-btn"
+            onClick={() => setShowPassword((s) => !s)}
+          >
+            {showPassword ? <EyeIcon /> : <EyeSlashIcon />}
+          </button>
+        </div>
+
+          <button type="submit" className="btn-next">Next</button>
+          <button type="button" className="btn-login" onClick={toggleForm}>
+            Login
+          </button>
       </form>
     </div>
   );

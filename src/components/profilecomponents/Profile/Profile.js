@@ -10,6 +10,7 @@ function Profile() {
     const [isLogin, setIsLogin] = useState(true);
     const [formData, setFormData] = useState({
         name: '',
+        surname: '',
         bio: '',
         email: '',
         password: ''
@@ -49,6 +50,7 @@ function Profile() {
         try {
             const formDataToSend = new FormData();
             formDataToSend.append('name', formData.name || user.name);
+            formDataToSend.append('surname', formData.surname || user.surname);
             formDataToSend.append('bio', formData.bio || user.bio);
             formDataToSend.append('email', formData.email || user.email);
 
@@ -78,6 +80,7 @@ function Profile() {
             localStorage.setItem("user", JSON.stringify(response.data.user));
             setFormData({
                 name: response.data.user.name || '',
+                surname: response.data.user.surname || '',
                 bio: response.data.user.bio || '',
                 email: response.data.user.email
             });
@@ -97,6 +100,7 @@ function Profile() {
         "http://localhost:8080/register",
         {
             name: formData.name,
+            surname: formData.surname,
             email: formData.email,
             password: formData.password,
         },
@@ -141,7 +145,7 @@ function Profile() {
                                             <img id="profile-image" src={user.profileImage || imagePreview} alt="Avatar"
                                                  className="img-fluid rounded-circle"
                                                  style={{ width: '250px', height: '250px' }} />
-                                            <h2>{user.name}</h2>
+                                            <h2>{user.name} {user.surname}</h2>
                                             <button onClick={() => setShowModal(true)} className="btn btn-info">Редагувати профіль</button>
                                             <button onClick={handleLogout} className="btn btn-danger">Вийти</button>
                                             <div className="about">
@@ -194,6 +198,12 @@ function Profile() {
                                             <label htmlFor="name" className="form-label">Ім'я</label>
                                             <input type="text" id="name" name="name" className="form-control"
                                                    value={formData.name || (user ? user.name : '')}
+                                                   onChange={handleInputChange}/>
+                                        </div>
+                                        <div className="mb-3">
+                                            <label htmlFor="surname" className="form-label">Прізвище</label>
+                                            <input type="text" id="surname" name="surname" className="form-control"
+                                                   value={formData.surname || (user ? user.surname : '')}
                                                    onChange={handleInputChange}/>
                                         </div>
                                         <div className="mb-3">
