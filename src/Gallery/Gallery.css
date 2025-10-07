@@ -300,7 +300,7 @@ z-index: 3;
   position: relative;
   left: -2vw;
   bottom: -24vh;
-transform: rotate(9.6deg);
+  transform: rotate(9.6deg);
 
 }
 
@@ -313,7 +313,7 @@ transform: rotate(9.6deg);
   background-position: center;
   border-radius: 10px;
   position: relative;
-  right: 40vw;
+  right: 35vw;
   bottom: -15vh;
   transform: rotate(-15deg);
 }
