@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import Gallery from '../Gallery/Gallery';
-import AuthorPage from './AuthorPage/AuthorPage';
-import PaintingDetailsModal from './PaintingsDetailsModal/PaintingsDetailsModal';
+import Gallery from '../../Gallery/Gallery';
+import AuthorPage from '../AuthorPage/AuthorPage';
+import PaintingDetailsModal from '../PaintingsDetailsModal/PaintingsDetailsModal';
 
 function HomePage() {   
     const [paintings, setPaintings] = useState([]);

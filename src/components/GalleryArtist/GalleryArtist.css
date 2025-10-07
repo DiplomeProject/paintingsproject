@@ -3,6 +3,8 @@
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
   gap: 15px;
   margin: 20px;
+  position: relative;
+  bottom: 90px;
 }
 
 .add-card {

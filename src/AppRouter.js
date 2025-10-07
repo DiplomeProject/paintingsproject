@@ -1,7 +1,7 @@
 import React from 'react'
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import Profile from "./components/profilecomponents/Profile/Profile";
-import HomePage from "./components/HomePage";
+import HomePage from "./components/HomePage/HomePage";
 
 
 export default function AppRouter() {
