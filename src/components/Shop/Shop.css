@@ -3,16 +3,6 @@
   width: 100%;
   display: flex;
   position: relative;
-  background: linear-gradient( 
-    135deg,
-    #361950 0%,
-
-    #0d0b1f 50%,
-    #2a0f3f 100%
-  ); 
-  background-repeat: no-repeat;
-  background-attachment: fixed;
-  color: #fff;
   font-family: "Segoe UI", sans-serif;
   position: absolute;
   display: flex;

@@ -1,12 +1,12 @@
-/* --- ОБЩИЕ СТИЛИ --- */
+/* --- Gallery.module.css (повністю оновлений) --- */
+
+/* --- ЗАГАЛЬНІ СТИЛІ --- */
 .container {
     min-height: 100vh;
     width: 100%;
     display: flex;
     flex-direction: column;
     position: relative;
-    background: linear-gradient(135deg, #361950 0%, #0d0b1f 50%, #2a0f3f 100%) no-repeat fixed;
-    color: #fff;
     font-family: "Segoe UI", sans-serif;
     overflow-x: hidden;
 }
@@ -24,7 +24,7 @@
     justify-content: center;
     align-items: center;
     background: none;
-    height: 90vh;
+    height: 92vh;
     padding: 0 50px;
 }
 
@@ -36,17 +36,6 @@
     height: 100%;
     overflow: hidden;
     z-index: 0;
-}
-
-.scrollingGrid::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: radial-gradient(circle, rgba(13, 11, 31, 0.1) 0%, rgba(13, 11, 31, 1) 85%);
-    z-index: 1;
 }
 
 .gridTrack {
@@ -63,19 +52,24 @@
     gap: 20px;
     flex: 0 0 50%;
     height: 100%;
+    padding-right: 20px;
+    opacity: 50%;
 }
 
+/* ОНОВЛЕНО: Додано ефект світіння до картинок у сітці */
 .gridImage {
     background-size: cover;
     background-position: center;
-    border-radius: 8px;
+    border-radius: 12px;
     filter: brightness(0.7);
     aspect-ratio: 1 / 1;
-    transition: transform 0.4s ease;
+    transition: transform 0.4s ease, box-shadow 0.4s ease;
+    box-shadow: 0 0 10px rgba(84, 84, 254, 0.2), 0 0 2px rgba(255, 255, 255, 0.1) inset;
 }
 
 .gridImage:hover {
     transform: scale(1.08);
+    box-shadow: 0 0 15px rgba(84, 84, 254, 0.4), 0 0 3px rgba(255, 255, 255, 0.2) inset;
 }
 
 @keyframes scrollLeft {
@@ -90,12 +84,12 @@
 .main-image {
     position: relative;
     width: 100%;
-    height: 90vh;
+    height: 92vh;
     background-image: url("../../../public/MainImg.png");
     background-size: contain;
     background-repeat: no-repeat;
     background-position: top center;
-    z-index: 1;
+    z-index: 2;
 }
 
 .textContentWrapper {
@@ -161,13 +155,13 @@
     background: #4141d8;
 }
 
-/* --- ОНОВЛЕНО: Повністю перероблений блок стилів для карток --- */
 .imageCardsContainer {
     position: relative;
     width: 50%;
     height: 600px;
 }
 
+/* ОНОВЛЕНО: Додано ефект світіння до карток */
 .cardBack, .cardMiddle, .cardFront {
     position: absolute;
     transition: transform 0.4s ease, width 0.4s ease, height 0.4s ease;
@@ -175,7 +169,7 @@
     border-color: transparent;
     background: linear-gradient(rgba(70, 70, 71, 0.6), rgba(70, 70, 71, 0.6)) padding-box,
     linear-gradient(135deg, #595C64, #474D5F) border-box;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 0 20px rgba(84, 84, 254, 0.2), 0 10px 30px rgba(0, 0, 0, 0.3);
     width: 25vw;
     height: 38vw;
 }
@@ -186,8 +180,6 @@
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    border-image-source: linear-gradient(168.05deg, #595C64 1.51%, rgba(71, 77, 95, 0.44) 90.56%);
-    backdrop-filter: blur(103px);
     border-radius: 6px;
 }
 
@@ -222,7 +214,6 @@
     gap: 5px;
     opacity: 0.8;
 }
-
 
 .cardBack {
     max-width: 369px;
@@ -263,16 +254,19 @@
     height: 600px;
 }
 
+/* ОНОВЛЕНО: Додано ефект світіння до розкиданих картинок */
 .image1, .image2, .image3, .image4, .image5 {
     position: absolute;
     background-size: cover;
     background-position: center;
     border-radius: 10px;
-    transition: transform 0.3s ease;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0 0 15px rgba(84, 84, 254, 0.3);
 }
 
 .image1:hover, .image2:hover, .image3:hover, .image4:hover, .image5:hover {
     transform: scale(1.08);
+    box-shadow: 0 0 25px rgba(84, 84, 254, 0.5);
 }
 
 .image1 {
@@ -333,16 +327,16 @@
 .trendsContentWrapper {
     padding: 51px;
     margin-top: 50px;
-    max-width: 1440px;
     margin-left: auto;
     margin-right: auto;
 }
+
 .TrendsContainer {
-    width: 100%;
     display: flex;
     align-items: center;
     margin-bottom: 40px;
 }
+
 .TrendsHeader {
     font-family: "Orbitron", sans-serif;
     font-weight: 800;
@@ -351,6 +345,7 @@
     color: #ffffff;
     margin-right: 25px;
 }
+
 .searchBarContainer {
     width: 100%;
     max-width: 500px;
@@ -361,6 +356,7 @@
     align-items: center;
     padding: 0 15px;
 }
+
 .searchInput {
     flex-grow: 1;
     background: transparent;
@@ -370,6 +366,7 @@
     font-size: 16px;
     min-width: 0;
 }
+
 .searchButton {
     background: none;
     border: none;
@@ -381,42 +378,46 @@
     padding: 5px;
     margin-left: 5px;
 }
+
 .searchButton svg {
     width: 24px;
     height: 24px;
     color: #333;
 }
 
-/* --- ОНОВЛЕНО: Секція Trends --- */
 .artGridSection {
     width: 100%;
     overflow: hidden;
 }
+
 .artGridCarouselWrapper {
     overflow: hidden;
 }
+
 .artGridCarousel {
     display: flex;
     transition: transform 0.8s ease-in-out;
 }
+
 .artGridSlide {
     display: grid;
-    /* ОНОВЛЕНО: 6 колонок на десктопі для більших карток */
-    grid-template-columns: repeat(6, 1fr);
-    gap: 25px; /* Збільшено відступ */
+    grid-template-columns: repeat(8, 1fr);
+    gap: 25px;
     flex: 0 0 100%;
 }
 
 .artCard {
-    /* ОНОВЛЕНО: Стиль картки з дизайну */
-    background: rgba(30, 30, 50, 0.6);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 12px;
+    border-radius: 5.04px;
+    border: 2px solid transparent;
+    background:
+            linear-gradient(rgba(70, 70, 71, 0.6), rgba(70, 70, 71, 0.6)) padding-box,
+            linear-gradient(168deg, rgba(89, 92, 100, 1), rgba(71, 77, 95, 0.44)) border-box;
     overflow: hidden;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     cursor: pointer;
     display: flex;
     flex-direction: column;
+    aspect-ratio: 211 / 328;
 }
 
 .artCard:hover {
@@ -425,32 +426,33 @@
 }
 
 .artCardImage {
-    height: 230px;
+    height: 65%;
     background-size: cover;
     background-position: center;
-    margin-top: 14px;
-    margin-right: 14px;
-    margin-left: 14px;
+    border-radius: 5.04px;
+    margin: 16px 16px 0 16px;
 }
 
 .artCardInfo {
-    padding: 15px;
+    padding: 15px 16px;
     color: white;
     display: flex;
     flex-direction: column;
-    gap: 12px; /* Відступ між блоками тексту */
-    flex-grow: 1; /* Дозволяє блоку розтягуватися */
+    gap: 12px;
+    flex-grow: 1;
 }
 
 .artCardDetails {
     display: flex;
     flex-direction: column;
 }
+
 .artCardTitle {
     font-size: 16px;
     font-weight: 600;
     margin: 0;
 }
+
 .artCardArtist {
     font-size: 13px;
     color: rgba(255, 255, 255, 0.7);
@@ -462,7 +464,7 @@
     justify-content: space-between;
     align-items: center;
     font-size: 14px;
-    margin-top: auto; /* Притискає цей блок до низу картки */
+    margin-top: auto;
 }
 
 .artCardLikes {
@@ -471,18 +473,19 @@
     gap: 6px;
     font-weight: 500;
 }
+
 .artCardPrice {
     font-size: 16px;
     font-weight: 700;
 }
 
-/* ОНОВЛЕНО: Стилі для точок каруселі */
 .carouselDots {
     display: flex;
     justify-content: center;
-    gap: 12px; /* Збільшено відступ */
+    gap: 12px;
     margin-top: 40px;
 }
+
 .dot {
     width: 12px;
     height: 12px;
@@ -491,9 +494,11 @@
     cursor: pointer;
     transition: all 0.3s ease;
 }
+
 .dot:hover {
     background: rgba(255, 255, 255, 0.5);
 }
+
 .dot.active {
     background: white;
 }
@@ -520,9 +525,7 @@
 
     .imageCardsContainer, .ImagesContainer {
         width: 100%;
-        max-width: 600px;
         height: 550px;
-        padding-bottom: 49px;
     }
 
     .artGridSlide {
@@ -576,8 +579,9 @@
         max-width: 100%;
     }
 
-    .imageCardsContainer, .ImagesContainer {
-        height: 450px;
+    .main-image{
+        height: 71vh;
+        bottom: -114px;
     }
 
     .artGridSlide {

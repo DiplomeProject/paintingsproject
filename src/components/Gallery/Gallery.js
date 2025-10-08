@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useEffect } from "react";
 import styles from "./Gallery.module.css";
+import {useNavigate} from "react-router-dom";
 
 // Дані-заглушки для верхньої секції
 const placeholderFeaturedCards = [
@@ -20,6 +21,11 @@ function Gallery({ paintings: paintingsFromProps = [] }) {
     const [currentSlide, setCurrentSlide] = useState(0);
     const [featuredCards, setFeaturedCards] = useState([]);
     const [scatteredImages, setScatteredImages] = useState([]);
+    const navigate = useNavigate();
+
+    const handleNavigation = (path) => {
+        navigate(path);
+    };
 
     useEffect(() => {
         setFeaturedCards(placeholderFeaturedCards);
@@ -86,7 +92,9 @@ function Gallery({ paintings: paintingsFromProps = [] }) {
                                 Create a profile, upload your paintings, and find buyers all over the world. DigitalBrush is a
                                 space where your talent becomes visible and valuable.
                             </div>
-                            <button className={styles.button1}>Registration</button>
+                            <button className={styles.button1} onClick={() => {
+                                    handleNavigation('/profile');
+                                }}>Registration</button>
                         </div>
                         <div className={styles.imageCardsContainer}>
                             {featuredCards.map(card => (
@@ -130,7 +138,9 @@ function Gallery({ paintings: paintingsFromProps = [] }) {
                                 Choose works that resonate with your emotions. Here, art is not just a commodity, but a way to
                                 tell the world something important.
                             </div>
-                            <button className={styles.button1}>Registration</button>
+                            <button className={styles.button1} onClick={() => {
+                                handleNavigation('/profile');
+                            }}>Registration</button>
                         </div>
                     </div>
                 </div>
