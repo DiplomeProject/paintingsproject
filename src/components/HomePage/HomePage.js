@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import Gallery from '../../Gallery/Gallery';
+import Gallery from '../Gallery/Gallery';
 import AuthorPage from '../AuthorPage/AuthorPage';
 import PaintingDetailsModal from '../PaintingsDetailsModal/PaintingsDetailsModal';
+import Navbar from '../Nav/Nav';
+import Footer from '../Footer/Footer';
 
-function HomePage() {   
+function HomePage() {
     const [paintings, setPaintings] = useState([]);
     const [selectedPainting, setSelectedPainting] = useState(null);
     const [showAuthorPage, setShowAuthorPage] = useState(false);
@@ -38,28 +40,28 @@ function HomePage() {
 
     return (
         <div className="HomePage">
-            {/* Показываем страницу автора, если showAuthorPage true */}
-            {showAuthorPage ? (
-                <AuthorPage
-                    authorData={authorData}
-                    onSelectPainting={setSelectedPainting}
-                    onClose={closeAuthorPage}
-                />
-            ) : (
-                <Gallery
-                    paintings={paintings}
-                    onSelectPainting={setSelectedPainting}
-                    onSelectAuthor={loadAuthorPage}
-                />
-            )}
+            <main>
+                {showAuthorPage ? (
+                    <AuthorPage
+                        authorData={authorData}
+                        onSelectPainting={setSelectedPainting}
+                        onClose={closeAuthorPage}
+                    />
+                ) : (
+                    <Gallery
+                        paintings={paintings}
+                        onSelectPainting={setSelectedPainting}
+                        onSelectAuthor={loadAuthorPage}
+                    />
+                )}
 
-            {/* Показываем модалку картины, только если selectedPainting не null */}
-            {selectedPainting ? (
-                <PaintingDetailsModal
-                    painting={selectedPainting}
-                    onClose={() => setSelectedPainting(null)}
-                />
-            ) : null}
+                {selectedPainting ? (
+                    <PaintingDetailsModal
+                        painting={selectedPainting}
+                        onClose={() => setSelectedPainting(null)}
+                    />
+                ) : null}
+            </main>
         </div>
     );
 }

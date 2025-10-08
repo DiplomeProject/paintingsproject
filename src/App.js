@@ -1,8 +1,8 @@
 import React from 'react';
 import { BrowserRouter } from 'react-router-dom';
-import Header from './Header/header';
-import Nav from './Nav/Nav';
+import Nav from './components/Nav/Nav';
 import AppRouter from "./AppRouter";
+import Footer from "./components/Footer/Footer";
 
 function App() {
   return (
@@ -10,6 +10,7 @@ function App() {
       <div className="App">
         <Nav />
         <AppRouter />
+          <Footer />
       </div>
     </BrowserRouter>
   );
