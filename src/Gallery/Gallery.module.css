@@ -15,6 +15,12 @@
     display: none;
 }
 
+.gallery {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
 /* --- ФОНОВАЯ ГАЛЕРЕЯ --- */
 .ScrollContainer {
     margin-top: 30px;
@@ -295,18 +301,32 @@
 }
 
 .searchInput {
-    width: 100%;
+    flex-grow: 1;
     background: transparent;
     border: none;
     outline: none;
     color: #000000;
     font-size: 16px;
+    min-width: 0;
 }
 
 .searchButton {
     background: none;
     border: none;
     cursor: pointer;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 5px;
+    margin-left: 5px; /* Добавим небольшой отступ слева */
+}
+
+/* ДОБАВЬ ЭТОТ КОД */
+.searchButton svg {
+    width: 24px;
+    height: 24px;
+    color: #333; /* Сделаем цвет иконки немного мягче */
 }
 
 /* --- СЕТКА РАБОТ (КАРУСЕЛЬ) --- */
