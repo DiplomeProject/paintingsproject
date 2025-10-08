@@ -5,7 +5,7 @@ function Gallery() {
 
   const [currentSlide, setCurrentSlide] = useState(0);
     
-     const slides = useMemo(() => {
+    const slides = useMemo(() => {
     return Array.from({ length: 3 }, () =>
       Array.from({ length: 16 }, (_, i) => {
         const randomIndex = Math.floor(Math.random() * 5) + 1;
