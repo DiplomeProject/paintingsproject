@@ -1,3 +1,4 @@
+/* --- ОБЩИЕ СТИЛИ --- */
 .container {
     min-height: 100vh;
     width: 100%;
@@ -7,13 +8,14 @@
     background: linear-gradient(135deg, #361950 0%, #0d0b1f 50%, #2a0f3f 100%) no-repeat fixed;
     color: #fff;
     font-family: "Segoe UI", sans-serif;
-    justify-self: center;
+    overflow-x: hidden; /* Предотвращает горизонтальный скролл */
 }
 
 ::-webkit-scrollbar {
     display: none;
 }
 
+/* --- ФОНОВАЯ ГАЛЕРЕЯ --- */
 .ScrollContainer {
     margin-top: 30px;
     position: relative;
@@ -34,7 +36,6 @@
     height: 100%;
     overflow: hidden;
     z-index: 0;
-
 }
 
 .gridTrack {
@@ -48,7 +49,7 @@
     display: grid;
     grid-template-columns: repeat(8, 1fr);
     grid-template-rows: repeat(3, 1fr);
-    gap: 0px;
+    gap: 10px;
     flex: 0 0 50%;
     height: 100%;
 }
@@ -60,21 +61,10 @@
     filter: brightness(0.85);
     aspect-ratio: 1 / 1;
     transition: transform 0.4s ease;
-    margin-right: 10px;
-    margin-top: 10px;
 }
 
 .gridImage:hover {
     transform: scale(1.08);
-}
-
-.gridImage::after {
-    content: '';
-    position: absolute;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    background: rgba(0,0,0,0.4); /* прозрачное затемнение */
-    pointer-events: none;
 }
 
 @keyframes scrollLeft {
@@ -88,245 +78,200 @@
 
 .main-image {
     position: relative;
-    top: 0;
-    left: 0;
     width: 100%;
     height: 90vh;
-    border-radius: 0;
     background-image: url("../../public/MainImg.png");
     background-size: contain;
     background-repeat: no-repeat;
     background-position: top center;
     z-index: 1;
-    justify-self: center;
-    bottom: 0px;
 }
 
+/* --- ОСНОВНОЙ КОНТЕНТ --- */
 .textContentWrapper {
-    min-height: 100vh;
-    padding-left: 51px;
-    padding-right: 51px;
-    padding-top: 51px;
+    display: flex;
+    flex-direction: column;
+    padding: 51px;
+    gap: 100px; /* Пространство между секциями */
 }
 
-.textContainer1 {
-    width: 580px;
-    height: 82.54px;
-    left: 4vw;
-    top: 108vh;
+.contentSection {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+    min-height: 70vh;
 }
 
-.textHeader1{
-    font-family: 'Orbitron';
-    font-style: normal;
+.textContainer {
+    width: 45%;
+    max-width: 580px;
+}
+
+.textHeader1 {
+    font-family: 'Orbitron', sans-serif;
     font-weight: 600;
-    font-size: 39.0879px;
-    line-height: 110%;
+    font-size: 39px;
+    line-height: 1.2;
     text-transform: uppercase;
     color: #FFFFFF;
 }
 
-.text1{
-  margin-top: 3vh;
-  width: 520px;
-  font-family: 'Roboto';
-  font-style: normal;
-  font-weight: 400;
-  font-size: 37.5996px;
-  line-height: 110%;
-  color: #FFFFFF;
+.text1 {
+    margin-top: 20px;
+    width: 100%;
+    max-width: 520px;
+    font-family: 'Roboto', sans-serif;
+    font-weight: 400;
+    font-size: 18px; /* Оптимизированный размер шрифта */
+    line-height: 1.6;
+    color: #FFFFFF;
 }
 
+.button1 {
+    margin-top: 30px;
+    padding: 18px 0;
+    width: 238px;
+    background: #5454FE;
+    border-radius: 26.4516px;
+    border: none;
+    color: white;
+    font-size: 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.3s ease;
+}
+
+.button1:hover {
+    background: #4141d8;
+}
+
+/* --- ПОЗИЦИОНИРОВАНИЕ КАРТОЧЕК (ПРАВАЯ ВЕРХНЯЯ СЕКЦИЯ) --- */
 .imageCardsContainer {
-  /*position: absolute;*/
-  left: 70vw;
-  top: 140vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 10vh;
+    position: relative;
+    width: 50%;
+    height: 600px; /* Задаем высоту для позиционирования */
 }
 
-.imageCard1,
-.imageCard2,
-.imageCard3 {
-    width: 324.86px;
-    height: 498.93px;
+.imageCard1, .imageCard2, .imageCard3 {
     background: rgba(70, 70, 71, 0.6);
-    backdrop-filter: blur(43.5152px);
+    backdrop-filter: blur(43.5px);
     border-radius: 8.7px;
     position: absolute;
-    transition: transform 0.4s ease, z-index 0.4s ease;
+    transition: transform 0.4s ease;
+    padding: 14px;
 }
 
-.imageCard1 {
-    transform: rotate(-10deg) translateX(-60px);
-    /*bottom: -150%;*/
-    /*left: -100px;*/
+.imageCard1 { /* Правая карточка */
+    width: 300px;
+    height: 460px;
+    transform: rotate(15deg);
+    top: 50px;
+    right: 0;
     z-index: 1;
 }
 
-.imageCard2 {
-    /*position: absolute;*/
-    width: 388.74px;
-    height: 608.34px;
-    left: -30vh;
-    top: 0vh;
-    transform: matrix(0.85, -0.53, 0.57, 0.82, 0, 0);
+.imageCard2 { /* Центральная карточка */
+    width: 320px;
+    height: 500px;
+    transform: rotate(2.5deg);
+    top: 0;
+    left: 50%;
+    margin-left: -160px; /* Центрирование */
     z-index: 3;
 }
 
-.imageCard3 {
-    transform: rotate(30deg) translateX(60px);
-    top: 0;
-    left: 2vw;
+.imageCard3 { /* Левая карточка */
+    width: 300px;
+    height: 460px;
+    transform: rotate(-10deg);
+    top: 60px;
+    left: 0;
     z-index: 2;
-    width: 304.86px;
-    height: 458.93px;
-    right: -65px;
-    top: -40px;
 }
 
-.imageCard1Img {
-    background-image: url("../../public/images/image3.png");
-}
-
-.imageCard2Img {
-    background-image: url("../../public/images/image3.png");
-}
-
-.imageCard3Img {
-    background-image: url("../../public/images/image3.png");
-}
-
-.imageCard1Img,
-.imageCard2Img,
-.imageCard3Img {
-    width: 90%;
-    height: 75%;
-    justify-self: center;
+.imageCard1Img, .imageCard2Img, .imageCard3Img {
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
     border-radius: 5px;
-    margin-right: 14px;
-    margin-top: 14px;
-    margin-left: 14px;
-}
-
-
-
-.button1{
-
-  padding: 26.4516px 0px;
-  top: 3vh;
-  /*position: relative;*/
-  width: 238px;
-  height: 70.71px;
-  align-content: center;
-
-  background: #5454FE;
-  border-radius: 26.4516px;
-  color: white;
-  font-size: 25px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.ImagesContainer {
-    /*position: absolute;*/
-    left: 4vw;
-    top: 210vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 10vh;
-}
-
-.image1 {
-    width: 182px;
-    height: 182px;
-    background-image: url("../../public/images/image1.png");
-    background-size: cover;
-    background-position: center;
-    border-radius: 10px;
-    /*position: relative;*/
-    left: 25vw;
-    bottom: 50vh;
-    transform: rotate(10deg);
-}
-
-.image2 {
-    width: 198.5px;
-    height: 198.5px;
-    background-image: url("../../public/images/image5.png");
-    background-size: cover;
-    background-position: center;
-    border-radius: 10px;
-    /*position: relative;*/
-    left: 0px;
-    bottom: 25vh;
-    transform: rotate(-15deg);
-}
-
-.image3 {
-    width: 231.5px;
-    height: 231.5px;
-    background-image: url("../../public/images/image4.png");
-    background-size: cover;
-    background-position: center;
-    border-radius: 10px;
-    /*position: relative;*/
-    left: 9vw;
-    bottom: 10vh;
-    transform: rotate(15deg);
-}
-
-.image4 {
-    width: 241.5px;
-    height: 241.5px;
-    background-image: url("../../public/images/image2.png");
-    background-size: cover;
-    background-position: center;
-    border-radius: 10px;
-    /*position: relative;*/
-    left: -2vw;
-    bottom: -24vh;
-    transform: rotate(9.6deg);
-}
-
-.image5 {
-    width: 185px;
-    height: 185px;
     background-image: url("../../public/images/image3.png");
+}
+
+/* --- ПОЗИЦИОНИРОВАНИЕ ИЗОБРАЖЕНИЙ (ЛЕВАЯ НИЖНЯЯ СЕКЦИЯ) --- */
+.ImagesContainer {
+    position: relative;
+    width: 45%;
+    height: 600px;
+}
+
+.image1, .image2, .image3, .image4, .image5 {
+    position: absolute;
     background-size: cover;
     background-position: center;
     border-radius: 10px;
-    /*position: relative;*/
-    right: 35vw;
+}
+
+.image1 { /* Верхний правый */
+    width: 150px;
+    height: 150px;
+    background-image: url("../../public/images/image1.png");
+    transform: rotate(15deg);
+    top: 20px;
+    right: 50px;
+}
+
+.image2 { /* Центральный */
+    width: 198px;
+    height: 198px;
+    background-image: url("../../public/images/image5.png");
+    transform: rotate(-5deg);
+    top: 150px;
+    left: 100px;
+    z-index: 2;
+}
+
+.image3 { /* Левый */
+    width: 140px;
+    height: 140px;
+    background-image: url("../../public/images/image4.png");
     transform: rotate(-15deg);
+    top: 320px;
+    left: 20px;
 }
 
-.textContainer2 {
-    /*position: absolute;*/
-    margin-left: 831px;
-    margin-top: 458px;
-    width: 420px;
-    height: 82.54px;
-    left: 68vw;
-    top: 220vh;
+.image4 { /* Нижний */
+    width: 180px;
+    height: 180px;
+    background-image: url("../../public/images/image2.png");
+    transform: rotate(9.6deg);
+    top: 380px;
+    left: 200px;
 }
 
+.image5 { /* Alien */
+    width: 160px;
+    height: 160px;
+    background-image: url("../../public/images/image3.png");
+    transform: rotate(-20deg);
+    top: 80px;
+    left: -20px;
+}
+
+/* --- СЕКЦИЯ ТРЕНДОВ --- */
 .trendsContentWrapper {
-    min-height: 100vh;
-    padding-left: 51px;
-    padding-right: 51px;
-    margin-top: auto;
+    padding: 51px;
+    margin-top: 50px;
 }
 
 .TrendsContainer {
     width: 100%;
     display: flex;
     align-items: center;
-    margin-bottom: 90px;
+    margin-bottom: 40px;
 }
 
 .TrendsHeader {
@@ -335,21 +280,18 @@
     font-size: clamp(2rem, 4vw, 3.8rem);
     text-transform: uppercase;
     color: #ffffff;
-    letter-spacing: 1px;
-    margin-right: 15px;
-    display: flex;
+    margin-right: 25px;
 }
 
 .searchBarContainer {
-  width: 50%;
-  height: 55px;
-  background: rgb(255, 255, 255);
-  backdrop-filter: blur(10px);
-  border-radius: 18px;
-  display: flex;
-  justify-content: space-between;
-  padding: 0 12px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+    width: 100%;
+    max-width: 500px;
+    height: 55px;
+    background: rgb(255, 255, 255);
+    border-radius: 18px;
+    display: flex;
+    align-items: center;
+    padding: 0 15px;
 }
 
 .searchInput {
@@ -358,55 +300,33 @@
     border: none;
     outline: none;
     color: #000000;
-    font-size: 14px;
-}
-
-.searchInput::placeholder {
-    color: rgba(0, 0, 0, 0.4);
+    font-size: 16px;
 }
 
 .searchButton {
     background: none;
     border: none;
     cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
 }
 
-.searchButton svg {
-    width: 18px;
-    height: 18px;
-    fill: #000000;
-    opacity: 0.8;
-    transition: opacity 0.2s ease;
-}
-
-.searchButton:hover svg {
-    opacity: 1;
-}
-
+/* --- СЕТКА РАБОТ (КАРУСЕЛЬ) --- */
 .art-grid-section {
-    width: auto;
+    width: 100%;
     overflow: hidden;
 }
 
 .art-grid-carousel-wrapper {
     overflow: hidden;
-    width: auto;
-    height: auto;
 }
 
 .art-grid-carousel {
     display: flex;
     transition: transform 0.8s ease-in-out;
-    width: 100%;
 }
 
 .art-grid-slide {
     display: grid;
     grid-template-columns: repeat(8, 1fr);
-    grid-template-rows: repeat(2, 1fr);
     gap: 20px;
     flex: 0 0 100%;
 }
@@ -417,9 +337,9 @@
     overflow: hidden;
     transition: transform 0.3s ease;
     cursor: pointer;
-    height: auto;
 }
 
+/* ... остальные стили для art-card остались без изменений ... */
 .art-card:hover {
     transform: translateY(-5px);
 }
@@ -430,9 +350,7 @@
     background-size: cover;
     background-position: center;
     border-radius: 8px;
-    margin-top: 14px;
-    margin-right: 14px;
-    margin-left: 14px;
+    margin: 14px;
 }
 
 .art-card-info {
@@ -444,13 +362,6 @@
     display: flex;
     justify-content: space-between;
     font-size: 12px;
-    color: rgba(255, 255, 255, 0.7);
-}
-
-.art-card-views {
-    display: flex;
-    align-items: center;
-    gap: 4px;
 }
 
 .art-card-title {
@@ -486,4 +397,68 @@
     height: 12px;
 }
 
+/* --- АДАПТИВНОСТЬ --- */
 
+/* Планшеты (до 1024px) */
+@media (max-width: 1024px) {
+    .contentSection {
+        flex-direction: column;
+        gap: 50px;
+    }
+
+    .contentSection:nth-child(2) {
+        flex-direction: column-reverse; /* Меняем порядок для второй секции */
+    }
+
+    .textContainer, .imageCardsContainer, .ImagesContainer {
+        width: 100%;
+        max-width: 600px; /* Ограничиваем ширину на планшетах */
+        height: 500px;
+    }
+
+    .art-grid-slide {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+/* Мобильные устройства (до 768px) */
+@media (max-width: 768px) {
+    .textContentWrapper {
+        padding: 25px;
+    }
+
+    .textHeader1 {
+        font-size: 32px;
+    }
+
+    .text1 {
+        font-size: 16px;
+    }
+
+    .TrendsContainer {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 20px;
+    }
+
+    .searchBarContainer {
+        max-width: 100%;
+    }
+
+    .imageCardsContainer, .ImagesContainer {
+        height: 400px; /* Уменьшаем высоту контейнеров */
+    }
+
+    .imageCard1, .imageCard2, .imageCard3 {
+        width: 220px;
+        height: 340px;
+    }
+
+    .imageCard2 {
+        margin-left: -110px;
+    }
+
+    .art-grid-slide {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}

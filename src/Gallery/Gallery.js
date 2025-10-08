@@ -44,48 +44,57 @@ function Gallery() {
                     </div>
                     <div className="main-image"/>
                 </div>
+
                 <div className="textContentWrapper">
-                    <div className="textContainer1">
-                        <div className="textHeader1">
-                            Are you an artist? <br/> Sell your work here!
+                    {/* --- Секция 1: Для художников --- */}
+                    <div className="contentSection">
+                        <div className="textContainer">
+                            <div className="textHeader1">
+                                Are you an artist? <br/> Sell your work here!
+                            </div>
+                            <div className="text1">
+                                Create a profile, upload your paintings, and find buyers all over the world. DigitalBrush is a
+                                space where your talent becomes visible and valuable.
+                            </div>
+                            <button className='button1'>Registration</button>
                         </div>
-                        <div className="text1">
-                            Create a profile, upload your paintings, and find buyers all over the world. DigitalBrush is a
-                            space where your talent becomes visible and valuable.
-                        </div>
-                        <button className='button1'>Registration</button>
-                    </div>
-                    <div className="imageCardsContainer">
-                        <div className="imageCard1">
-                            <div className="imageCard1Img"></div>
-                        </div>
-                        <div className="imageCard2">
-                            <div className="imageCard2Img"></div>
-                        </div>
-                        <div className="imageCard3">
-                            <div className="imageCard3Img"></div>
+                        <div className="imageCardsContainer">
+                            <div className="imageCard3">
+                                <div className="imageCard3Img"></div>
+                            </div>
+                            <div className="imageCard1">
+                                <div className="imageCard1Img"></div>
+                            </div>
+                            <div className="imageCard2">
+                                <div className="imageCard2Img"></div>
+                            </div>
                         </div>
                     </div>
 
-                    <div className="ImagesContainer">
-                        <div className="image1"></div>
-                        <div className="image2"></div>
-                        <div className="image3"></div>
-                        <div className="image4"></div>
-                        <div className="image5"></div>
-                    </div>
-                    <div className="textContainer2">
-                        <div className="textHeader1">
-                            Don't you draw? <br/> No problem.
+                    {/* --- Секция 2: Для покупателей --- */}
+                    <div className="contentSection">
+                        <div className="ImagesContainer">
+                            <div className="image1"></div>
+                            <div className="image2"></div>
+                            <div className="image3"></div>
+                            <div className="image4"></div>
+                            <div className="image5"></div>
                         </div>
-                        <div className="text1">
-                            Choose works that resonate with your emotions. Here, art is not just a commodity, but a way to
-                            tell the world something important.
+                        <div className="textContainer">
+                            <div className="textHeader1">
+                                Don't you draw? <br/> No problem.
+                            </div>
+                            <div className="text1">
+                                Choose works that resonate with your emotions. Here, art is not just a commodity, but a way to
+                                tell the world something important.
+                            </div>
+                            <button className='button1'>Registration</button>
                         </div>
-                        <button className='button1'>Registration</button>
                     </div>
                 </div>
+
                 <div className="trendsContentWrapper">
+                    {/* ... остальная часть твоего JSX остается без изменений ... */}
                     <div className='TrendsContainer'>
                         <div className='TrendsHeader'> TRENDS</div>
                         <div className="searchBarContainer">
@@ -147,7 +156,6 @@ function Gallery() {
                                 ))}
                             </div>
 
-                            {/* Dots Navigation */}
                             <div className="carousel-dots">
                                 {slides.map((_, i) => (
                                     <span
@@ -160,13 +168,9 @@ function Gallery() {
                         </div>
                     </div>
                 </div>
-
             </div>
         </main>
-    )
-        ;
+    );
 }
 
 export default Gallery;
-
-
