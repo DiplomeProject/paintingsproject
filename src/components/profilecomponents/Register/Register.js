@@ -40,16 +40,118 @@ function Register({ toggleForm }) {
     password: "",
   });
 
+  const [step, setStep] = useState(1);
+  const [generatedCode, setGeneratedCode] = useState("");
+  const [userCode, setUserCode] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const generateCode = () =>
+    Math.floor(100000 + Math.random() * 900000).toString();
+
+  const sendVerificationEmail = async (name, email, code) => {
+    try {
+      console.log("SKIPP EMAIL FOR TEST");
+      console.log("Name:", name);
+      console.log("Email:", email);  
+      console.log("Code:", code);
+      console.log("=================================");
+      
+      /*
+      console.log("Attempting to send email with EmailJS...");
+      const result = await emailjs.send(
+        "service_fv0f2qo",
+        "template_zn93brw",
+        {
+          name: name,
+          verification_code: code,
+          to_email: email,
+          reply_to: email,
+        },
+        "7Gw-RPTO7wMAtHcSb"
+      );
+      console.log("EmailJS response:", result);
+      console.log("Verification code sent successfully");
+      */
+
+      return true; // Temporarily always return true
+    } catch (error) {
+      console.error("Email sending failed:", error);
+      console.error("Error details:", error.text || error.message);
+      return false;
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      console.log("Starting registration process...");
+      
+      const code = generateCode();
+      console.log("Generated code:", code);
+      
+      console.log("Sending verification email to:", formData.email);
+      
+      const emailSent = await sendVerificationEmail(formData.username, formData.email, code);
+      
+      console.log("Email sent result:", emailSent);
+      
+      if (emailSent) {
+        setGeneratedCode(code);
+        setStep(2);
+        console.log("Moving to step 2");
+      }
+    } catch (error) {
+      console.error("Error during submission:", error);
+      alert("Сталася помилка: " + error.message);
+    } finally {
+      console.log("Setting loading to false");
+      setLoading(false);
+    }
+  };
+
+const handleVerifyCode = async (e) => {
+  e.preventDefault();
+  setLoading(true);
+
+  try {
+    console.log("User entered code:", userCode);
+    console.log("Generated code:", generatedCode);
+    console.log("Form data to submit:", formData);
+
+    if (userCode.trim() !== generatedCode.trim()) {
+      alert("Невірний код підтвердження");
+    }
+
+    const response = await fetch("http://localhost:8080/register", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify(formData),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      console.error("Registration error:", data);
+      alert(data.error || data.message || "Помилка реєстрації");
+    } else {
+      alert("Реєстрація успішна! Тепер ви можете увійти.");
+      toggleForm();
+    }
+  } catch (error) {
+    console.error("Registration failed:", error);
+    alert("Сталася помилка сервера. Перевірте з'єднання.");
+  } finally {
+    setLoading(false); 
+  }
+};
+
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    // заглушка
-    console.log("Submit", formData);
-    alert("Форма отправлена (проверь консоль)");
   };
 
   return (
