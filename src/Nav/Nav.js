@@ -38,7 +38,7 @@ export function Navbar() {
               className={activeLink === "SHOP" ? "nav-button-active" : "nav-link"}
               onClick={() => {
                 setActiveLink("SHOP");
-                handleNavigation('/');
+                handleNavigation('/shop');
               }}
             >
               SHOP
