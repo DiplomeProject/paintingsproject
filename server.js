@@ -508,6 +508,135 @@ app.get('/api/creator/:id', (req, res) => {
     });
 });
 
+app.get('/api/search', (req, res) => {
+    const { query, field } = req.query;
+
+    // If no query provided, return all paintings
+    if (!query || query.trim() === '') {
+        const sql = `
+            SELECT 
+                Painting_ID,
+                Title,
+                Description,
+                Style,
+                Price,
+                Image,
+                Creation_Date,
+                Author
+            FROM Paintings
+            ORDER BY Painting_ID
+        `;
+        
+        con.query(sql, (err, results) => {
+            if (err) {
+                console.error('Database error:', err);
+                return res.status(500).json({ success: false, message: 'Database error' });
+            }
+            return res.json({ success: true, results, count: results.length });
+        });
+        return;
+    }
+
+    const searchTerm = `%${query.trim()}%`;
+    let sql;
+    let params;
+
+    switch(field) {
+        case 'title':
+            sql = `
+                SELECT 
+                    Painting_ID,
+                    Title,
+                    Description,
+                    Style,
+                    Price,
+                    Image,
+                    Creation_Date,
+                    Author
+                FROM Paintings
+                WHERE LOWER(Title) LIKE LOWER(?)
+                ORDER BY Title
+            `;
+            params = [searchTerm];
+            break;
+            
+        case 'author':
+            sql = `
+                SELECT 
+                    Painting_ID,
+                    Title,
+                    Description,
+                    Style,
+                    Price,
+                    Image,
+                    Creation_Date,
+                    Author
+                FROM Paintings
+                WHERE LOWER(Author) LIKE LOWER(?)
+                ORDER BY Author, Title
+            `;
+            params = [searchTerm];
+            break;
+            
+        case 'style':
+            sql = `
+                SELECT 
+                    Painting_ID,
+                    Title,
+                    Description,
+                    Style,
+                    Price,
+                    Image,
+                    Creation_Date,
+                    Author
+                FROM Paintings
+                WHERE LOWER(Style) LIKE LOWER(?)
+                ORDER BY Style, Title
+            `;
+            params = [searchTerm];
+            break;
+            
+        default: // 'all' or no field specified
+            sql = `
+                SELECT 
+                    Painting_ID,
+                    Title,
+                    Description,
+                    Style,
+                    Price,
+                    Image,
+                    Creation_Date,
+                    Author
+                FROM Paintings
+                WHERE LOWER(Title) LIKE LOWER(?) 
+                   OR LOWER(Author) LIKE LOWER(?) 
+                   OR LOWER(Style) LIKE LOWER(?)
+                   OR LOWER(Description) LIKE LOWER(?)
+                ORDER BY Painting_ID
+            `;
+            params = [searchTerm, searchTerm, searchTerm, searchTerm];
+    }
+
+    con.query(sql, params, (err, results) => {
+        if (err) {
+            console.error('Database search error:', err);
+            return res.status(500).json({ 
+                success: false, 
+                message: 'Database search error',
+                error: process.env.NODE_ENV === 'development' ? err.message : undefined
+            });
+        }
+
+        res.json({
+            success: true,
+            results,
+            count: results.length,
+            searchTerm: query.trim(),
+            searchField: field || 'all'
+        });
+    });
+});
+
 app.delete('/paintings/:id', (req, res) => {
     if (!req.session.user) {
         return res.status(401).json({ success: false, message: 'Not authorized' });
