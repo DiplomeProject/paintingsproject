@@ -1,24 +1,26 @@
-/* --- Nav.module.css (повністю оновлений) --- */
-
 .navbar {
     position: relative;
     z-index: 50;
     font-family: 'Roboto', sans-serif;
 }
+
 .navbarMain {
     background-color: transparent;
     padding: 1rem 1.5rem;
 }
+
 .navbarContainer {
     display: flex;
     align-items: center;
     justify-content: space-between;
     margin: 0 auto;
 }
+
 .navbarLogo {
     display: flex;
     align-items: center;
 }
+
 .logoText {
     color: white;
     font-weight: 800;
@@ -26,14 +28,16 @@
     letter-spacing: 0.05em;
     font-family: 'Orbitron', sans-serif;
 }
+
 .navbarLinks {
     display: flex;
     align-items: center;
     gap: 2rem;
 }
+
 .navLink {
     background: none;
-    border: 1.5px solid rgba(255, 255, 255, 0.2);
+    border: 1.5px solid transparent;
     border-radius: 23px;
     color: white;
     padding: 1.2em 1.5em;
@@ -45,26 +49,31 @@
     cursor: pointer;
     transition: color 0.2s, border-color 0.2s;
 }
+
 .navLink:hover {
     color: #a5b4fc;
     border-color: rgba(255, 255, 255, 0.5);
 }
+
 .navButtonActive {
     composes: navLink;
     font-weight: bold;
     background: rgba(84, 84, 254, 0.1);
     border-color: rgba(255, 255, 255, 0.8);
 }
+
 .navButtonActive:hover {
     transform: scale(1.05);
     color: white;
     border-color: rgba(255, 255, 255, 0.8);
 }
+
 .navbarRight {
     display: flex;
     align-items: center;
     gap: 1.5rem;
 }
+
 .languageSelector {
     display: flex;
     align-items: center;
@@ -72,6 +81,7 @@
     color: white;
     cursor: pointer;
 }
+
 .navSigninButton {
     background: none;
     border: none;
@@ -82,6 +92,7 @@
     text-align: left;
     cursor: pointer;
 }
+
 .navbarBottomBorder {
     height: 1px;
     background-color: rgba(255, 255, 255, 0.5);
