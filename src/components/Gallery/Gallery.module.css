@@ -1,5 +1,3 @@
-/* --- Gallery.module.css (повністю оновлений) --- */
-
 /* --- ЗАГАЛЬНІ СТИЛІ --- */
 .container {
     min-height: 100vh;
@@ -158,17 +156,17 @@
 .imageCardsContainer {
     position: relative;
     width: 50%;
-    height: 600px;
+    height: 955px;
 }
 
-/* ОНОВЛЕНО: Додано ефект світіння до карток */
 .cardBack, .cardMiddle, .cardFront {
     position: absolute;
     transition: transform 0.4s ease, width 0.4s ease, height 0.4s ease;
     border-style: solid;
     border-color: transparent;
-    background: linear-gradient(rgba(70, 70, 71, 0.6), rgba(70, 70, 71, 0.6)) padding-box,
-    linear-gradient(135deg, #595C64, #474D5F) border-box;
+    background:
+            linear-gradient(rgba(70, 70, 71, 0.6), rgba(70, 70, 71, 0.6)) padding-box,
+            linear-gradient(135deg, #595C64, #474D5F) border-box;
     box-shadow: 0 0 20px rgba(84, 84, 254, 0.2), 0 10px 30px rgba(0, 0, 0, 0.3);
     width: 25vw;
     height: 38vw;
@@ -182,7 +180,6 @@
     overflow: hidden;
     border-radius: 6px;
 }
-
 .cardImage {
     flex-grow: 1;
     margin-top: 14px;
@@ -192,7 +189,6 @@
     background-repeat: no-repeat;
     background-position: center;
 }
-
 .cardInfo {
     padding: 10px 15px;
     color: #fff;
@@ -201,7 +197,6 @@
     align-items: center;
     font-size: 14px;
 }
-
 .cardTitle {
     font-weight: 400;
     font-family: 'Roboto';
@@ -215,36 +210,38 @@
     opacity: 0.8;
 }
 
+
+/* ОНОВЛЕНО: Нове позиціонування з опущеними бічними картками */
 .cardBack {
     max-width: 369px;
     max-height: 543px;
     border-radius: 8.8px;
     border-width: 3.52px;
-    transform: rotate(16.58deg);
+    transform: rotate(-16.58deg);
     top: 0;
     left: 40%;
     z-index: 1;
 }
 
 .cardMiddle {
-    max-width: 429px;
-    max-height: 648px;
+    max-width: 365px;
+    max-height: 539px;
     border-radius: 10.36px;
     border-width: 4.14px;
-    transform: rotate(31.8deg);
-    top: 5%;
-    right: -15%;
+    transform: rotate(18.7deg);
+    top: 28%;
+    right: -28%;
     z-index: 2;
 }
 
 .cardFront {
-    max-width: 365px;
-    max-height: 539px;
+    max-width: 429px;
+    max-height: 648px;
     border-radius: 8.71px;
     border-width: 3.49px;
-    transform: rotate(-18.7deg);
-    top: 10%;
-    left: 10%;
+    transform: rotate(-31.8deg);
+    top: 23%;
+    left: 17%;
     z-index: 3;
 }
 
