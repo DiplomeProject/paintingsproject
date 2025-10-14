@@ -92,12 +92,10 @@
     opacity: 1;
 }
 
-/* --- ОНОВЛЕНО: Стилі Карток з Артом --- */
 .artGridFull {
     display: grid;
-    /* Оновлено для кращого відповідника 7-8 колонкам на великих екранах */
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-    gap: 30px;
+    grid-template-columns: repeat(auto-fill, minmax(212px, 1fr));
+    gap: 20px;
 }
 .artCard {
     background: rgba(30, 30, 50, 0.6);
@@ -109,6 +107,8 @@
     gap: 16px;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     cursor: pointer;
+    max-width: 212px;
+    max-height: 329px;
 }
 .artCard:hover {
     transform: translateY(-8px);
@@ -173,3 +173,11 @@
     font-weight: 700;
 }
 .pageBtn:disabled { opacity: 0.4; cursor: default; }
+
+.noResults {
+    text-align: center;
+    padding: 80px 20px;
+    font-size: 1.2rem;
+    color: rgba(255, 255, 255, 0.7);
+    grid-column: 1 / -1; /* Розтягуємо на всю ширину сітки, якщо потрібно */
+}
