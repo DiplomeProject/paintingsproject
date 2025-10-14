@@ -1,146 +1,126 @@
 import React, { useMemo, useState } from "react";
-import "./Shop.css";
+import styles from "./Shop.module.css";
 
 const categories = [
-  "2D AVATARS",
-  "3D MODELS",
-  "READING",
-  "BRENDING",
-  "ICONS",
-  "GAMES",
-  "MOCKUPS",
-  "UI/UX",
+    "2D AVATARS", "3D MODELS", "READING", "BRENDING",
+    "ICONS", "GAMES", "MOCKUPS", "UI/UX",
+    "advertising", "Brending", "poster", "Architecture",
+    "Fashion", "Sketch", "Photography",
 ];
 
 const Shop = () => {
-  const [currentPage, setCurrentPage] = useState(0);
-  const itemsPerPage = 21;
+    const [currentPage, setCurrentPage] = useState(0);
+    const itemsPerPage = 20;
 
-  // Generate 63 demo cards (3 pages)
-  const cards = useMemo(() => {
-    return Array.from({ length: 63 }, (_, i) => {
-      const randomIndex = Math.floor(Math.random() * 5) + 1;
-      return {
-        id: i,
-        image: `/images/image${randomIndex}.png`,
-        artist: "Digital Artist",
-        views: `${Math.floor(Math.random() * 500)}k`,
-        title: `Artwork #${i + 1}`,
-        price: `$${(Math.random() * 200 + 20).toFixed(0)}`,
-      };
-    });
-  }, []);
+    const cards = useMemo(() => {
+        return Array.from({ length: 63 }, (_, i) => ({
+            id: i,
+            imageUrl: `/images/image${(i % 5) + 1}.png`,
+            title: `Artwork #${i + 1}`,
+            artistName: "Digital Artist",
+            artistStyle: "AI Art",
+            likes: `${Math.floor(Math.random() * 500)}k`,
+            price: (Math.random() * 200 + 20).toFixed(2),
+        }));
+    }, []);
 
-  const totalPages = Math.ceil(cards.length / itemsPerPage);
-  const startIndex = currentPage * itemsPerPage;
-  const displayedCards = cards.slice(startIndex, startIndex + itemsPerPage);
+    const totalPages = Math.ceil(cards.length / itemsPerPage);
+    const startIndex = currentPage * itemsPerPage;
+    const displayedCards = cards.slice(startIndex, startIndex + itemsPerPage);
 
-  return (
-    <div className="containerShop">
-      <div className="shop-container">
-        {/* Header + Search */}
-        <div className="ShopContainer">
-          <div className="ShopHeader">Shop</div>
-          <div className="searchBarContainer">
-            <input
-              type="text"
-              className="searchInput"
-              placeholder="Title of the art"
-            />
-            <button className="searchButton">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                <path
-                  d="M21 21l-4.35-4.35M10 18a8 8 0 1 1 0-16 8 8 0 0 1 0 16z"
-                  stroke="black"
-                  strokeWidth="2"
-                  fill="none"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </button>
-          </div>
-        </div>
+    const renderPageNumbers = () => {
+        const pageNumbers = [];
+        for (let i = 0; i < totalPages; i++) {
+            pageNumbers.push(
+                <button
+                    key={i}
+                    className={`${styles.pageNumber} ${i === currentPage ? styles.active : ""}`}
+                    onClick={() => setCurrentPage(i)}
+                >
+                    {i + 1}
+                </button>
+            );
+        }
+        return pageNumbers;
+    };
 
-        {/* Category Buttons */}
-        <div className="categoryGrid">
-          {categories.map((cat, index) => (
-            <button key={index} className="categoryButton">
-              {cat}
-            </button>
-          ))}
-        </div>
-
-        {/* Grid Cards */}
-        <div className="CardsContainer">
-          <div className="art-grid-full">
-            {displayedCards.map((card) => (
-              <div key={card.id} className="art-card">
-                <div
-                  className="art-card-image"
-                  style={{ backgroundImage: `url(${card.image})` }}
-                />
-                <div className="art-card-info">
-                  <div className="art-card-meta">
-                    <span className="art-card-artist">{card.artist}</span>
-                    <span className="art-card-views">
-                      <svg
-                        width="12"
-                        height="12"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          d="M12 5C7 5 2.73 8.11 1 12.5 2.73 16.89 7 20 12 20s9.27-3.11 11-7.5C21.27 8.11 17 5 12 5zm0 12.5c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"
-                          fill="currentColor"
+    return (
+        <div className={styles.shopPage}>
+            <div className={styles.contentWrapper}>
+                <header className={styles.header}>
+                    <h1 className={styles.shopTitle}>Shop</h1>
+                    <div className={styles.searchBarContainer}>
+                        <input
+                            type="text"
+                            className={styles.searchInput}
+                            placeholder="Search by title, artist, style..."
                         />
-                      </svg>
-                      {card.views}
-                    </span>
-                  </div>
-                  <div className="art-card-title">{card.title}</div>
-                  <div className="art-card-price">{card.price}</div>
+                        <button className={styles.searchButton}>
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20">
+                                <path d="M21 21l-4.35-4.35M10 18a8 8 0 1 1 0-16 8 8 0 0 1 0 16z" stroke="black" strokeWidth="2" fill="none" />
+                            </svg>
+                        </button>
+                    </div>
+                </header>
+
+                <div className={styles.categoryGrid}>
+                    {categories.map((cat) => (
+                        <button key={cat} className={styles.categoryButton}>
+                            {cat}
+                        </button>
+                    ))}
                 </div>
-              </div>
-            ))}
-          </div>
 
-          <div className="pagination">
-            <button
-              className="page-btn"
-              onClick={() => setCurrentPage((p) => Math.max(p - 1, 0))}
-              disabled={currentPage === 0}
-            >
-              ‹
-            </button>
+                <div className={styles.artGridFull}>
+                    {displayedCards.map((card) => (
+                        <div key={card.id} className={styles.artCard}>
+                            <div
+                                className={styles.artCardImage}
+                                style={{ backgroundImage: `url(${card.imageUrl})` }}
+                            />
+                            {/* --- ПОВЕРНУТО ВІДСУТНІЙ БЛОК --- */}
+                            <div className={styles.artCardInfo}>
+                                <div className={styles.cardRow}>
+                                    <span className={styles.artCardTitle}>{card.title}</span>
+                                    <span className={styles.artCardLikes}>
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" /></svg>
+                                        {card.likes}
+                                    </span>
+                                </div>
+                                <div className={styles.cardRow}>
+                                    <div className={styles.artistInfo}>
+                                        <span className={styles.artistName}>{card.artistName}</span>
+                                        <span className={styles.artistStyle}>{card.artistStyle}</span>
+                                    </div>
+                                    <span className={styles.artCardPrice}>$ {card.price}</span>
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
 
-            {Array.from({ length: totalPages }, (_, i) => (
-              <button
-                key={i}
-                className={`page-number ${i === currentPage ? "active" : ""}`}
-                onClick={() => setCurrentPage(i)}
-              >
-                {i + 1}
-              </button>
-            ))}
-
-            <button
-              className="page-btn"
-              onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages - 1))}
-              disabled={currentPage === totalPages - 1}
-            >
-              ›
-            </button>
-          </div>
+                <div className={styles.paginationContainer}>
+                    <div className={styles.pagination}>
+                        <button
+                            className={styles.pageBtn}
+                            onClick={() => setCurrentPage((p) => Math.max(p - 1, 0))}
+                            disabled={currentPage === 0}
+                        >
+                            ‹
+                        </button>
+                        {renderPageNumbers()}
+                        <button
+                            className={styles.pageBtn}
+                            onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages - 1))}
+                            disabled={currentPage === totalPages - 1}
+                        >
+                            ›
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
-      </div>
-    </div>
-  );
+    );
 };
 
 export default Shop;
-
-
-
-// шрифт фильтров, сохранить цвет ховера при нажатии на фильтр, поставить иконки в карточки
