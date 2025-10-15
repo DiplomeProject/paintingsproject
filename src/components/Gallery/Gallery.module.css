@@ -400,92 +400,92 @@
 
 .artGridSlide {
     display: grid;
-    grid-template-columns: repeat(8, 1fr);
-    gap: 20px;
+    grid-template-columns: repeat(8, minmax(212px, 1fr));
+    gap: 17px;
     flex: 0 0 100%;
 }
 
-.artCard {
-    border-radius: 5px;
-    background: linear-gradient(rgba(70, 70, 71, 0.6), rgba(70, 70, 71, 0.6)) padding-box,
-    linear-gradient(168deg, rgba(89, 92, 100, 0), rgba(71, 77, 95, 0)) border-box;
-    border: 2px solid transparent;
-    background-clip: padding-box;
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    padding: 10px;
-    gap: 16px;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    cursor: pointer;
-}
+/*.artCard {*/
+/*    border-radius: 5px;*/
+/*    background: linear-gradient(rgba(70, 70, 71, 0.6), rgba(70, 70, 71, 0.6)) padding-box,*/
+/*    linear-gradient(168deg, rgba(89, 92, 100, 0), rgba(71, 77, 95, 0)) border-box;*/
+/*    border: 2px solid transparent;*/
+/*    background-clip: padding-box;*/
+/*    position: relative;*/
+/*    display: flex;*/
+/*    flex-direction: column;*/
+/*    padding: 10px;*/
+/*    gap: 16px;*/
+/*    transition: transform 0.3s ease, box-shadow 0.3s ease;*/
+/*    cursor: pointer;*/
+/*}*/
 
-.artCard:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
-}
+/*.artCard:hover {*/
+/*    transform: translateY(-8px);*/
+/*    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);*/
+/*}*/
 
-.artCardImage {
-    height: 220px;
-    background-size: cover;
-    background-position: center;
-    border-radius: 3px;
-}
+/*.artCardImage {*/
+/*    height: 220px;*/
+/*    background-size: cover;*/
+/*    background-position: center;*/
+/*    border-radius: 3px;*/
+/*}*/
 
-.artCardInfo {
-    color: white;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    flex-grow: 1;
-    padding: 15px 16px;
-}
-.cardRow {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-}
+/*.artCardInfo {*/
+/*    color: white;*/
+/*    display: flex;*/
+/*    flex-direction: column;*/
+/*    gap: 12px;*/
+/*    flex-grow: 1;*/
+/*    padding: 15px 16px;*/
+/*}*/
+/*.cardRow {*/
+/*    display: flex;*/
+/*    justify-content: space-between;*/
+/*    align-items: flex-start;*/
+/*}*/
 
-.artCardTitle {
-    font-family: 'Roboto', sans-serif;
-    font-weight: 400;
-    font-size: 16px;
-    line-height: 1;
-}
+/*.artCardTitle {*/
+/*    font-family: 'Roboto', sans-serif;*/
+/*    font-weight: 400;*/
+/*    font-size: 16px;*/
+/*    line-height: 1;*/
+/*}*/
 
-.artistInfo {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
-}
-.artistName {
-    font-family: 'Roboto', sans-serif;
-    font-weight: 400;
-    font-size: 11px;
-    line-height: 1;
-}
-.artistStyle {
-    font-family: 'Roboto', sans-serif;
-    font-weight: 400;
-    font-size: 11px;
-    line-height: 1;
-    color: rgba(255, 255, 255, 0.7);
-}
+/*.artistInfo {*/
+/*    display: flex;*/
+/*    flex-direction: column;*/
+/*    align-items: flex-start;*/
+/*    gap: 8px;*/
+/*}*/
+/*.artistName {*/
+/*    font-family: 'Roboto', sans-serif;*/
+/*    font-weight: 400;*/
+/*    font-size: 11px;*/
+/*    line-height: 1;*/
+/*}*/
+/*.artistStyle {*/
+/*    font-family: 'Roboto', sans-serif;*/
+/*    font-weight: 400;*/
+/*    font-size: 11px;*/
+/*    line-height: 1;*/
+/*    color: rgba(255, 255, 255, 0.7);*/
+/*}*/
 
-.artCardLikes {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 0.9rem;
-}
-.artCardPrice {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 1rem;
-    font-weight: 700;
-}
+/*.artCardLikes {*/
+/*    display: flex;*/
+/*    align-items: center;*/
+/*    gap: 6px;*/
+/*    font-size: 0.9rem;*/
+/*}*/
+/*.artCardPrice {*/
+/*    display: flex;*/
+/*    align-items: center;*/
+/*    gap: 6px;*/
+/*    font-size: 1rem;*/
+/*    font-weight: 700;*/
+/*}*/
 
 .carouselDots {
     display: flex;
@@ -511,18 +511,16 @@
     background: white;
 }
 
+.noResults {
+    text-align: center;
+    padding: 80px 20px;
+    font-size: 1.2rem;
+    color: rgba(255, 255, 255, 0.7);
+    grid-column: 1 / -1;
+}
+
 
 /* --- АДАПТИВНІСТЬ --- */
-@media (max-width: 1440px) {
-    .navbarContainer, .navbarBottomBorder {
-        max-width: 95vw;
-    }
-}
-
-@media (max-width: 1200px) {
-    .artGridSlide { grid-template-columns: repeat(6, 1fr); }
-}
-
 @media (max-width: 1024px) {
     .contentSection {
         flex-direction: column;
@@ -618,7 +616,6 @@
 
     .TrendsContainer {
         flex-direction: column;
-        align-items: flex-start;
         gap: 20px;
     }
 

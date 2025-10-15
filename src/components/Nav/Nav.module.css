@@ -58,7 +58,7 @@
 .navButtonActive {
     composes: navLink;
     font-weight: bold;
-    background: rgba(84, 84, 254, 0.1);
+    background: linear-gradient(90deg, rgba(1, 0, 38, 0.2) 0%, rgba(253, 76, 204, 0.2) 100%);
     border-color: rgba(255, 255, 255, 0.8);
 }
 

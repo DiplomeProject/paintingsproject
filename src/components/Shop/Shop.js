@@ -1,5 +1,6 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react"; // 1. Імпортуємо useEffect
 import styles from "./Shop.module.css";
+import ArtCard from '../ArtCard/ArtCard';
 
 const categories = [
     "2D AVATARS", "3D MODELS", "BOOKS", "ANIME", "ICONS", "GAMES", "MOCKUPS", "UI/UX",
@@ -9,15 +10,25 @@ const categories = [
 const Shop = () => {
     const [activeCategory, setActiveCategory] = useState(null);
     const [currentPage, setCurrentPage] = useState(0);
-    const itemsPerPage = 20;
+    const [searchQuery, setSearchQuery] = useState('');
+    const itemsPerPage = 112;
+
+    // 2. ДОДАНО: Хук, який спрацьовує при зміні 'currentPage'
+    useEffect(() => {
+        // Плавно прокручуємо вікно до самого верху
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
+    }, [currentPage]); // Залежність: ефект спрацює щоразу, коли currentPage зміниться
 
     const cards = useMemo(() => {
-        return Array.from({ length: 63 }, (_, i) => ({
+        return Array.from({ length: 5000 }, (_, i) => ({
             id: i,
-            imageUrl: `/images/image${(i % 5) + 1}.png`,
+            imageUrl: `/images/shopAndOtherPageImages/image${(i % 4) + 1}.png`,
             title: `Artwork #${i + 1}`,
             artistName: "Digital Artist",
-            artistStyle: "AI Art",
+            artistStyle: categories[i % categories.length],
             likes: `${Math.floor(Math.random() * 500)}k`,
             price: (Math.random() * 200 + 20).toFixed(2),
             category: categories[i % categories.length],
@@ -25,11 +36,23 @@ const Shop = () => {
     }, []);
 
     const filteredCards = useMemo(() => {
-        if (!activeCategory) {
-            return cards;
+        let filtered = cards;
+
+        if (activeCategory) {
+            filtered = filtered.filter(card => card.category.toUpperCase() === activeCategory.toUpperCase());
         }
-        return cards.filter(card => card.category.toUpperCase() === activeCategory.toUpperCase());
-    }, [activeCategory, cards]);
+
+        if (searchQuery) {
+            const lowercasedQuery = searchQuery.toLowerCase();
+            filtered = filtered.filter(card =>
+                card.title.toLowerCase().includes(lowercasedQuery) ||
+                card.artistName.toLowerCase().includes(lowercasedQuery) ||
+                card.artistStyle.toLowerCase().includes(lowercasedQuery)
+            );
+        }
+
+        return filtered;
+    }, [activeCategory, cards, searchQuery]);
 
     const totalPages = Math.ceil(filteredCards.length / itemsPerPage);
     const startIndex = currentPage * itemsPerPage;
@@ -44,21 +67,61 @@ const Shop = () => {
         setCurrentPage(0);
     };
 
+    const handleSearchChange = (event) => {
+        setSearchQuery(event.target.value);
+        setCurrentPage(0);
+    };
+
     const renderPageNumbers = () => {
-        const pageNumbers = [];
-        const pagesToShow = Math.ceil(filteredCards.length / itemsPerPage);
-        for (let i = 0; i < pagesToShow; i++) {
-            pageNumbers.push(
-                <button
-                    key={i}
-                    className={`${styles.pageNumber} ${i === currentPage ? styles.active : ""}`}
-                    onClick={() => setCurrentPage(i)}
-                >
+        if (totalPages <= 7) {
+            const pageNumbers = [];
+            for (let i = 0; i < totalPages; i++) {
+                pageNumbers.push(
+                    <button key={i} className={`${styles.pageNumber} ${i === currentPage ? styles.active : ""}`} onClick={() => setCurrentPage(i)}>
+                        {i + 1}
+                    </button>
+                );
+            }
+            return pageNumbers;
+        }
+
+        const pages = [];
+        const siblingCount = 1;
+
+        pages.push(
+            <button key={0} className={`${styles.pageNumber} ${0 === currentPage ? styles.active : ""}`} onClick={() => setCurrentPage(0)}>
+                1
+            </button>
+        );
+
+        if (currentPage > siblingCount + 1) {
+            pages.push(<span key="dots1" className={styles.paginationDots}>...</span>);
+        }
+
+        const startPage = Math.max(1, currentPage - siblingCount);
+        const endPage = Math.min(totalPages - 2, currentPage + siblingCount);
+
+        for (let i = startPage; i <= endPage; i++) {
+            pages.push(
+                <button key={i} className={`${styles.pageNumber} ${i === currentPage ? styles.active : ""}`} onClick={() => setCurrentPage(i)}>
                     {i + 1}
                 </button>
             );
         }
-        return pageNumbers;
+
+        if (currentPage < totalPages - siblingCount - 2) {
+            pages.push(<span key="dots2" className={styles.paginationDots}>...</span>);
+        }
+
+        if (totalPages > 1) {
+            pages.push(
+                <button key={totalPages - 1} className={`${styles.pageNumber} ${totalPages - 1 === currentPage ? styles.active : ""}`} onClick={() => setCurrentPage(totalPages - 1)}>
+                    {totalPages}
+                </button>
+            );
+        }
+
+        return pages;
     };
 
     return (
@@ -71,6 +134,8 @@ const Shop = () => {
                             type="text"
                             className={styles.searchInput}
                             placeholder="Search by title, artist, style..."
+                            value={searchQuery}
+                            onChange={handleSearchChange}
                         />
                         <button className={styles.searchButton}>
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20">
@@ -105,28 +170,15 @@ const Shop = () => {
                     <>
                         <div className={styles.artGridFull}>
                             {displayedCards.map((card) => (
-                                <div key={card.id} className={styles.artCard}>
-                                    <div
-                                        className={styles.artCardImage}
-                                        style={{ backgroundImage: `url(${card.imageUrl})` }}
-                                    />
-                                    <div className={styles.artCardInfo}>
-                                        <div className={styles.cardRow}>
-                                            <span className={styles.artCardTitle}>{card.title}</span>
-                                            <span className={styles.artCardLikes}>
-                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" /></svg>
-                                                {card.likes}
-                                            </span>
-                                        </div>
-                                        <div className={styles.cardRow}>
-                                            <div className={styles.artistInfo}>
-                                                <span className={styles.artistName}>{card.artistName}</span>
-                                                <span className={styles.artistStyle}>{card.artistStyle}</span>
-                                            </div>
-                                            <span className={styles.artCardPrice}>$ {card.price}</span>
-                                        </div>
-                                    </div>
-                                </div>
+                                <ArtCard
+                                    key={card.id}
+                                    imageUrl={card.imageUrl}
+                                    title={card.title}
+                                    artistName={card.artistName}
+                                    artistStyle={card.artistStyle}
+                                    likes={card.likes}
+                                    price={card.price}
+                                />
                             ))}
                         </div>
 

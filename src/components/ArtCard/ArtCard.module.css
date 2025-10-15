@@ -1,0 +1,74 @@
+.artCard {
+    background: linear-gradient(rgba(70, 70, 71, 0.6), rgba(70, 70, 71, 0.6)) padding-box,
+    linear-gradient(168deg, rgba(89, 92, 100, 0), rgba(71, 77, 95, 0)) border-box;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    cursor: pointer;
+    overflow: hidden;
+    aspect-ratio: 212 / 329;
+}
+
+.artCard:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+}
+
+.artCardImage {
+    height: 65%;
+    background-size: cover;
+    background-position: center;
+    margin: 16px 16px 0 16px;
+    border-radius: 8px;
+}
+
+.artCardInfo {
+    color: white;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    flex-grow: 1;
+    padding: 16px;
+}
+
+.cardRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.artCardTitle {
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+.artistInfo {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.artistName {
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.artistStyle {
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.artCardLikes {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.9rem;
+}
+
+.artCardPrice {
+    font-size: 1rem;
+    font-weight: 700;
+}
