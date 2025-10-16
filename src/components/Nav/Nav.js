@@ -41,35 +41,38 @@ export function Navbar() {
         <nav className={styles.navbar}>
             <div className={styles.navbarMain}>
                 <div className={styles.navbarContainer}>
-                    <div className={styles.navbarLogo}>
-                        <div className={styles.logoText}>Digital Brush</div>
-                    </div>
+                    {/* ОНОВЛЕНО: Додано нову обгортку .navbarLeft */}
+                    <div className={styles.navbarLeft}>
+                        <div className={styles.navbarLogo}>
+                            <div className={styles.logoText}>Digital Brush</div>
+                        </div>
 
-                    <div className={styles.navbarLinks}>
-                        <button
-                            className={getButtonClass('/homepage', 'MAIN')}
-                            onClick={() => handleNavigation('/homepage')}
-                        >
-                            MAIN
-                        </button>
-                        <button
-                            className={getButtonClass('/shop', 'SHOP')}
-                            onClick={() => handleNavigation('/shop')}
-                        >
-                            SHOP
-                        </button>
-                        <button
-                            className={getButtonClass('/artists', 'ARTISTS')}
-                            onClick={() => handleNavigation('/artists')}
-                        >
-                            ARTISTS
-                        </button>
-                        <button
-                            className={getButtonClass('/commission', 'COMMISSION')}
-                            onClick={() => handleNavigation('/commission')}
-                        >
-                            COMMISSION
-                        </button>
+                        <div className={styles.navbarLinks}>
+                            <button
+                                className={getButtonClass('/homepage', 'MAIN')}
+                                onClick={() => handleNavigation('/homepage')}
+                            >
+                                MAIN
+                            </button>
+                            <button
+                                className={getButtonClass('/shop', 'SHOP')}
+                                onClick={() => handleNavigation('/shop')}
+                            >
+                                SHOP
+                            </button>
+                            <button
+                                className={getButtonClass('/artists', 'ARTISTS')}
+                                onClick={() => handleNavigation('/artists')}
+                            >
+                                ARTISTS
+                            </button>
+                            <button
+                                className={getButtonClass('/commission', 'COMMISSION')}
+                                onClick={() => handleNavigation('/commission')}
+                            >
+                                COMMISSION
+                            </button>
+                        </div>
                     </div>
 
                     <div className={styles.navbarRight}>

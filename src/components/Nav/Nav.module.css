@@ -16,6 +16,12 @@
     margin: 0 auto;
 }
 
+.navbarLeft {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
 .navbarLogo {
     display: flex;
     align-items: center;
@@ -24,7 +30,7 @@
 .logoText {
     color: white;
     font-weight: 800;
-    font-size: 1.5rem;
+    font-size: 42px;
     letter-spacing: 0.05em;
     font-family: 'Orbitron', sans-serif;
 }
@@ -44,10 +50,12 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 0.875rem;
+    font-size: 22px;
     font-family: 'Roboto', sans-serif;
     cursor: pointer;
     transition: color 0.2s, border-color 0.2s;
+    width: 215px;
+    height: 55px;
 }
 
 .navLink:hover {
@@ -60,6 +68,8 @@
     font-weight: bold;
     background: linear-gradient(90deg, rgba(1, 0, 38, 0.2) 0%, rgba(253, 76, 204, 0.2) 100%);
     border-color: rgba(255, 255, 255, 0.8);
+    width: 215px;
+    height: 55px;
 }
 
 .navButtonActive:hover {
@@ -162,7 +172,7 @@
     padding: 0.5rem;
 }
 
-@media (max-width: 900px) {
+@media (max-width: 1420px) {
     .navbarLinks, .navbarRight {
         display: none;
     }

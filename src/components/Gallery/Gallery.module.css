@@ -34,6 +34,7 @@
     height: 100%;
     overflow: hidden;
     z-index: 0;
+    opacity: 0.5;
 }
 
 .gridTrack {
@@ -94,28 +95,29 @@
     display: flex;
     flex-direction: column;
     padding: 51px;
-    gap: 100px;
-    max-width: 1440px;
-    margin: 0 auto;
-    width: 100%;
+    gap: 250px;
+    width: auto;
+    box-sizing: border-box;
 }
 
 .contentSection {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
+    /*justify-content: space-between;*/
+    /*align-items: center;*/
+    gap: 5%;
     position: relative;
 }
 
 .textContainer {
-    width: 45%;
-    max-width: 580px;
+    width: 40%;
+    /*max-width: 580px;*/
+    padding-top: 30px;
 }
 
 .textHeader1 {
     font-family: 'Orbitron', sans-serif;
     font-weight: 600;
-    font-size: 39px;
+    font-size: 47px;
     line-height: 1.2;
     text-transform: uppercase;
     color: #FFFFFF;
@@ -124,10 +126,10 @@
 .text1 {
     margin-top: 20px;
     width: 100%;
-    max-width: 520px;
+    max-width: 100%;
     font-family: 'Roboto', sans-serif;
     font-weight: 400;
-    font-size: 18px;
+    font-size: 41px;
     line-height: 1.6;
     color: #FFFFFF;
 }
@@ -154,19 +156,16 @@
 
 .imageCardsContainer {
     position: relative;
-    width: 60%;
-    height: 955px;
+    width: 55%; /* Ширина блоку з картками */
+    height: 650px; /* Висота контейнера для позиціонування */
 }
 
 .cardBack, .cardMiddle, .cardFront {
     position: absolute;
     transition: transform 0.4s ease, width 0.4s ease, height 0.4s ease;
-    border-style: solid;
-    border-color: transparent;
-    background:
-            linear-gradient(rgba(70, 70, 71, 0.6), rgba(70, 70, 71, 0.6)) padding-box,
-            linear-gradient(135deg, #595C64, #474D5F) border-box;
-    box-shadow: 0 0 20px rgba(84, 84, 254, 0.2), 0 10px 30px rgba(0, 0, 0, 0.3);
+    /*background: linear-gradient(rgba(70, 70, 71, 0.6), rgba(70, 70, 71, 0.6)) padding-box, linear-gradient(168deg, rgba(89, 92, 100, 1), rgba(71, 77, 95, 0)) border-box;*/
+    /*border: 2px solid transparent;*/
+    background-clip: padding-box;
     width: 25vw;
     height: 38vw;
 }
@@ -178,7 +177,10 @@
     flex-direction: column;
     overflow: hidden;
     border-radius: 6px;
+    background: linear-gradient(rgba(70, 70, 71, 0.6), rgba(70, 70, 71, 0.6)) padding-box, linear-gradient(168deg, rgba(89, 92, 100, 1), rgba(71, 77, 95, 1)) border-box;
+    border: 2px solid transparent;
 }
+
 .cardImage {
     flex-grow: 1;
     margin-top: 14px;
@@ -187,7 +189,9 @@
     background-size: cover;
     background-repeat: no-repeat;
     background-position: center;
+
 }
+
 .cardInfo {
     padding: 10px 15px;
     color: #fff;
@@ -195,7 +199,9 @@
     justify-content: space-between;
     align-items: center;
     font-size: 14px;
+    border-radius: 0 0 6px 6px;
 }
+
 .cardTitle {
     font-weight: 400;
     font-family: 'Roboto';
@@ -212,35 +218,37 @@
 
 /* ОНОВЛЕНО: Нове позиціонування з опущеними бічними картками */
 .cardBack {
-    max-width: 369px;
-    max-height: 543px;
+    width: 300px;
+    height: 460px;
     border-radius: 8.8px;
     border-width: 3.52px;
-    transform: rotate(-16.58deg);
-    top: 0;
-    left: 40%;
+    transform: rotate(-16deg);
+    top: 1%;
+    left: 35%;
     z-index: 1;
 }
 
+/* Права середня картка */
 .cardMiddle {
-    max-width: 365px;
-    max-height: 539px;
+    width: 300px;
+    height: 460px;
     border-radius: 10.36px;
     border-width: 4.14px;
-    transform: rotate(18.7deg);
-    top: 28%;
-    right: -11%;
+    transform: rotate(18deg);
+    top: 20%;
+    right: 14%;
     z-index: 2;
 }
 
+/* Центральна передня картка */
 .cardFront {
-    max-width: 429px;
-    max-height: 648px;
+    width: 340px;
+    height: 520px;
     border-radius: 8.71px;
     border-width: 3.49px;
-    transform: rotate(-31.8deg);
-    top: 23%;
-    left: 17%;
+    transform: translateX(-50%) rotate(-31deg);
+    top: 29%;
+    left: 37%;
     z-index: 3;
 }
 
@@ -347,7 +355,7 @@
 
 .searchBarContainer {
     width: 100%;
-    max-width: 500px;
+    max-width: 56%;
     height: 55px;
     background: rgb(255, 255, 255);
     border-radius: 18px;
@@ -521,18 +529,41 @@
 
 
 /* --- АДАПТИВНІСТЬ --- */
+@media (max-width: 2560px) {
+    .cardMiddle {
+        right: 25%;
+    }
+}
+
+@media (max-width: 1920px) {
+    .cardMiddle {
+        right: 14%;
+    }
+}
+
+@media (max-width: 1440px) {
+    .textContentWrapper {
+        padding: 51px 10vw;
+    }
+}
+
 @media (max-width: 1024px) {
+    .textContentWrapper {
+        padding: 51px;
+        gap: 80px;
+    }
+
     .contentSection {
         flex-direction: column;
         /*gap: 80px;*/
         min-height: auto;
     }
 
-    .button1{
+    .button1 {
         display: initial;
     }
 
-    .text1{
+    .text1 {
         display: initial;
     }
 
@@ -550,14 +581,22 @@
         width: 100%;
         max-width: 600px;
         text-align: center;
+        padding-top: 0;
+        margin-left: 20%;
+    }
+
+    .textHeader1 {
+        font-size: 34px;
+    }
+
+    .text1 {
+        font-size: 18px;
     }
 
     .imageCardsContainer, .ImagesContainer {
-        height: 550px;
-    }
-
-    .ImagesContainer {
         width: 100%;
+        height: 500px;
+        position: relative;
     }
 
     .artGridSlide {
@@ -569,8 +608,8 @@
     }
 
     .cardBack, .cardMiddle, .cardFront {
-        width: 35vw;
-        height: 53vw;
+        width: 280px;
+        height: 420px;
     }
 
     .cardBack {
@@ -578,7 +617,46 @@
     }
 
     .cardFront {
-        left: 0;
+        top: 28%;
+        left: 50%;
+        transform: translateX(-50%) rotate(-20deg);
+    }
+
+    .image1, .image2, .image3, .image4, .image5 {
+        top: auto;
+        left: auto;
+        right: auto;
+        bottom: auto;
+    }
+
+    .image1 {
+        top: 0;
+        left: 5%;
+        transform: rotate(-15deg);
+    }
+
+    .image2 {
+        top: 10%;
+        right: 5%;
+        transform: rotate(15deg);
+    }
+
+    .image3 {
+        bottom: 10%;
+        left: 20%;
+        transform: rotate(5deg);
+    }
+
+    .image4 {
+        bottom: 5%;
+        right: 25%;
+        transform: rotate(-5deg);
+    }
+
+    .image5 {
+        top: 30%;
+        left: 50%;
+        transform: translateX(-50%) rotate(2deg);
     }
 }
 
@@ -593,8 +671,8 @@
         gap: inherit;
     }
 
-    .imageCardsContainer{
-        left: -8%;
+    .textContainer {
+        margin-left: 15%;
     }
 
     .textContainer:nth-child(2) {
@@ -646,18 +724,42 @@
     }
 
     .cardBack {
-        transform: rotate(10deg);
-        left: 45%;
-        top: 0;
-    }
-
-    .cardBack {
-        display: inherit;
+        width: 220px;
+        height: 330px;
+        top: 13%;
+        left: 21%;
+        transform: rotate(-10deg);
+        display: flex;
     }
 
     .cardFront {
-        transform: rotate(-10deg);
+        width: 220px;
+        height: 330px;
+        top: 10%;
+        left: auto;
+        right: 5%;
+        transform: rotate(10deg);
+    }
+
+    .image3, .image5 {
+        display: none;
+    }
+
+    .image1 {
+        top: 0;
         left: 5%;
+        transform: rotate(-10deg);
+    }
+
+    .image2 {
         top: 5%;
+        right: 5%;
+        transform: rotate(10deg);
+    }
+
+    .image4 {
+        bottom: 10%;
+        left: 50%;
+        transform: rotate(5deg);
     }
 }
