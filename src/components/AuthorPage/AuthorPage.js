@@ -1,5 +1,5 @@
 import React from 'react';
-import Gallery from '../../Gallery/Gallery';
+import Gallery from '../Gallery/Gallery';
 import './AuthorPage.css';
 
 function AuthorPage({ authorData, onSelectPainting, onClose }) {
