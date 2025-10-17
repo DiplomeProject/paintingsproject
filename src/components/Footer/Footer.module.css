@@ -1,0 +1,85 @@
+.footer {
+    background-color: #0D0B1F; /* Фон как у основного контейнера */
+    color: #a0aec0; /* Светло-серый текст */
+    padding: 60px 51px 20px;
+    margin-top: auto; /* Прижимает футер к низу */
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.footerContainer {
+    max-width: 1400px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 40px;
+}
+
+.footerLeft {
+    flex: 2;
+    min-width: 300px;
+}
+
+.footerLogo {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 24px;
+    font-weight: 600;
+    color: #ffffff;
+    margin-bottom: 20px;
+}
+
+.footerText {
+    font-family: 'Roboto', sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+    max-width: 450px;
+}
+
+.footerRight {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    min-width: 250px;
+}
+
+.footerContact p, .footerSocial p {
+    margin: 0 0 10px 0;
+    font-size: 16px;
+    color: #ffffff;
+}
+
+.footerContact a {
+    color: #a0aec0;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.footerContact a:hover {
+    color: #ffffff;
+}
+
+.socialIconsContainer {
+    display: flex;
+    gap: 15px;
+}
+
+.socialIcon {
+    color: #ffffff;
+    width: 24px;
+    height: 24px;
+    transition: transform 0.3s ease;
+}
+
+.socialIcon:hover {
+    transform: scale(1.1);
+}
+
+
+.footerBottom {
+    text-align: center;
+    margin-top: 60px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    font-size: 14px;
+}
