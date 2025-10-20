@@ -5,6 +5,7 @@ import Login from "../Login/Login";
 import Register from "../Register/Register";
 import ForgotPassword from "../Login/ForgotPassword/ForgotPassword";
 import styles from './Profile.module.css';
+import DigitalBrushProfile from "./UserProfile/DigitalBrushProfile";
 
 function Profile() {
     const [user, setUser] = useState(null);
@@ -145,6 +146,7 @@ function Profile() {
         <div className={styles.profilePage}>
             {user ? (
                 // --- Секція для залогіненого користувача ---
+                <DigitalBrushProfile  />
                 <div className={styles.profileContainer}>
                     <div className={styles.profileCard}>
                         <div className={styles.sidebar}>
