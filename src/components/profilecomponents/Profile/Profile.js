@@ -1,14 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import axios from "axios";
-import GalleryArtist from "../../GalleryArtist/GalleryArtist";
 import Login from "../Login/Login";
 import Register from "../Register/Register";
 import ForgotPassword from "../Login/ForgotPassword/ForgotPassword";
 import styles from './Profile.module.css';
 import DigitalBrushProfile from "./UserProfile/DigitalBrushProfile";
 
+const mockUser = {
+    name: "Kira",
+    surname: "Kudo",
+    bio: "I create visual solutions that not only look good, but also work helping businesses stand out and users enjoy the interaction.",
+    email: "kira.kudo@example.com",
+    profileImage: "/images/profileImg.jpg",
+};
+
 function Profile() {
-    const [user, setUser] = useState(null);
+    // const [user, setUser] = useState(null);
+    const [user, setUser] = useState(mockUser);
     const [view, setView] = useState('login');
     const [isLogin, setIsLogin] = useState(true);
     const [formData, setFormData] = useState({
@@ -133,6 +141,7 @@ function Profile() {
         try {
             await axios.post('http://localhost:8080/logout', {}, { withCredentials: true });
             setUser(null);
+            setView('login');
         } catch (error) {
             console.error('Logout failed:', error);
         }
@@ -146,34 +155,11 @@ function Profile() {
         <div className={styles.profilePage}>
             {user ? (
                 // --- Секція для залогіненого користувача ---
-                <DigitalBrushProfile  />
-                <div className={styles.profileContainer}>
-                    <div className={styles.profileCard}>
-                        <div className={styles.sidebar}>
-                            <img
-                                src={user.profileImage || '/images/icons/profile.jpg'}
-                                alt="Avatar"
-                                className={styles.avatar}
-                            />
-                            <h2 className={styles.userName}>{user.name} {user.surname}</h2>
-                            <div className={styles.buttonGroup}>
-                                <button onClick={() => setShowModal(true)} className={styles.editButton}>Редагувати</button>
-                                <button onClick={handleLogout} className={styles.logoutButton}>Вийти</button>
-                            </div>
-                            <div className={styles.userInfo}>
-                                <h3>Про себе:</h3>
-                                <p>{user.bio || 'Інформація відсутня.'}</p>
-                                <h3>Контакти:</h3>
-                                <p>{user.email}</p>
-                            </div>
-                        </div>
-                        <div className={styles.mainContent}>
-                            <h3>Роботи художника</h3>
-                            <hr />
-                            <GalleryArtist user={user} />
-                        </div>
-                    </div>
-                </div>
+                <DigitalBrushProfile
+                    user={user}
+                    onEditProfile={() => setShowModal(true)}
+                    onLogout={handleLogout}
+                />
             ) : (
                 // --- Секція для гостя (форми входу/реєстрації) ---
                 <div className={styles.authFormsContainer}>

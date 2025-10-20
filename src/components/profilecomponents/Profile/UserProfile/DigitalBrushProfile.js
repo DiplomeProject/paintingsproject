@@ -1,55 +1,43 @@
 import React from 'react';
 import styles from './DigitalBrushProfile.module.css';
+import ArtCard from "../../../ArtCard/ArtCard";
 
-export default function DigitalBrushProfile() {
+function DigitalBrushProfile({ user, onEditProfile, onLogout }) {
+    // Дані-заглушки для галереї робіт
     const works = Array.from({ length: 20 }).map((_, i) => ({
         id: i + 1,
         title: `ARTEMIS ${i + 1}`,
-        price: 25,
-        img: `/assets/thumb${(i % 5) + 1}.jpg`,
+        price: (Math.random() * 100 + 20).toFixed(2),
+        likes: `${(Math.random() * 300).toFixed(1)}k`,
+        artistName: user.name,
+        artistStyle: "Retro/Psychedelia",
+        imageUrl: `/images/image${(i % 5) + 1}.png`,
     }));
 
     return (
-        <div className={styles.container}>
-            {/* Header */}
-            <header className={styles.header}>
-                <div className={styles.logoNav}>
-                    <div className={styles.logo}>Digital Brush</div>
-                    <nav className={styles.nav}>
-                        <a href="#">MAIN</a>
-                        <a href="#">SHOP</a>
-                        <a href="#">ARTISTS</a>
-                        <a href="#">COMMISSION</a>
-                    </nav>
-                </div>
-                <div className={styles.icons}>
-                    <div className={styles.icon}>🛒</div>
-                    <div className={styles.icon}>⚙️</div>
-                </div>
-            </header>
-
-            {/* Main */}
+        <div className={styles.profileView}>
             <main className={styles.main}>
-                <aside className={styles.profile}>
+                <aside className={styles.profileSidebar}>
                     <div className={styles.profileCard}>
                         <div className={styles.avatarContainer}>
-                            <img src="/assets/profile.jpg" alt="Kira Kudo" className={styles.avatar} />
+                            <img src={user.profileImage || "/images/icons/profile.jpg"} alt={`${user.name} ${user.surname}`} className={styles.avatar} />
                         </div>
-                        <h2 className={styles.name}>Kira Kudo <span className={styles.status}>(available)</span></h2>
+                        <h2 className={styles.name}>{user.name} {user.surname} <span className={styles.status}>(available)</span></h2>
                         <div className={styles.info}>
-                            <div>Retro/Psychedelia</div>
-                            <div>En/Укр</div>
-                            <div className={styles.followers}>52.5k</div>
+                            <span>Retro/Psychedelia</span>
+                            <span>En/Укр</span>
+                            <span className={styles.followers}>52.5k Followers</span>
                         </div>
                         <p className={styles.description}>
-                            I create visual solutions that not only look good, but also work helping businesses stand out and users enjoy the interaction.
+                            {user.bio || "I create visual solutions that not only look good, but also work..."}
                         </p>
                         <div className={styles.buttons}>
-                            <button>Settings profile</button>
+                            {/* ОНОВЛЕНО: Кнопки тепер функціональні */}
+                            <button onClick={onEditProfile}>Settings profile</button>
                             <button>Add image</button>
                             <button>My Commission</button>
                             <button>Payment</button>
-                            <button>Calendar</button>
+                            <button onClick={onLogout}>Logout</button>
                         </div>
                     </div>
                 </aside>
@@ -66,48 +54,30 @@ export default function DigitalBrushProfile() {
                     </div>
 
                     <div className={styles.gallery}>
-                        {works.map(w => (
-                            <article key={w.id} className={styles.card}>
-                                <div className={styles.imageContainer}>
-                                    <img src={w.img} alt={w.title} className={styles.image} />
-                                </div>
-                                <div className={styles.caption}>We build the</div>
-                                <div className={styles.cardFooter}>
-                                    <div className={styles.cardTitle}>{w.title}</div>
-                                    <div className={styles.cardPrice}>{w.price}$</div>
-                                </div>
-                            </article>
+                        {works.map(work => (
+                            <ArtCard
+                                key={work.id}
+                                imageUrl={work.imageUrl}
+                                title={work.title}
+                                artistName={work.artistName}
+                                artistStyle={work.artistStyle}
+                                likes={work.likes}
+                                price={work.price}
+                            />
                         ))}
                     </div>
 
                     <div className={styles.pagination}>
+                        <button>‹</button>
                         <button className={styles.activePage}>1</button>
                         <button>2</button>
                         <button>3</button>
+                        <button>›</button>
                     </div>
                 </section>
             </main>
-
-            <footer className={styles.footer}>
-                <div className={styles.footerContent}>
-                    <div>
-                        <div className={styles.footerLogo}>Digital Brush</div>
-                        <p className={styles.footerText}>
-                            This is a space that unites artists and customers, ensures transparency, security, and convenience of cooperation, promotes the development of the creative economy, and supports digital culture.
-                        </p>
-                    </div>
-                    <div className={styles.contact}>
-                        <div>Contact us if you have any problems: digital_brush@gmail.com</div>
-                        <div className={styles.follow}>Follow us:</div>
-                        <div className={styles.socials}>
-                            <div>T</div>
-                            <div>F</div>
-                            <div>I</div>
-                        </div>
-                    </div>
-                </div>
-                <div className={styles.copy}>2025</div>
-            </footer>
         </div>
     );
 }
+
+export default DigitalBrushProfile;
