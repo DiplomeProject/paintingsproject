@@ -1,6 +1,7 @@
 import React, { useMemo, useState, useEffect } from "react"; // 1. Імпортуємо useEffect
 import styles from "./Shop.module.css";
 import ArtCard from '../ArtCard/ArtCard';
+import CategoryFilters from "../CategoryFilters/CategoryFilters";
 
 const categories = [
     "2D AVATARS", "3D MODELS", "BOOKS", "ANIME", "ICONS", "GAMES", "MOCKUPS", "UI/UX",
@@ -145,17 +146,11 @@ const Shop = () => {
                     </div>
                 </header>
 
-                <div className={styles.categoryGrid}>
-                    {categories.map((cat) => (
-                        <button
-                            key={cat}
-                            className={`${styles.categoryButton} ${activeCategory === cat ? styles.active : ''}`}
-                            onClick={() => handleCategoryClick(cat)}
-                        >
-                            {cat}
-                        </button>
-                    ))}
-                </div>
+                <CategoryFilters
+                    categories={categories}
+                    activeCategory={activeCategory}
+                    onCategoryClick={handleCategoryClick}
+                />
 
                 <div className={styles.filtersContainer}>
                     <button className={styles.additionalFilters}>
