@@ -2,16 +2,26 @@ import React, { useState } from "react";
 import styles from "./Login.module.css";
 import { EyeIcon, EyeSlashIcon, TwitterIcon, FacebookIcon, MailIcon } from "../Register/AuthIcons"; // Іконки винесемо в окремий файл
 
-function Login({ toggleForm }) {
+function Login({ toggleForm, handleLogin, handleInputChange, onForgotPassword }) {
     const [showPassword, setShowPassword] = useState(false);
 
+    const handleSubmit = (e) => {
+        handleLogin(e);
+    };
+
     return (
-        <div className={styles.authCard}>
+        <form className={styles.authCard} onSubmit={handleSubmit}>
             <h2 className={styles.logo}>DIGITAL BRUSH</h2>
 
             <div className={styles.field}>
                 <label htmlFor="login-email">Login</label>
-                <input id="login-email" type="email" name="email" required />
+                <input
+                    id="login-email"
+                    type="email"
+                    name="email" // Ім'я поля має відповідати стану в Profile.js
+                    onChange={handleInputChange} // Використовуємо обробник з Profile.js
+                    required
+                />
             </div>
 
             <div className={styles.field}>
@@ -19,8 +29,9 @@ function Login({ toggleForm }) {
                 <div className={styles.passwordWrapper}>
                     <input
                         id="login-password"
-                        name="password"
+                        name="password" // Ім'я поля має відповідати стану в Profile.js
                         type={showPassword ? "text" : "password"}
+                        onChange={handleInputChange} // Використовуємо обробник з Profile.js
                         required
                     />
                     <button
@@ -35,8 +46,12 @@ function Login({ toggleForm }) {
 
             <button type="submit" className={styles.submitBtn}>Log in</button>
 
-            <a href="#" className={styles.forgotPassword}>Password forgotten?</a>
+            {/* Кнопка для переходу до відновлення пароля */}
+            <a type="button" className={styles.forgotPassword} onClick={onForgotPassword}>
+                Password forgotten?
+            </a>
 
+            {/* Кнопка для переходу до реєстрації */}
             <button type="button" className={styles.switchFormBtn} onClick={toggleForm}>
                 Create account
             </button>
@@ -54,7 +69,7 @@ function Login({ toggleForm }) {
                     <MailIcon />
                 </button>
             </div>
-        </div>
+        </form>
     );
 }
 

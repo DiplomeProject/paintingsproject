@@ -3,10 +3,12 @@ import axios from "axios";
 import GalleryArtist from "../../GalleryArtist/GalleryArtist";
 import Login from "../Login/Login";
 import Register from "../Register/Register";
-import styles from './Profile.module.css'; // ОНОВЛЕНО: Імпортуємо модуль
+import ForgotPassword from "../Login/ForgotPassword/ForgotPassword";
+import styles from './Profile.module.css';
 
 function Profile() {
-    const [user, setUser] = useState(null); // Змінено початковий стан
+    const [user, setUser] = useState(null);
+    const [view, setView] = useState('login');
     const [isLogin, setIsLogin] = useState(true);
     const [formData, setFormData] = useState({
         name: '',
@@ -25,11 +27,21 @@ function Profile() {
             .then(data => {
                 if (data.loggedIn) {
                     setUser(data.user);
+                    setFormData({
+                        name: data.user.name || '',
+                        surname: data.user.surname || '',
+                        bio: data.user.bio || '',
+                        email: data.user.email || '',
+                        password: ''
+                    });
+                    if (data.user.profileImage) {
+                        setImagePreview(data.user.profileImage);
+                    }
                 } else {
                     setUser(null);
                 }
             })
-            .catch(error => console.error('Error:', error));
+            .catch(error => console.error('Error checking session:', error));
     }, []);
 
     const handleInputChange = (e) => {
@@ -87,6 +99,7 @@ function Profile() {
             if (response.data.user.profileImage) {
                 setImagePreview(response.data.user.profileImage);
             }
+            setView('profile');
         } catch (error) {
             console.error('Login failed:', error);
             alert('Ошибка при авторизации');
@@ -115,9 +128,6 @@ function Profile() {
     }
     };
 
-
-    const toggleForm = () => setIsLogin(!isLogin);
-
     const handleLogout = async () => {
         try {
             await axios.post('http://localhost:8080/logout', {}, { withCredentials: true });
@@ -126,6 +136,10 @@ function Profile() {
             console.error('Logout failed:', error);
         }
     };
+
+    const showLogin = () => setView('login');
+    const showRegister = () => setView('register');
+    const showForgotPassword = () => setView('forgotPassword');
 
     return (
         <div className={styles.profilePage}>
@@ -161,14 +175,25 @@ function Profile() {
             ) : (
                 // --- Секція для гостя (форми входу/реєстрації) ---
                 <div className={styles.authFormsContainer}>
-                    {isLogin ? (
+                    {view === 'login' && (
                         <Login
                             handleLogin={handleLogin}
-                            handleInputChange={handleInputChange}
-                            toggleForm={toggleForm}
+                            handleInputChange={handleInputChange} // Передаємо єдиний обробник
+                            toggleForm={showRegister}
+                            onForgotPassword={showForgotPassword}
                         />
-                    ) : (
-                        <Register handleRegister={handleRegister} toggleForm={toggleForm} />
+                    )}
+                    {view === 'register' && (
+                        <Register
+                            // Передаємо handleRegister з Profile, щоб він міг викликати API
+                            handleRegister={handleRegister}
+                            toggleForm={showLogin}
+                        />
+                    )}
+                    {view === 'forgotPassword' && (
+                        <ForgotPassword
+                            onBack={showLogin} // Функція для повернення до логіну
+                        />
                     )}
                 </div>
             )}
@@ -179,21 +204,21 @@ function Profile() {
                     <div className={styles.modalContent}>
                         <div className={styles.modalHeader}>
                             <h5>Редагувати профіль</h5>
-                            <button type="button" className={styles.closeButton} onClick={() => setShowModal(false)}>&times;</button>
+                            <button type="button" className={styles.closeButton} onClick={() => { setShowModal(false); setImagePreview(user.profileImage || null); }} >&times;</button> {/* Скидаємо прев'ю при закритті */}
                         </div>
                         <div className={styles.modalBody}>
                             <form onSubmit={handleProfileUpdate}>
                                 <div className={styles.formGroup}>
                                     <label htmlFor="name">Ім'я</label>
-                                    <input type="text" id="name" name="name" defaultValue={user.name || ''} onChange={handleInputChange}/>
+                                    <input type="text" id="name" name="name" defaultValue={formData.name} onChange={handleInputChange}/>
                                 </div>
                                 <div className={styles.formGroup}>
                                     <label htmlFor="surname">Прізвище</label>
-                                    <input type="text" id="surname" name="surname" defaultValue={user.surname || ''} onChange={handleInputChange}/>
+                                    <input type="text" id="surname" name="surname" defaultValue={formData.surname} onChange={handleInputChange}/>
                                 </div>
                                 <div className={styles.formGroup}>
                                     <label htmlFor="bio">Про себе</label>
-                                    <textarea id="bio" name="bio" defaultValue={user.bio || ''} onChange={handleInputChange}></textarea>
+                                    <textarea id="bio" name="bio" defaultValue={formData.bio} onChange={handleInputChange}></textarea>
                                 </div>
                                 <div className={styles.formGroup}>
                                     <label htmlFor="profileImage">Змінити зображення</label>
