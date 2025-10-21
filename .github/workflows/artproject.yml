@@ -25,4 +25,4 @@ jobs:
 
   steps:
    - name: Let test some packages if they are here
-     run: zip
+     run: zip --version
