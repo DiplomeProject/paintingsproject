@@ -1,10 +1,7 @@
 name: CI-GitHubActions-Diplomproject
 
-on:
-  push:
-    branches:
-      -master
-
+on: [push]
+ 
 jobs:
   my_ci_part:
     runs-on: self-hosted
