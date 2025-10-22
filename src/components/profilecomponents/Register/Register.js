@@ -67,7 +67,7 @@ function Register({ toggleForm }) {
         },
         "7Gw-RPTO7wMAtHcSb"
       );*/
-      console.log("EmailJS response:", result);
+      //console.log("EmailJS response:", result);
       console.log("Verification code sent successfully");
       
       
