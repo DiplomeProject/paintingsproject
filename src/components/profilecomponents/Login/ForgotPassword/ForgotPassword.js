@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import styles from "./ForgotPassword.module.css";
-import { TwitterIcon, FacebookIcon, MailIcon } from "../../Register/AuthIcons";
 
 function ForgotPassword({ onBack }) {
     const [email, setEmail] = useState("");
@@ -43,20 +42,6 @@ function ForgotPassword({ onBack }) {
                     </button>
                 </div>
             </form>
-
-            <div className={styles.divider}>OR</div>
-
-            <div className={styles.socialLogin}>
-                <button type="button" className={`${styles.socialButton} ${styles.twitter}`}>
-                    <TwitterIcon />
-                </button>
-                <button type="button" className={`${styles.socialButton} ${styles.facebook}`}>
-                    <FacebookIcon />
-                </button>
-                <button type="button" className={`${styles.socialButton} ${styles.mail}`}>
-                    <MailIcon />
-                </button>
-            </div>
         </div>
     );
 }

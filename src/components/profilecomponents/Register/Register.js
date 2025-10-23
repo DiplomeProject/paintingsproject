@@ -1,26 +1,13 @@
 import React, { useState } from "react";
 import styles from "./Register.module.css";
-import { EyeIcon, EyeSlashIcon, TwitterIcon, FacebookIcon, MailIcon } from "./AuthIcons"; // Використовуємо ті ж іконки
+import { EyeIcon, EyeSlashIcon } from "./AuthIcons"; // Видалено непотрібні іконки
 
 function Register({ toggleForm }) {
     const [showPassword, setShowPassword] = useState(false);
 
     return (
         <div className={styles.authCard}>
-            <div className={styles.title}>Registration via:</div>
-            <div className={styles.socialLogin}>
-                <button type="button" className={`${styles.socialButton} ${styles.twitter}`}>
-                    <TwitterIcon />
-                </button>
-                <button type="button" className={`${styles.socialButton} ${styles.facebook}`}>
-                    <FacebookIcon />
-                </button>
-                <button type="button" className={`${styles.socialButton} ${styles.mail}`}>
-                    <MailIcon />
-                </button>
-            </div>
-
-            <div className={`${styles.title} ${styles.emailTitle}`}>Registration via email</div>
+            <div className={styles.title}>Registration via email</div>
 
             <div className={styles.field}>
                 <label htmlFor="reg-username">Username</label>
@@ -32,7 +19,7 @@ function Register({ toggleForm }) {
             </div>
             <div className={styles.field}>
                 <label htmlFor="reg-birthday">Birthday</label>
-                <input id="reg-birthday" type="date" name="birthday" required />
+                <input id="reg- birthday" type="date" name="birthday" required />
             </div>
             <div className={styles.field}>
                 <label htmlFor="reg-password">Password</label>
