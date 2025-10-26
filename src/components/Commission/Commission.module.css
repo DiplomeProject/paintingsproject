@@ -1,8 +1,6 @@
 .commissionPage {
     width: 100%;
     min-height: 100vh;
-    display: flex;
-    flex-direction: column;
     padding: 0 51px;
     box-sizing: border-box;
 }
@@ -63,11 +61,10 @@
     cursor: pointer;
 }
 
-/* ОНОВЛЕНО: Стилі для кнопки "+ ADD COMMISSION" */
 .addCommissionButton {
     background: transparent;
     color: white;
-    border: 1px solid white;
+    border: 1px solid transparent;
     padding: 15px 25px;
     border-radius: 12px;
     font-family: 'Orbitron', sans-serif;
@@ -76,6 +73,12 @@
     display: flex;
     align-items: center;
     gap: 10px;
+    transition: color 0.3s ease, border-color 0.3s ease;
+}
+
+.addCommissionButton:hover {
+    color: #a5b4fc;
+    border-color: rgba(255, 255, 255, 0.5);
 }
 
 .filtersWrapper {
@@ -90,84 +93,153 @@
     border: none;
     color: #fff;
     font-family: 'Roboto', sans-serif;
-    font-size: 14px;
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
     cursor: pointer;
     opacity: 0.8;
+    transition: opacity 0.3s ease;
 }
 
-/* ОНОВЛЕНО: Сітка тепер на 4 колонки */
+.additionalFilters:hover {
+    opacity: 1;
+}
+
 .commissionGrid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 30px;
+    grid-template-columns: repeat(auto-fill, minmax(444px, 1fr));
+    gap: 14px;
     padding-bottom: 60px;
 }
 
 .commissionCard {
-    background: rgba(30, 30, 50, 0.6);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 12px;
     overflow: hidden;
-    /* ОНОВЛЕНО: Змінено на горизонтальний layout */
     display: flex;
+    border-radius: 5px;
+    opacity: 1;
+    padding: 17px;
+    position: relative;
+    /*aspect-ratio: 444 / 304;*/
+    border: 3px solid transparent;
+    background: linear-gradient(#332a40, #332a40) padding-box, linear-gradient(168.05deg, #595C64 1.51%, rgba(71, 77, 95, 0.44) 90.56%) border-box;
+    max-width: 444px;
+    max-height: 304px;
+    gap: 17px;
+}
+
+.imagePriceWrapper {
+    width: 45%;
+    flex-shrink: 0;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    /*margin-right: 17px;*/
+    box-sizing: border-box;
+    border: 3px solid transparent;
+    border-radius: 5px;
+    background: linear-gradient(168.05deg, #595C64 1.51%, rgba(71, 77, 95, 0.44) 90.56%) border-box;
+    aspect-ratio: 268/192;
+}
+
+.imageWrapper {
+    width: 100%;
+    height: 80%;
+    overflow: hidden;
+    border-radius: 1px 1px 0 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    z-index: 1;
 }
 
 .cardImage {
-    width: 45%;
-    height: auto;
+    display: block;
+    width: 100%;
+    height: 100%;
     object-fit: cover;
-    flex-shrink: 0;
 }
 
-.cardContent {
-    padding: 20px;
+.priceOverlay {
+    height: 20%;
+    background: #2c2c33;
     display: flex;
-    flex-direction: column;
-    flex-grow: 1;
-}
-
-.cardTitle {
-    font-family: 'Orbitron', sans-serif;
-    font-size: 1.1rem;
-    margin: 0 0 10px 0;
-}
-
-.cardDescription {
-    font-size: 0.9rem;
-    color: rgba(255, 255, 255, 0.8);
-    line-height: 1.5;
-    margin-bottom: 15px;
-}
-
-.cardTags {
-    font-size: 0.8rem;
-    color: rgba(255, 255, 255, 0.6);
-    margin-bottom: 20px;
-}
-
-.cardFooter {
-    margin-top: auto;
-    display: flex;
-    justify-content: space-between;
     align-items: center;
+    justify-content: center;
+    border-radius: 0 0 1px 1px;
+    backdrop-filter: blur(52.5px);
+    position: relative;
+    z-index: 1;
 }
 
 .cardPrice {
-    font-size: 1.5rem;
-    font-weight: 700;
+    color: white;
+    font-family: Roboto, sans-serif;
+    font-weight: 400;
+    font-size: 24px;
+    line-height: 100%;
+    letter-spacing: 0;
+}
+
+.cardContent {
+    display: flex;
+    flex-direction: column;
+    /*justify-content: space-between;*/
+    flex-grow: 1;
+    position: relative;
+}
+
+.cardTitle {
+    margin: 0 0 13px 0;
+    font-family: Roboto, sans-serif;
+    font-weight: 400;
+    font-size: 19px;
+    line-height: 100%;
+    letter-spacing: 0;
+    text-transform: uppercase;
+}
+
+.cardDescription {
+    color: rgba(255, 255, 255, 0.85);
+    font-family: Roboto, sans-serif;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 100%;
+    letter-spacing: 0;
+}
+
+.cardTags {
+    color: rgba(255, 255, 255, 0.7);
+    margin-bottom: 35px;
+    font-family: Roboto, sans-serif;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 100%;
+    letter-spacing: 0;
 }
 
 .takeButton {
     background: #5454FE;
+    font-family: Roboto, sans-serif;
+    font-weight: 400;
+    font-size: 25px;
+    line-height: 100%;
+    letter-spacing: 0;
     color: white;
     border: none;
-    padding: 12px 35px;
-    border-radius: 10px;
-    font-weight: 600;
+    padding: 15px 35px;
+    border-radius: 2px;
     cursor: pointer;
+    width: 100%;
+    transition: color 0.2s;
 }
 
-/* ДОДАНО: Стилі пагінації, як у Shop.module.css */
+.takeButton:hover {
+    background: #4f4fe8;
+}
+
+/* --- Стилі пагінації (без змін) --- */
 .paginationContainer {
     display: flex;
     justify-content: center;
