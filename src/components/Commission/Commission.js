@@ -1,6 +1,20 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import styles from './Commission.module.css';
 import CategoryFilters from "../CategoryFilters/CategoryFilters";
+import AdvancedFilters from '../AdvancedFilters/AdvancedFilters';
+
+// ОНОВЛЕНО: Визначаємо конфігурацію фільтрів для Commission
+const commissionFilterConfig = [
+    { title: "SORT BY", options: [
+            { name: "NONE" }, { name: "RATING" }, { name: "LATEST" }, { name: "EXPENSIVE" }, { name: "CHEAP" }
+        ]},
+    { title: "STYLE", options: [
+            { name: "NONE STYLE", subOptions: [ "Retro Futurism", "Mid-Century", "Cyberpunk", "Synthwave" ]} // Скорочений список для прикладу
+        ]},
+    { title: "FORMAT", options: [
+            { name: "NONE", subOptions: [ "PNG", "JPG", "JPEG", "SVG" ]} // Скорочений список для прикладу
+        ]}
+];
 
 const categories = [
     "2D AVATARS", "3D MODELS", "BOOKS", "ANIME", "ICONS", "GAMES", "MOCKUPS", "UI/UX",
@@ -21,6 +35,7 @@ function Commission() {
     const [activeCategory, setActiveCategory] = useState(null);
     const [searchQuery, setSearchQuery] = useState('');
     const [currentPage, setCurrentPage] = useState(0);
+    const [showAdvanced, setShowAdvanced] = useState(false);
     const itemsPerPage = 12;
 
     useEffect(() => {
@@ -120,7 +135,10 @@ function Commission() {
                     />
 
                     <div className={styles.filtersContainer}>
-                        <button className={styles.additionalFilters}>
+                        <button
+                            className={`${styles.additionalFilters} ${showAdvanced ? styles.active : ''}`}
+                            onClick={() => setShowAdvanced(!showAdvanced)}
+                        >
                             ADDITIONAL FILTERS
                             <svg width="12" height="8" viewBox="0 0 12 8" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M1 1.5L6 6.5L11 1.5" stroke="white" strokeWidth="2"/>
@@ -128,7 +146,7 @@ function Commission() {
                         </button>
                     </div>
                 </div>
-
+                {showAdvanced && <AdvancedFilters filterConfig={commissionFilterConfig} />}
                 {displayedCommissions.length > 0 ? (
                     <>
                         <div className={styles.commissionGrid}>
