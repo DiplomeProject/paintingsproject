@@ -1,9 +1,11 @@
-.gallery {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 15px;
-  margin: 20px;
-}
+/*.gallery {*/
+/*  display: grid;*/
+/*  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));*/
+/*  gap: 15px;*/
+/*  margin: 20px;*/
+/*  position: relative;*/
+/*  bottom: 90px;*/
+/*}*/
 
 .add-card {
   border: 2px dashed #aaa;

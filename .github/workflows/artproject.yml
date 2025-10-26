@@ -1,0 +1,22 @@
+name: CI-GitHubActions-Diplomproject
+
+on: [push]
+ 
+jobs:
+  my_ci_part:
+    runs-on: self-hosted
+
+    steps:
+      - name: Git clone my repo
+        uses: actions/checkout@v4
+
+      - name: List current folder
+        run: ls -la
+
+  my_cd_part:
+    runs-on: self-hosted
+    needs: [my_ci_part]
+
+    steps:
+      - name: Print for CD finish
+        run: echo "CD part finished successfully"

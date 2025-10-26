@@ -1,5 +1,5 @@
 import React from 'react';
-import Gallery from '../../Gallery/Gallery';
+import Gallery from '../Gallery/Gallery';
 import './AuthorPage.css';
 
 function AuthorPage({ authorData, onSelectPainting, onClose }) {
@@ -10,7 +10,7 @@ function AuthorPage({ authorData, onSelectPainting, onClose }) {
             <div className="author-modal-content" onClick={e => e.stopPropagation()}>
                 <div className="author-modal-header">
                     <h5 className="author-modal-title">
-                        {authorData.name} {authorData.surname}
+                        {authorData.name}   
                     </h5>
                     <button className="author-modal-close" onClick={onClose}>
                         ×
@@ -26,7 +26,7 @@ function AuthorPage({ authorData, onSelectPainting, onClose }) {
                                 alt="Avatar"
                                 className="author-profile-image"
                             />
-                            <h3>{authorData.name} {authorData.surname}</h3>
+                            <h3>{authorData.name}</h3>
 
                             <div className="author-section">
                                 <p className="section-title">Про себе:</p>

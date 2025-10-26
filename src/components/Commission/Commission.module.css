@@ -1,0 +1,230 @@
+.commissionPage {
+    width: 100%;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    padding: 0 51px;
+    box-sizing: border-box;
+}
+
+.contentWrapper {
+    width: 100%;
+    margin: 0 auto;
+    padding-top: 70px;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 30px;
+    flex-wrap: wrap;
+}
+
+.headerLeft {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+    flex-wrap: wrap;
+    flex: 1;
+    min-width: 300px;
+}
+
+.commissionTitle {
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 800;
+    font-size: 60px;
+    text-transform: uppercase;
+    flex-shrink: 0;
+}
+
+.searchBarContainer {
+    display: flex;
+    align-items: center;
+    max-width: 791px;
+    height: 55px;
+    background: white;
+    border-radius: 18px;
+    padding: 0 15px;
+    flex-grow: 1;
+}
+
+.searchInput {
+    flex-grow: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    font-size: 14px;
+}
+
+.searchButton {
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+/* ОНОВЛЕНО: Стилі для кнопки "+ ADD COMMISSION" */
+.addCommissionButton {
+    background: transparent;
+    color: white;
+    border: 1px solid white;
+    padding: 15px 25px;
+    border-radius: 12px;
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.filtersWrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    margin-bottom: 40px;
+}
+
+.additionalFilters {
+    background: none;
+    border: none;
+    color: #fff;
+    font-family: 'Roboto', sans-serif;
+    font-size: 14px;
+    cursor: pointer;
+    opacity: 0.8;
+}
+
+/* ОНОВЛЕНО: Сітка тепер на 4 колонки */
+.commissionGrid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 30px;
+    padding-bottom: 60px;
+}
+
+.commissionCard {
+    background: rgba(30, 30, 50, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    overflow: hidden;
+    /* ОНОВЛЕНО: Змінено на горизонтальний layout */
+    display: flex;
+}
+
+.cardImage {
+    width: 45%;
+    height: auto;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+.cardContent {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+.cardTitle {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.1rem;
+    margin: 0 0 10px 0;
+}
+
+.cardDescription {
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.8);
+    line-height: 1.5;
+    margin-bottom: 15px;
+}
+
+.cardTags {
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.6);
+    margin-bottom: 20px;
+}
+
+.cardFooter {
+    margin-top: auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.cardPrice {
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.takeButton {
+    background: #5454FE;
+    color: white;
+    border: none;
+    padding: 12px 35px;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+/* ДОДАНО: Стилі пагінації, як у Shop.module.css */
+.paginationContainer {
+    display: flex;
+    justify-content: center;
+    margin: 60px 0;
+}
+
+.pagination {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(30, 30, 50, 0.8);
+    padding: 8px;
+    border-radius: 12px;
+}
+
+.pageBtn, .pageNumber {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 16px;
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.pageBtn:hover, .pageNumber:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.pageNumber.active {
+    background: linear-gradient(90deg, #9600ff 0%, #ff00cc 100%);
+    font-weight: 700;
+}
+
+.pageBtn:disabled {
+    opacity: 0.4;
+    cursor: default;
+}
+
+.paginationDots {
+    color: white;
+    font-size: 16px;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.noResults {
+    text-align: center;
+    padding: 80px 20px;
+    font-size: 1.2rem;
+    color: rgba(255, 255, 255, 0.7);
+}
