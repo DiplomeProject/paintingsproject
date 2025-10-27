@@ -1,0 +1,187 @@
+.navbar {
+    position: relative;
+    z-index: 50;
+    font-family: 'Roboto', sans-serif;
+}
+
+.navbarMain {
+    background-color: transparent;
+    padding: 1rem 1.5rem;
+}
+
+.navbarContainer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 0 auto;
+}
+
+.navbarLeft {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.navbarLogo {
+    display: flex;
+    align-items: center;
+}
+
+.logoText {
+    color: white;
+    font-weight: 800;
+    font-size: 42px;
+    letter-spacing: 0.05em;
+    font-family: 'Orbitron', sans-serif;
+}
+
+.navbarLinks {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+}
+
+.navLink {
+    background: none;
+    border: 1.5px solid transparent;
+    border-radius: 23px;
+    color: white;
+    padding: 1.2em 1.5em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    font-family: 'Roboto', sans-serif;
+    cursor: pointer;
+    transition: color 0.2s, border-color 0.2s;
+    width: 215px;
+    height: 55px;
+}
+
+.navLink:hover {
+    color: #a5b4fc;
+    border-color: rgba(255, 255, 255, 0.5);
+}
+
+.navButtonActive {
+    composes: navLink;
+    font-weight: bold;
+    background: linear-gradient(90deg, rgba(1, 0, 38, 0.2) 0%, rgba(253, 76, 204, 0.2) 100%);
+    border-color: rgba(255, 255, 255, 0.8);
+    width: 215px;
+    height: 55px;
+}
+
+.navButtonActive:hover {
+    transform: scale(1.05);
+    color: white;
+    border-color: rgba(255, 255, 255, 0.8);
+}
+
+.navbarRight {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.languageSelector {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: white;
+    cursor: pointer;
+}
+
+.navSigninButton {
+    background: none;
+    border: none;
+    color: white;
+    padding: 0;
+    font-size: 0.875rem;
+    line-height: 1.2;
+    text-align: left;
+    cursor: pointer;
+}
+
+.navbarBottomBorder {
+    height: 1px;
+    background-color: rgba(255, 255, 255, 0.5);
+    margin-top: 1rem;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.burgerMenu {
+    display: none;
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+    z-index: 1001;
+}
+
+.mobileMenu {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #0d0b1f;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-100%);
+    transition: transform 0.4s ease-in-out, opacity 0.4s ease-in-out, visibility 0.4s;
+    z-index: 1000;
+}
+
+.mobileMenu.open {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.closeButton {
+    position: absolute;
+    top: 1.5rem;
+    right: 1.5rem;
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+    z-index: 1002;
+}
+
+.mobileNavLinks {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2rem;
+}
+
+.mobileNavLinks button {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.5rem;
+    font-family: 'Orbitron', sans-serif;
+    cursor: pointer;
+    padding: 0.5rem;
+}
+
+@media (max-width: 1420px) {
+    .navbarLinks, .navbarRight {
+        display: none;
+    }
+    .burgerMenu {
+        display: flex;
+    }
+}
+
+.hidden {
+    visibility: hidden;
+    opacity: 0;
+}

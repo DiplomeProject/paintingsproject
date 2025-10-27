@@ -1,0 +1,116 @@
+/* Register.module.css */
+/* Багато стилів схожі на Login.module.css */
+.authCard {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: 400px;
+    background-color: #f9f9f9;
+    padding: 40px 30px;
+    border-radius: 20px;
+    font-family: 'Roboto', sans-serif;
+}
+
+.title {
+    font-size: 14px;
+    color: #555;
+    text-align: center;
+    margin-bottom: 15px;
+}
+
+.emailTitle {
+    margin-top: 25px;
+}
+
+.socialLogin {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}
+
+.socialButton {
+    width: 50px;
+    height: 50px;
+    border: none;
+    border-radius: 12px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+}
+
+.twitter {
+    background-color: #1DA1F2;
+}
+
+.facebook {
+    background-color: #1877F2;
+}
+
+.mail {
+    background-color: #EA4335;
+}
+
+.field {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 15px;
+}
+
+.field label {
+    font-size: 14px;
+    color: #555;
+    margin-bottom: 8px;
+}
+
+.field input {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 10px;
+    font-size: 16px;
+    background-color: #361950;
+    color: white;
+    box-sizing: border-box;
+}
+
+.passwordWrapper {
+    position: relative;
+}
+
+.passwordWrapper input {
+    padding-right: 40px;
+}
+
+.eyeBtn {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: white;
+}
+
+.submitBtn {
+    padding: 15px;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    background: #5454FE;
+    color: white;
+    margin-top: 10px;
+    margin-bottom: 20px;
+}
+
+.switchFormBtn {
+    background: none;
+    border: none;
+    color: #5454FE;
+    font-size: 14px;
+    cursor: pointer;
+    text-align: center;
+}

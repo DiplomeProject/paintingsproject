@@ -1,146 +1,210 @@
-import React, { useMemo, useState } from "react";
-import "./Shop.css";
+import React, { useMemo, useState, useEffect } from "react"; // 1. Імпортуємо useEffect
+import styles from "./Shop.module.css";
+import ArtCard from '../ArtCard/ArtCard';
+import CategoryFilters from "../CategoryFilters/CategoryFilters";
 
 const categories = [
-  "2D AVATARS",
-  "3D MODELS",
-  "READING",
-  "BRENDING",
-  "ICONS",
-  "GAMES",
-  "MOCKUPS",
-  "UI/UX",
+    "2D AVATARS", "3D MODELS", "BOOKS", "ANIME", "ICONS", "GAMES", "MOCKUPS", "UI/UX",
+    "ADVERTISING", "BRENDING", "POSTER", "ARCHITECTURE", "FASHION", "SKETCH", "PHOTOGRAPHY"
 ];
 
 const Shop = () => {
-  const [currentPage, setCurrentPage] = useState(0);
-  const itemsPerPage = 21;
+    const [activeCategory, setActiveCategory] = useState(null);
+    const [currentPage, setCurrentPage] = useState(0);
+    const [searchQuery, setSearchQuery] = useState('');
+    const itemsPerPage = 112;
 
-  // Generate 63 demo cards (3 pages)
-  const cards = useMemo(() => {
-    return Array.from({ length: 63 }, (_, i) => {
-      const randomIndex = Math.floor(Math.random() * 5) + 1;
-      return {
-        id: i,
-        image: `/images/image${randomIndex}.png`,
-        artist: "Digital Artist",
-        views: `${Math.floor(Math.random() * 500)}k`,
-        title: `Artwork #${i + 1}`,
-        price: `$${(Math.random() * 200 + 20).toFixed(0)}`,
-      };
-    });
-  }, []);
+    // 2. ДОДАНО: Хук, який спрацьовує при зміні 'currentPage'
+    useEffect(() => {
+        // Плавно прокручуємо вікно до самого верху
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
+    }, [currentPage]); // Залежність: ефект спрацює щоразу, коли currentPage зміниться
 
-  const totalPages = Math.ceil(cards.length / itemsPerPage);
-  const startIndex = currentPage * itemsPerPage;
-  const displayedCards = cards.slice(startIndex, startIndex + itemsPerPage);
+    const cards = useMemo(() => {
+        return Array.from({ length: 5000 }, (_, i) => ({
+            id: i,
+            imageUrl: `/images/shopAndOtherPageImages/image${(i % 4) + 1}.png`,
+            title: `Artwork #${i + 1}`,
+            artistName: "Digital Artist",
+            artistStyle: categories[i % categories.length],
+            likes: `${Math.floor(Math.random() * 500)}k`,
+            price: (Math.random() * 200 + 20).toFixed(2),
+            category: categories[i % categories.length],
+        }));
+    }, []);
 
-  return (
-    <div className="containerShop">
-      <div className="shop-container">
-        {/* Header + Search */}
-        <div className="ShopContainer">
-          <div className="ShopHeader">Shop</div>
-          <div className="searchBarContainer">
-            <input
-              type="text"
-              className="searchInput"
-              placeholder="Title of the art"
-            />
-            <button className="searchButton">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                <path
-                  d="M21 21l-4.35-4.35M10 18a8 8 0 1 1 0-16 8 8 0 0 1 0 16z"
-                  stroke="black"
-                  strokeWidth="2"
-                  fill="none"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
+    const filteredCards = useMemo(() => {
+        let filtered = cards;
+
+        if (activeCategory) {
+            filtered = filtered.filter(card => card.category.toUpperCase() === activeCategory.toUpperCase());
+        }
+
+        if (searchQuery) {
+            const lowercasedQuery = searchQuery.toLowerCase();
+            filtered = filtered.filter(card =>
+                card.title.toLowerCase().includes(lowercasedQuery) ||
+                card.artistName.toLowerCase().includes(lowercasedQuery) ||
+                card.artistStyle.toLowerCase().includes(lowercasedQuery)
+            );
+        }
+
+        return filtered;
+    }, [activeCategory, cards, searchQuery]);
+
+    const totalPages = Math.ceil(filteredCards.length / itemsPerPage);
+    const startIndex = currentPage * itemsPerPage;
+    const displayedCards = filteredCards.slice(startIndex, startIndex + itemsPerPage);
+
+    const handleCategoryClick = (category) => {
+        if (activeCategory === category) {
+            setActiveCategory(null);
+        } else {
+            setActiveCategory(category);
+        }
+        setCurrentPage(0);
+    };
+
+    const handleSearchChange = (event) => {
+        setSearchQuery(event.target.value);
+        setCurrentPage(0);
+    };
+
+    const renderPageNumbers = () => {
+        if (totalPages <= 7) {
+            const pageNumbers = [];
+            for (let i = 0; i < totalPages; i++) {
+                pageNumbers.push(
+                    <button key={i} className={`${styles.pageNumber} ${i === currentPage ? styles.active : ""}`} onClick={() => setCurrentPage(i)}>
+                        {i + 1}
+                    </button>
+                );
+            }
+            return pageNumbers;
+        }
+
+        const pages = [];
+        const siblingCount = 1;
+
+        pages.push(
+            <button key={0} className={`${styles.pageNumber} ${0 === currentPage ? styles.active : ""}`} onClick={() => setCurrentPage(0)}>
+                1
             </button>
-          </div>
-        </div>
+        );
 
-        {/* Category Buttons */}
-        <div className="categoryGrid">
-          {categories.map((cat, index) => (
-            <button key={index} className="categoryButton">
-              {cat}
-            </button>
-          ))}
-        </div>
+        if (currentPage > siblingCount + 1) {
+            pages.push(<span key="dots1" className={styles.paginationDots}>...</span>);
+        }
 
-        {/* Grid Cards */}
-        <div className="CardsContainer">
-          <div className="art-grid-full">
-            {displayedCards.map((card) => (
-              <div key={card.id} className="art-card">
-                <div
-                  className="art-card-image"
-                  style={{ backgroundImage: `url(${card.image})` }}
-                />
-                <div className="art-card-info">
-                  <div className="art-card-meta">
-                    <span className="art-card-artist">{card.artist}</span>
-                    <span className="art-card-views">
-                      <svg
-                        width="12"
-                        height="12"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          d="M12 5C7 5 2.73 8.11 1 12.5 2.73 16.89 7 20 12 20s9.27-3.11 11-7.5C21.27 8.11 17 5 12 5zm0 12.5c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"
-                          fill="currentColor"
+        const startPage = Math.max(1, currentPage - siblingCount);
+        const endPage = Math.min(totalPages - 2, currentPage + siblingCount);
+
+        for (let i = startPage; i <= endPage; i++) {
+            pages.push(
+                <button key={i} className={`${styles.pageNumber} ${i === currentPage ? styles.active : ""}`} onClick={() => setCurrentPage(i)}>
+                    {i + 1}
+                </button>
+            );
+        }
+
+        if (currentPage < totalPages - siblingCount - 2) {
+            pages.push(<span key="dots2" className={styles.paginationDots}>...</span>);
+        }
+
+        if (totalPages > 1) {
+            pages.push(
+                <button key={totalPages - 1} className={`${styles.pageNumber} ${totalPages - 1 === currentPage ? styles.active : ""}`} onClick={() => setCurrentPage(totalPages - 1)}>
+                    {totalPages}
+                </button>
+            );
+        }
+
+        return pages;
+    };
+
+    return (
+        <div className={styles.shopPage}>
+            <div className={styles.contentWrapper}>
+                <header className={styles.header}>
+                    <h1 className={styles.shopTitle}>Shop</h1>
+                    <div className={styles.searchBarContainer}>
+                        <input
+                            type="text"
+                            className={styles.searchInput}
+                            placeholder="Search by title, artist, style..."
+                            value={searchQuery}
+                            onChange={handleSearchChange}
                         />
-                      </svg>
-                      {card.views}
-                    </span>
-                  </div>
-                  <div className="art-card-title">{card.title}</div>
-                  <div className="art-card-price">{card.price}</div>
+                        <button className={styles.searchButton}>
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20">
+                                <path d="M21 21l-4.35-4.35M10 18a8 8 0 1 1 0-16 8 8 0 0 1 0 16z" stroke="black" strokeWidth="2" fill="none" />
+                            </svg>
+                        </button>
+                    </div>
+                </header>
+
+                <CategoryFilters
+                    categories={categories}
+                    activeCategory={activeCategory}
+                    onCategoryClick={handleCategoryClick}
+                />
+
+                <div className={styles.filtersContainer}>
+                    <button className={styles.additionalFilters}>
+                        ADDITIONAL FILTERS
+                        <svg width="12" height="8" viewBox="0 0 12 8" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M1 1.5L6 6.5L11 1.5" stroke="white" strokeWidth="2"/>
+                        </svg>
+                    </button>
                 </div>
-              </div>
-            ))}
-          </div>
 
-          <div className="pagination">
-            <button
-              className="page-btn"
-              onClick={() => setCurrentPage((p) => Math.max(p - 1, 0))}
-              disabled={currentPage === 0}
-            >
-              ‹
-            </button>
+                {displayedCards.length > 0 ? (
+                    <>
+                        <div className={styles.artGridFull}>
+                            {displayedCards.map((card) => (
+                                <ArtCard
+                                    key={card.id}
+                                    imageUrl={card.imageUrl}
+                                    title={card.title}
+                                    artistName={card.artistName}
+                                    artistStyle={card.artistStyle}
+                                    likes={card.likes}
+                                    price={card.price}
+                                />
+                            ))}
+                        </div>
 
-            {Array.from({ length: totalPages }, (_, i) => (
-              <button
-                key={i}
-                className={`page-number ${i === currentPage ? "active" : ""}`}
-                onClick={() => setCurrentPage(i)}
-              >
-                {i + 1}
-              </button>
-            ))}
-
-            <button
-              className="page-btn"
-              onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages - 1))}
-              disabled={currentPage === totalPages - 1}
-            >
-              ›
-            </button>
-          </div>
+                        <div className={styles.paginationContainer}>
+                            <div className={styles.pagination}>
+                                <button
+                                    className={styles.pageBtn}
+                                    onClick={() => setCurrentPage((p) => Math.max(p - 1, 0))}
+                                    disabled={currentPage === 0}
+                                >
+                                    ‹
+                                </button>
+                                {renderPageNumbers()}
+                                <button
+                                    className={styles.pageBtn}
+                                    onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages - 1))}
+                                    disabled={currentPage === totalPages - 1 || totalPages === 0}
+                                >
+                                    ›
+                                </button>
+                            </div>
+                        </div>
+                    </>
+                ) : (
+                    <div className={styles.noResults}>
+                        There are no paintings available at the moment
+                    </div>
+                )}
+            </div>
         </div>
-      </div>
-    </div>
-  );
+    );
 };
 
 export default Shop;
-
-
-
-// шрифт фильтров, сохранить цвет ховера при нажатии на фильтр, поставить иконки в карточки
