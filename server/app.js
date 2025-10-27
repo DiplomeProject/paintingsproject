@@ -6,6 +6,7 @@ const authRoutes = require('./routes/authRoutes');
 const paintingRoutes = require('./routes/paintingRoutes');
 const profileRoutes = require('./routes/profileRoutes');
 const searchRoutes = require('./routes/searchRoutes');
+const commissions = require('./commissions/Commissions');
 
 const app = express();
 
@@ -26,6 +27,7 @@ app.use(authRoutes);
 app.use(paintingRoutes);
 app.use(profileRoutes);
 app.use(searchRoutes);
+app.use(commissions);
 
 
 module.exports = app;
