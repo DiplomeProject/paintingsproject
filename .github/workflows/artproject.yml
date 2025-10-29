@@ -16,6 +16,17 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      - name: npm install
+        run: npm install
+      - name: npm test
+        run: npm test
+      - name: npm run build
+        run: npm run build
+
       - name: List current folder
         run: ls -la
 
