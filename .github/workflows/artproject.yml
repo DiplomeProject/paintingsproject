@@ -1,6 +1,12 @@
 name: CI-GitHubActions-Diplomproject
 
-on: [push]
+
+on:
+  push:
+    # Adjust branch name if needed (e.g., master, production)
+    branches: [ "main" ]
+    # Publish semver tags as releases.
+    tags: [ 'v*.*.*' ]
 
 env:
   # Use docker.io for Docker Hub if empty
