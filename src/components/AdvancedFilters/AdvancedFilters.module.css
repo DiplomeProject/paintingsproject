@@ -2,7 +2,6 @@
 
 .filtersContainer {
     display: grid;
-    /* ОНОВЛЕНО: Кількість колонок тепер гнучка */
     grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
     gap: 40px;
     padding: 30px;

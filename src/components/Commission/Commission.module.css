@@ -106,6 +106,10 @@
     opacity: 1;
 }
 
+.additionalFilters.active svg {
+    transform: rotate(180deg);
+}
+
 .commissionGrid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(444px, 1fr));
