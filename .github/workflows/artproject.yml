@@ -1,4 +1,4 @@
-name: CI-GitHubActions-Diplomproject
+name: CI/CD-GitHubActions-Diplomproject
 
 on: [push]
   
