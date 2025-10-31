@@ -12,7 +12,7 @@ jobs:
     - name: Set up Node.js
       uses: actions/setup-node@v3
       with:
-        node: alpine
+        node:alpine AS builder
 
     - name: Build React app
       run: npm ci
