@@ -1,6 +1,7 @@
 name: CI/CD-GitHubActions-Diplomproject
 
 on: [push]
+
   
 jobs:
   my_ci_part:
