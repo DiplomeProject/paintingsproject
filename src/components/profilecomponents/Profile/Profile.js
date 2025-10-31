@@ -6,17 +6,10 @@ import ForgotPassword from "../Login/ForgotPassword/ForgotPassword";
 import styles from './Profile.module.css';
 import DigitalBrushProfile from "./UserProfile/DigitalBrushProfile";
 
-const mockUser = {
-    name: "Kira",
-    surname: "Kudo",
-    bio: "I create visual solutions that not only look good, but also work helping businesses stand out and users enjoy the interaction.",
-    email: "kira.kudo@example.com",
-    profileImage: "/images/profileImg.jpg",
-};
+
 
 function Profile() {
     const [user, setUser] = useState(null);
-    //const [user, setUser] = useState(mockUser);
     const [view, setView] = useState('login');
     const [isLogin, setIsLogin] = useState(true);
     const [formData, setFormData] = useState({
@@ -52,6 +45,7 @@ function Profile() {
             })
             .catch(error => console.error('Error checking session:', error));
     }, []);
+
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
