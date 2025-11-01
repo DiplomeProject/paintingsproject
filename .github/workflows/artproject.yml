@@ -11,7 +11,13 @@ env:
 jobs:
   my_ci_part:
     runs-on: self-hosted
-    
+    permissions:
+    # GITHUB_TOKEN має дозвіл на читання (read) запис (write) пакетів.
+      contents: read
+      packages: write
+      # with sigstore/fulcio when running outside of PRs.
+      id-token: write
+      
     steps:
     
       # Git clone our repo
