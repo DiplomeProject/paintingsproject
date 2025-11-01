@@ -15,8 +15,8 @@ const mockUser = {
 };
 
 function Profile() {
-    const [user, setUser] = useState(null);
-    //const [user, setUser] = useState(mockUser);
+    //const [user, setUser] = useState(null);
+    const [user, setUser] = useState(mockUser);
     const [view, setView] = useState('login');
     const [isLogin, setIsLogin] = useState(true);
     const [formData, setFormData] = useState({
