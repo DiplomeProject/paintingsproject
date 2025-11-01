@@ -1,6 +1,12 @@
 name: CI/CD-GitHubActions-Diplomproject
 
 on: [push]
+
+env:
+  # Use docker.io for Docker Hub if empty
+  REGISTRY: ghcr.io
+  # github.repository as <account>/<repo>
+  IMAGE_NAME: ${{ github.repository }}
   
 jobs:
   my_ci_part:
