@@ -5,6 +5,7 @@ on: [push]
 jobs:
   my_ci_part:
     runs-on: self-hosted
+
       
     steps:
     
