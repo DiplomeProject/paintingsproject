@@ -11,8 +11,7 @@ env:
 jobs:
   my_ci_part:
     runs-on: self-hosted
-
-      
+    
     steps:
     
       # Git clone our repo
