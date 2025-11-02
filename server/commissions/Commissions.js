@@ -91,7 +91,7 @@ router.post('/api/commissions/direct/:creatorId', upload.single('referenceImage'
 
     // Перевірка, чи існує художник
     const checkCreatorSql = 'SELECT Creator_ID, styles FROM creators WHERE Creator_ID = ?';
-    con.query(checkCreatorSql, [creatorId], (err, results) => {
+    db.query(checkCreatorSql, [creatorId], (err, results) => {
         if (err) {
             console.error('Error checking creator:', err);
             return res.status(500).json({ success: false, message: 'Database error' });
@@ -135,7 +135,7 @@ router.post('/api/commissions/direct/:creatorId', upload.single('referenceImage'
             creatorId
         ];
 
-        con.query(sql, values, (err, result) => {
+        db.query(sql, values, (err, result) => {
             if (err) {
                 console.error('Error creating direct commission:', err);
                 return res.status(500).json({ 
@@ -197,7 +197,7 @@ router.get('/api/commissions/creator/:creatorId', (req, res) => {
         ORDER BY c.Created_At DESC
     `;
 
-    con.query(sql, [creatorId], (err, results) => {
+    db.query(sql, [creatorId], (err, results) => {
         if (err) {
             console.error('Error fetching creator commissions:', err);
             return res.status(500).json({ 
@@ -230,7 +230,7 @@ router.get('/api/commissions/my-orders', (req, res) => {
         ORDER BY c.Created_At DESC
     `;
 
-    con.query(sql, [req.session.user.id], (err, results) => {
+    db.query(sql, [req.session.user.id], (err, results) => {
         if (err) {
             console.error('Error fetching user commissions:', err);
             return res.status(500).json({ 
@@ -261,7 +261,7 @@ router.post('/api/commissions/:id/accept', (req, res) => {
         WHERE Commission_ID = ? AND Type = 'public' AND Status = 'open' AND Creator_ID IS NULL
     `;
 
-    con.query(checkSql, [commissionId], (err, results) => {
+    db.query(checkSql, [commissionId], (err, results) => {
         if (err) {
             console.error('Error checking commission:', err);
             return res.status(500).json({ success: false, message: 'Database error' });
@@ -281,7 +281,7 @@ router.post('/api/commissions/:id/accept', (req, res) => {
             WHERE Commission_ID = ?
         `;
 
-        con.query(updateSql, [creatorId, commissionId], (err) => {
+        db.query(updateSql, [creatorId, commissionId], (err) => {
             if (err) {
                 console.error('Error accepting commission:', err);
                 return res.status(500).json({ 
@@ -322,7 +322,7 @@ router.put('/api/commissions/:id/status', (req, res) => {
         WHERE Commission_ID = ? AND (Customer_ID = ? OR Creator_ID = ?)
     `;
 
-    con.query(checkSql, [commissionId, userId, userId], (err, results) => {
+    db.query(checkSql, [commissionId, userId, userId], (err, results) => {
         if (err) {
             console.error('Error checking commission:', err);
             return res.status(500).json({ success: false, message: 'Database error' });
@@ -341,7 +341,7 @@ router.put('/api/commissions/:id/status', (req, res) => {
             WHERE Commission_ID = ?
         `;
 
-        con.query(updateSql, [status, commissionId], (err) => {
+        db.query(updateSql, [status, commissionId], (err) => {
             if (err) {
                 console.error('Error updating commission status:', err);
                 return res.status(500).json({ 
@@ -363,8 +363,8 @@ router.get('/api/creator/:id/styles', (req, res) => {
     const creatorId = req.params.id;
 
     const sql = 'SELECT styles FROM creators WHERE Creator_ID = ?';
-    
-    con.query(sql, [creatorId], (err, results) => {
+
+    db.query(sql, [creatorId], (err, results) => {
         if (err) {
             console.error('Error fetching creator styles:', err);
             return res.status(500).json({ 
@@ -405,8 +405,8 @@ router.put('/api/creator/update-styles', (req, res) => {
     }
 
     const sql = 'UPDATE creators SET styles = ? WHERE Creator_ID = ?';
-    
-    con.query(sql, [JSON.stringify(styles), userId], (err) => {
+
+    db.query(sql, [JSON.stringify(styles), userId], (err) => {
         if (err) {
             console.error('Error updating styles:', err);
             return res.status(500).json({ 
@@ -438,7 +438,7 @@ router.delete('/api/commissions/:id', (req, res) => {
         WHERE Commission_ID = ?
     `;
 
-    con.query(selectSql, [commissionId], (err, results) => {
+    db.query(selectSql, [commissionId], (err, results) => {
         if (err) {
             console.error('Error fetching commission:', err);
             return res.status(500).json({ success: false, message: 'Database error' });
@@ -463,8 +463,8 @@ router.delete('/api/commissions/:id', (req, res) => {
 
         // Видалення з бази даних
         const deleteSql = 'DELETE FROM commissions WHERE Commission_ID = ?';
-        
-        con.query(deleteSql, [commissionId], (err) => {
+
+        db.query(deleteSql, [commissionId], (err) => {
             if (err) {
                 console.error('Error deleting commission:', err);
                 return res.status(500).json({ 

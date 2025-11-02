@@ -2,6 +2,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import styles from './Commission.module.css';
 import CategoryFilters from "../CategoryFilters/CategoryFilters";
 import AdvancedFilters from '../AdvancedFilters/AdvancedFilters';
+import axios from 'axios';
 
 // ОНОВЛЕНО: Визначаємо конфігурацію фільтрів для Commission
 const commissionFilterConfig = [
@@ -21,13 +22,56 @@ const categories = [
     "ADVERTISING", "BRENDING", "POSTER", "ARCHITECTURE", "FASHION", "SKETCH", "PHOTOGRAPHY"
 ];
 
+// Функція для отримання випадкового цілого числа
+const getRandomInt = (min, max) => {
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+};
+
+// Функція для отримання випадкового елемента з масиву
+const getRandomElement = (arr) => arr[Math.floor(Math.random() * arr.length)];
+
+// Масиви з прикладами даних для рандомізації
+const mockTitles = [
+    'Cyberpunk Alley', 'Forest Spirit', 'Oceanic Dread', 'Retro Future Car', 'Zen Garden 3D',
+    'Project "Phoenix"', 'Synthwave Sunset', 'Minimalist Icon Set', 'Space Opera Concept',
+    'Gothic Architecture', 'Vibrant Street Art', 'Abstract Emotions', 'Lunar Colony UI/UX',
+    'Vintage Poster Ad', 'Nomad Sketch', 'EXHIBITION ADVERTISING'
+];
+
+const mockDescriptions = [
+    'To convey the spirit of retro - to combine the vintage aesthetics of the past with a modern visual language.',
+    'A deep dive into neon-lit streets and future tech.',
+    'Exploring the mystical connection between nature and magic.',
+    'Modern UI/UX kit for a sleek and fast web application.',
+    'Capturing the essence of the 80s with a modern twist.',
+    'A 3D model designed for next-gen gaming engines.',
+    'Hand-drawn sketches of fantastical creatures and lands.'
+];
+
+const allFeelings = ['nostalgia', 'creativity', 'free spirit', 'experiment', 'dark', 'peaceful', 'energetic', 'minimalist', 'complex', 'vibrant'];
+
+// Функція для отримання 2-4 випадкових тегів
+const getRandomFeelings = () => {
+    const num = getRandomInt(2, 4); // Вибираємо 2, 3 або 4 теги
+    const shuffled = [...allFeelings].sort(() => 0.5 - Math.random()); // Тасуємо масив
+    return shuffled.slice(0, num); // Беремо перші 'num' елементів
+};
+
 const commissionsData = Array.from({ length: 24 }, (_, i) => ({
     id: i,
-    imageUrl: `/images/shopAndOtherPageImages/image${(i % 4) + 1}.png`,
-    title: 'EXHIBITION ADVERTISING',
-    description: 'To convey the spirit of retro - to combine the vintage aesthetics of the past with a modern visual language.',
-    feelings: ['nostalgia', 'creativity', 'free spirit', 'experiment'],
-    price: 45,
+    // Випадкова картинка (припускаємо, що у вас є image1.png ... image4.png)
+    imageUrl: `/images/shopAndOtherPageImages/image${getRandomInt(1, 4)}.png`,
+    // Випадковий заголовок
+    title: getRandomElement(mockTitles),
+    // Випадковий опис
+    description: getRandomElement(mockDescriptions),
+    // Випадковий набір тегів
+    feelings: getRandomFeelings(),
+    // Випадкова ціна від 10 до 250
+    price: getRandomInt(10, 250),
+    // Категорія залишається циклічною для різноманітності
     category: categories[i % categories.length]
 }));
 
@@ -38,12 +82,34 @@ function Commission() {
     const [showAdvanced, setShowAdvanced] = useState(false);
     const itemsPerPage = 12;
 
+    // const [commissions, setCommissions] = useState([]);
+    // const [loading, setLoading] = useState(true);
+
+    // useEffect(() => {
+    //     const fetchCommissions = async () => {
+    //         setLoading(true);
+    //         try {
+    //             // Використовуємо наш API endpoint
+    //             const response = await axios.get('http://localhost:8080/api/commissions/public', {
+    //                 withCredentials: true
+    //             });
+    //             setCommissions(response.data); // Зберігаємо дані в стані
+    //         } catch (error) {
+    //             console.error('Error fetching commissions:', error);
+    //         } finally {
+    //             setLoading(false);
+    //         }
+    //     };
+    //     fetchCommissions();
+    // }, []);
+
     useEffect(() => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }, [currentPage]);
 
     const filteredCommissions = useMemo(() => {
         let items = commissionsData;
+        // let items = commissions;
         if (activeCategory) {
             items = items.filter(c => c.category.toUpperCase() === activeCategory.toUpperCase());
         }
@@ -97,6 +163,10 @@ function Commission() {
         }
         return pages;
     };
+
+    // if (loading) {
+    //     return <div className={styles.loading}>Loading commissions...</div>;
+    // }
 
     return (
         <div className={styles.commissionPage}>
@@ -161,9 +231,11 @@ function Commission() {
                                         </div>
                                     </div>
                                     <div className={styles.cardContent}>
-                                        <h3 className={styles.cardTitle}>{commission.title}</h3>
-                                        <p className={styles.cardDescription}>{commission.description}</p>
-                                        <p className={styles.cardTags}>Feelings: {commission.feelings.join(', ')}</p>
+                                        <div>
+                                            <h3 className={styles.cardTitle}>{commission.title}</h3>
+                                            <p className={styles.cardDescription}>{commission.description}</p>
+                                            <p className={styles.cardTags}>Feelings: {commission.feelings.join(', ')}</p>
+                                        </div>
                                         <button className={styles.takeButton}>Take</button>
                                     </div>
                                 </div>
