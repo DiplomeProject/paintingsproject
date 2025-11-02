@@ -20,23 +20,32 @@
     gap: 20px;
 }
 
+.headerLeft {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+    flex-wrap: wrap;
+    flex: 1;
+    min-width: 300px;
+}
+
 .shopTitle {
     font-family: 'Orbitron', sans-serif;
     font-weight: 800;
     font-size: 60px;
-    line-height: 1;
     text-transform: uppercase;
+    flex-shrink: 0;
 }
 
 .searchBarContainer {
     display: flex;
     align-items: center;
-    width: 100%;
-    max-width: 885px;
+    max-width: 791px;
     height: 55px;
-    background: rgb(255, 255, 255);
+    background: white;
     border-radius: 18px;
-    padding: 0 12px;
+    padding: 0 15px;
+    flex-grow: 1;
 }
 
 .searchInput {
@@ -44,15 +53,33 @@
     background: transparent;
     border: none;
     outline: none;
-    color: #000000;
     font-size: 14px;
-    padding: 0 8px;
 }
 
 .searchButton {
     background: none;
     border: none;
     cursor: pointer;
+}
+
+.addImageButton {
+    background: transparent;
+    color: white;
+    border: 1px solid transparent;
+    padding: 15px 25px;
+    border-radius: 12px;
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: color 0.3s ease, border-color 0.3s ease;
+}
+
+.addImageButton:hover {
+    color: #a5b4fc;
+    border-color: rgba(255, 255, 255, 0.5);
 }
 
 .filtersContainer {
