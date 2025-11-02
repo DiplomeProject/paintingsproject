@@ -2,6 +2,35 @@ import React, { useMemo, useState, useEffect } from "react"; // 1. Імпорт�
 import styles from "./Shop.module.css";
 import ArtCard from '../ArtCard/ArtCard';
 import CategoryFilters from "../CategoryFilters/CategoryFilters";
+import AdvancedFilters from '../AdvancedFilters/AdvancedFilters';
+
+// ОНОВЛЕНО: Визначаємо конфігурацію фільтрів для Shop
+const shopFilterConfig = [
+    { title: "SORT BY", options: [
+            { name: "NONE" }, { name: "RATING" }, { name: "LATEST" }, { name: "EXPENSIVE" }, { name: "CHEAP" }
+        ]},
+    { title: "STYLE", options: [
+            { name: "NONE STYLE", subOptions: [
+                    "Retro Futurism", "Mid-Century", "Modern, Art Deco", "Bauhaus, Y2K", "Aesthetic", "Memphis Style",
+                    "Grunge", "Psychedelic Art", "Surrealism, Neo-Psychedelia, Op Art", "Dreamcore", "Weirdcore",
+                    "Hyperrealism", "Social Realism", "Digital Realism", "Cinematic Realism", "Cyberpunk",
+                    "Synthwave", "Vaporwave", "Minimalism", "Brutalism", "Postmodern", "Collage."
+                ]}
+        ]},
+    { title: "FORMAT", options: [
+            { name: "NONE", subOptions: [
+                    "PNG", "JPG", "JPEG", "SVG", "AI", "PSD", "PDF", "EPS", "FIG", "XD", "SKETCH",
+                    "CLIP", "SAI", "ICO", "TIFF", "RAW", "DNG", "DWG", "SKP", "3DS", "MAX", "FBX",
+                    "OBJ", "GLB", "STL", "UNITYPACKAGE", "UNREALPROJECT"
+                ]}
+        ]},
+    { title: "SIZE", options: [
+            { name: "NONE" }, { name: "BIG" }, { name: "MIDDLE" }, { name: "SMALL" }
+        ]},
+    { title: "COLOR", options: [
+            { name: "NONE" }, { name: "COLOR" }
+        ]}
+];
 
 const categories = [
     "2D AVATARS", "3D MODELS", "BOOKS", "ANIME", "ICONS", "GAMES", "MOCKUPS", "UI/UX",
@@ -12,6 +41,7 @@ const Shop = () => {
     const [activeCategory, setActiveCategory] = useState(null);
     const [currentPage, setCurrentPage] = useState(0);
     const [searchQuery, setSearchQuery] = useState('');
+    const [showAdvanced, setShowAdvanced] = useState(false);
     const itemsPerPage = 112;
 
     // 2. ДОДАНО: Хук, який спрацьовує при зміні 'currentPage'
@@ -153,14 +183,17 @@ const Shop = () => {
                 />
 
                 <div className={styles.filtersContainer}>
-                    <button className={styles.additionalFilters}>
+                    <button
+                        className={`${styles.additionalFilters} ${showAdvanced ? styles.active : ''}`}
+                        onClick={() => setShowAdvanced(!showAdvanced)}
+                    >
                         ADDITIONAL FILTERS
                         <svg width="12" height="8" viewBox="0 0 12 8" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M1 1.5L6 6.5L11 1.5" stroke="white" strokeWidth="2"/>
                         </svg>
                     </button>
                 </div>
-
+                {showAdvanced && <AdvancedFilters filterConfig={shopFilterConfig} />}
                 {displayedCards.length > 0 ? (
                     <>
                         <div className={styles.artGridFull}>
