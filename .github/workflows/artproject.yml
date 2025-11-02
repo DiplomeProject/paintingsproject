@@ -88,7 +88,23 @@ jobs:
     runs-on: self-hosted
     needs: [my_ci_part]
 
-
     steps:
-      - name: Print for CD finish
-        run: echo "CD part finished successfully"
+      - name: SSH and Deploy to Server
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_PRIVATE_SSH_KEY }}
+          port: ${{ secrets.SERVER_PORT }}
+          script: |
+            echo ${{ secrets.GITHUB_TOKEN }} | docker login ${{ env.REGISTRY }} -u ${{ github.actor }} --password-stdin
+            echo "--- Pulling latest Docker image ---"
+            docker pull ghcr.io/tatticoder/terraform-get-time:main
+            echo "--- Stopping existing container (if running) ---"
+            docker stop paintingproject 
+            echo "--- Removing existing container ---"
+            docker rm paintingproject 
+            echo "--- Starting new container ---"
+           # Adjust ports (-p host: container) 
+           # Add any necessary environment variables (-e)
+            docker run -d --name my_container -p 8080:80 ghcr.io/tatticoder/terraform-get-time:main
