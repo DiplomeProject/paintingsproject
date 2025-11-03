@@ -55,41 +55,6 @@
     cursor: pointer;
 }
 
-.categoryGrid {
-    display: flex;
-    justify-content: flex-start;
-    flex-wrap: wrap;
-    gap: 15px;
-    margin: 40px 0 20px 0;
-}
-
-.categoryButton {
-    padding: 12px 28px;
-    font-family: 'Roboto', sans-serif;
-    font-size: 19px;
-    font-weight: 400;
-    text-transform: uppercase;
-    color: #fff;
-    background: transparent;
-    border: 1px solid rgba(255, 255, 255, 0.4);
-    border-radius: 20px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    width: 214px;
-    height: 45px;
-}
-
-.categoryButton:hover {
-    background: rgba(84, 84, 254, 0.3);
-    border-color: #7a7aff;
-}
-
-.categoryButton.active {
-    border-color: #5454FE;
-    background: linear-gradient(90deg, rgba(131, 29, 199, 0.6) 0%, rgba(174, 30, 151, 0.6) 100%);
-    font-weight: 600;
-}
-
 .filtersContainer {
     display: flex;
     margin-bottom: 40px;
