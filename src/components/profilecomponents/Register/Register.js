@@ -2,6 +2,7 @@ import React, {useState} from "react";
 import styles from "./Register.module.css";
 import emailjs from "@emailjs/browser";
 import {EyeIcon, EyeSlashIcon} from "./AuthIcons"; // Видалено непотрібні іконки
+import "./Register.module.css";
 
 function Register({toggleForm}) {
     const [showPassword, setShowPassword] = useState(false);

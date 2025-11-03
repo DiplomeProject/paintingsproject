@@ -59,4 +59,48 @@ router.post('/update-profile', auth, uploadMemory.single('profileImage'), async 
     }
 });
 
+router.get('/getuserpaintings', auth, async (req, res) => {
+  const userId = req.session.user?.Creator_ID || req.session.user?.id;
+
+  if (!userId) {
+    return res.status(401).json({ success: false, message: 'User not authenticated' });
+  }
+
+  try {
+    const [rows] = await db.query(
+      `SELECT Painting_ID AS id, Title AS title, Image AS image_blob, Description AS description, Price AS price, Style AS style 
+       FROM paintings 
+       WHERE Creator_ID = ?`,
+      [userId]
+    );
+
+    const paintings = rows.map((row) => {
+      const blob = row.image_blob;
+      const image_url = blob
+        ? `data:image/jpeg;base64,${Buffer.from(blob).toString('base64')}`
+        : null;
+      return {
+        id: row.id,
+        title: row.title,
+        description: row.description,
+        price: row.price,
+        style: row.style,
+        image_url,
+      };
+    });
+
+    res.json({
+      success: true,
+      paintings,
+    });
+  } catch (err) {
+    console.error('Error fetching user paintings:', err);
+    res.status(500).json({ success: false, message: 'Error fetching user paintings' });
+  }
+});
+
+
+
+   
+
 module.exports = router;

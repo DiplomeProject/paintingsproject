@@ -37,9 +37,10 @@ router.post('/upload', auth, uploadMemory.single('image'), async (req, res) => {
   try {
     await db.query(
       `INSERT INTO paintings (Title, Description, Author, Creation_Date, Image, Creator_ID)
-       VALUES (?, ?, ?, NOW(), ?, ?)`,
+      VALUES (?, ?, ?, NOW(), ?, ?)`,
       [title, description, Author, imageBuffer, Creator_ID]
     );
+
     console.log('Painting successfully added to database');
     res.status(201).json({ success: true, message: 'Painting added successfully' });
   } catch (err) {
