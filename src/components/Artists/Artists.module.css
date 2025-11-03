@@ -1,0 +1,198 @@
+/* --- Загальна структура сторінки (як у Shop/Commission) --- */
+.artistsPage {
+    width: 100%;
+    min-height: 100vh;
+    padding: 0 51px;
+    box-sizing: border-box;
+}
+
+.contentWrapper {
+    width: 100%;
+    margin: 0 auto;
+    padding-top: 70px;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 30px;
+    flex-wrap: wrap;
+    margin-bottom: 30px; /* Додано відступ */
+}
+
+.headerLeft {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+    flex-wrap: wrap;
+    flex: 1;
+    min-width: 300px;
+}
+
+.artistsTitle {
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 800;
+    font-size: 60px;
+    text-transform: uppercase;
+    flex-shrink: 0;
+}
+
+.searchBarContainer {
+    display: flex;
+    align-items: center;
+    max-width: 791px;
+    height: 55px;
+    background: white;
+    border-radius: 18px;
+    padding: 0 15px;
+    flex-grow: 1;
+}
+
+.searchInput {
+    width: 100%;
+    height: 100%;
+    border: none;
+    outline: none;
+    background: transparent;
+    font-family: 'Roboto', sans-serif;
+    font-size: 18px;
+    padding: 0 10px;
+}
+
+.searchButton {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 5px;
+    display: flex;
+    align-items: center;
+}
+
+/* --- Фільтри (як у Shop/Commission) --- */
+.filtersWrapper {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.filtersContainer {
+    position: relative;
+    z-index: 10;
+}
+
+.additionalFilters {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 16px;
+    text-transform: uppercase;
+    color: white;
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    border-radius: 20px;
+    padding: 12px 28px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: all 0.3s ease;
+}
+
+.additionalFilters {
+    background: none;
+    border: none;
+    color: #fff;
+    font-family: 'Roboto', sans-serif;
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    opacity: 0.8;
+    transition: opacity 0.3s ease;
+}
+
+.additionalFilters:hover {
+    opacity: 1;
+}
+
+.additionalFilters.active svg {
+    transform: rotate(180deg);
+}
+
+/* --- Список артистів --- */
+.artistsList {
+    display: flex;
+    flex-direction: column;
+    gap: 60px; /* Великий відступ між секціями артистів */
+    margin-top: 40px;
+}
+
+.artistSection {
+    background: rgba(30, 30, 50, 0.3); /* Легкий фон для секції */
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 30px;
+}
+
+.artistInfoRow {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+    flex-wrap: wrap;
+    margin-bottom: 30px;
+}
+
+.artistAvatar {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #5454FE;
+}
+
+.artistMeta {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.artistName {
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 700;
+    font-size: 32px;
+    text-transform: uppercase;
+}
+
+.artistDetails {
+    font-family: 'Roboto', sans-serif;
+    font-size: 16px;
+    color: #bdbdbd;
+}
+
+.artistGalleryTitle {
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 600;
+    font-size: 20px;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    padding-bottom: 10px;
+}
+
+/* --- Галерея робіт --- */
+.artistGallery {
+    display: grid;
+    /* Адаптивна сітка для ArtCard */
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+.noResults {
+    font-family: 'Roboto', sans-serif;
+    font-size: 24px;
+    text-align: center;
+    margin-top: 80px;
+    opacity: 0.7;
+}
