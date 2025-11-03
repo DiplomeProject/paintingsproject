@@ -4,6 +4,7 @@
     min-height: 100vh;
     padding: 0 51px;
     box-sizing: border-box;
+    color: white; /* Переконаємось, що текст білий */
 }
 
 .contentWrapper {
@@ -18,7 +19,7 @@
     align-items: center;
     gap: 30px;
     flex-wrap: wrap;
-    margin-bottom: 30px; /* Додано відступ */
+    margin-bottom: 30px;
 }
 
 .headerLeft {
@@ -58,6 +59,7 @@
     font-family: 'Roboto', sans-serif;
     font-size: 18px;
     padding: 0 10px;
+    color: #333; /* Колір тексту в пошуку */
 }
 
 .searchButton {
@@ -68,6 +70,9 @@
     display: flex;
     align-items: center;
 }
+.searchButton svg path {
+    stroke: black; /* Колір іконки пошуку */
+}
 
 /* --- Фільтри (як у Shop/Commission) --- */
 .filtersWrapper {
@@ -76,27 +81,12 @@
     align-items: center;
     flex-wrap: wrap;
     gap: 20px;
+    margin-bottom: 40px; /* Додано відступ */
 }
 
 .filtersContainer {
     position: relative;
     z-index: 10;
-}
-
-.additionalFilters {
-    font-family: 'Orbitron', sans-serif;
-    font-size: 16px;
-    text-transform: uppercase;
-    color: white;
-    background: transparent;
-    border: 1px solid rgba(255, 255, 255, 0.4);
-    border-radius: 20px;
-    padding: 12px 28px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    transition: all 0.3s ease;
 }
 
 .additionalFilters {
@@ -125,23 +115,22 @@
 .artistsList {
     display: flex;
     flex-direction: column;
-    gap: 60px; /* Великий відступ між секціями артистів */
+    gap: 25px;
     margin-top: 40px;
 }
 
+/* --- Секція окремого артиста (рядок) --- */
 .artistSection {
-    background: rgba(30, 30, 50, 0.3); /* Легкий фон для секції */
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 12px;
-    padding: 30px;
-}
-
-.artistInfoRow {
     display: flex;
     align-items: center;
-    gap: 30px;
-    flex-wrap: wrap;
-    margin-bottom: 30px;
+    gap: 92px;
+    padding: 20px;
+}
+
+.artistLeftInfo {
+    flex-shrink: 0;
+    text-align: center;
+    width: 200px;
 }
 
 .artistAvatar {
@@ -150,44 +139,82 @@
     border-radius: 50%;
     object-fit: cover;
     border: 3px solid #5454FE;
-}
-
-.artistMeta {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
+    margin-bottom: 15px;
 }
 
 .artistName {
     font-family: 'Orbitron', sans-serif;
     font-weight: 700;
-    font-size: 32px;
+    font-size: 24px;
     text-transform: uppercase;
+    margin-bottom: 5px;
 }
 
 .artistDetails {
     font-family: 'Roboto', sans-serif;
-    font-size: 16px;
+    font-size: 14px;
     color: #bdbdbd;
+    line-height: 1.4;
 }
 
-.artistGalleryTitle {
-    font-family: 'Orbitron', sans-serif;
-    font-weight: 600;
-    font-size: 20px;
-    text-transform: uppercase;
-    margin-bottom: 20px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-    padding-bottom: 10px;
+/* Права частина: Галерея робіт */
+.artistRightGallery {
+    flex-grow: 1; /* Займе весь доступний простір */
+    position: relative; /* Для кнопок навігації */
+    overflow: hidden; /* Обрізаємо контент, що виходить за межі */
+    /*height: 350px; !* Фіксована висота для каруселі *!*/
+    /*display: flex;*/
+    align-items: center;
 }
 
-/* --- Галерея робіт --- */
-.artistGallery {
+.artistGalleryInner {
     display: grid;
-    /* Адаптивна сітка для ArtCard */
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
     gap: 20px;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    padding-top: 20px;
+    scrollbar-width: none;
+    grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
 }
+
+/* Сховати скролбар для WebKit браузерів (Chrome, Safari) */
+.artistGalleryInner::-webkit-scrollbar {
+    display: none;
+}
+
+/* Навігаційні кнопки */
+.navButton {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(255, 255, 255, 0); /* Прозорий фон */
+    border: none;
+    border-radius: 50%;
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 5;
+    transition: background 0.3s ease, opacity 0.3s ease;
+    opacity: 0.8;
+}
+
+.navButton:hover {
+    background: rgba(84, 84, 254, 0.3); /* Підсвітка при наведенні */
+    opacity: 1;
+}
+
+.navButton img {
+    width: 24px;
+    height: 24px;
+    pointer-events: none;
+}
+
+.navButton.left { left: 10px; }
+.navButton.right { right: 10px; }
 
 .noResults {
     font-family: 'Roboto', sans-serif;
@@ -195,4 +222,42 @@
     text-align: center;
     margin-top: 80px;
     opacity: 0.7;
+}
+
+/* --- Адаптивність --- */
+@media (max-width: 768px) {
+    .artistsPage {
+        padding: 0 20px;
+    }
+    .headerLeft {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .artistsTitle {
+        font-size: 40px;
+    }
+    .artistSection {
+        flex-direction: column; /* На малих екранах - вертикальний лейаут */
+        text-align: center;
+        gap: 20px;
+    }
+    .artistLeftInfo {
+        width: 100%;
+    }
+    .artistAvatar {
+        margin-left: auto;
+        margin-right: auto;
+    }
+    .artistRightGallery {
+        height: auto; /* Дозволимо автоматичну висоту */
+    }
+    .artistGalleryInner {
+        flex-wrap: wrap; /* Дозволяємо переносити картки */
+        justify-content: center;
+        overflow-x: hidden; /* Вимикаємо горизонтальний скрол */
+        padding-bottom: 0;
+    }
+    .navButton {
+        display: none; /* Сховати кнопки навігації на малих екранах */
+    }
 }
