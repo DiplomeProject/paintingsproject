@@ -42,7 +42,7 @@ const mockStyles = ["Digital Art", "Fantasy", "Synthwave", "Minimalism", "Cyberp
 
 // Генерує 3-6 рандомних карток для одного артиста
 const generateRandomArtworks = (artistName) => {
-    return Array.from({ length: getRandomInt(3, 6) }, (_, i) => ({
+    return Array.from({ length: getRandomInt(3, 12) }, (_, i) => ({
         id: `p-${artistName.replace(/\s/g, '-')}-${i}`, // Унікальний ID
         title: getRandomElement(mockTitles),
         imageUrl: `/images/shopAndOtherPageImages/image${getRandomInt(1, 4)}.png`, // Використовуємо ваші 4 картинки
@@ -72,12 +72,11 @@ const generateRandomArtist = (i) => {
 // Створюємо масив з 10 рандомних артистів
 const artistsData = Array.from({ length: 10 }, (_, i) => generateRandomArtist(i));
 
-// --- Головний компонент Artists ---
-
 export default function Artists() {
     const [searchQuery, setSearchQuery] = useState("");
     const [activeCategory, setActiveCategory] = useState(null);
     const [showAdvanced, setShowAdvanced] = useState(false);
+    const [galleryStates, setGalleryStates] = useState({});
 
     useEffect(() => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -86,17 +85,23 @@ export default function Artists() {
     // Референси для скролу галерей кожного артиста
     const galleryRefs = useRef({});
 
-    const scrollGallery = (artistId, direction) => {
+    const checkGalleryOverflow = (artistId) => {
         const gallery = galleryRefs.current[artistId];
         if (gallery) {
-            const scrollAmount = 300; // Кількість пікселів для скролу
-            if (direction === 'left') {
-                gallery.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
-            } else {
-                gallery.scrollBy({ left: scrollAmount, behavior: 'smooth' });
-            }
+            const hasOverflow = gallery.scrollWidth > gallery.clientWidth;
+
+            setGalleryStates(prev => ({
+                ...prev,
+                [artistId]: {
+                    hasOverflow: hasOverflow,
+                    showLeft: false, // На початку кнопка "вліво" завжди схована
+                    showRight: hasOverflow // Кнопка "вправо" показана, тільки якщо є скрол
+                }
+            }));
         }
     };
+
+
 
     const filteredArtists = useMemo(() => {
         let items = artistsData;
@@ -108,6 +113,64 @@ export default function Artists() {
         }
         return items;
     }, [activeCategory, searchQuery]);
+
+    useEffect(() => {
+        const galleries = galleryRefs.current;
+        const artistIds = Object.keys(galleries);
+
+        // Початкова перевірка
+        artistIds.forEach(id => checkGalleryOverflow(id));
+
+        // Перевірка при ресайзі
+        const handleResize = () => {
+            artistIds.forEach(id => checkGalleryOverflow(id));
+        };
+
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+
+    }, [filteredArtists]);
+
+    const handleGalleryScroll = (artistId) => {
+        const gallery = galleryRefs.current[artistId];
+        if (gallery) {
+            const tolerance = 5; // Похибка в 5px
+            const atStart = gallery.scrollLeft <= tolerance;
+            const atEnd = gallery.scrollLeft + gallery.clientWidth >= gallery.scrollWidth - tolerance;
+
+            setGalleryStates(prev => ({
+                ...prev,
+                [artistId]: {
+                    ...prev[artistId], // Зберігаємо 'hasOverflow'
+                    showLeft: !atStart,
+                    showRight: !atEnd
+                }
+            }));
+        }
+    };
+
+    /* --- ЗМІНЕНО: Логіка скролу --- */
+    const scrollGallery = (artistId, direction) => {
+        const gallery = galleryRefs.current[artistId];
+        if (gallery) {
+
+            /* --- ЗМІНЕНО: Розрахунок прокрутки на 6 елементів --- */
+            const cardWidth = 210; // 210px from CSS
+            const gap = 20; // 20px from CSS
+            const itemsToScroll = 6;
+
+            // Прокручуємо 6 карток + 6 проміжків,
+            // щоб 7-а картка стала першою на позиції 0
+            const scrollAmount = (itemsToScroll * cardWidth) + (itemsToScroll * gap);
+            // (6 * 210) + (6 * 20) = 1260 + 120 = 1380px
+
+            if (direction === 'left') {
+                gallery.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+            } else {
+                gallery.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+            }
+        }
+    };
 
     const handleCategoryClick = (category) => {
         if (activeCategory === category) {
@@ -163,59 +226,73 @@ export default function Artists() {
                 </div>
                 {showAdvanced && <AdvancedFilters filterConfig={artistFilterConfig} />}
 
-                {/* --- Список артистів (Оновлена розмітка для горизонтальних галерей) --- */}
+                {/* --- Список артистів (Оновлена розмітка) --- */}
                 <div className={styles.artistsList}>
                     {filteredArtists.length > 0 ? (
-                        filteredArtists.map(artist => (
-                            <div key={artist.id} className={styles.artistSection}>
+                        filteredArtists.map(artist => {
+                            // Отримуємо стан для поточної галереї
+                            const state = galleryStates[artist.id] || { hasOverflow: false, showLeft: false, showRight: false };
 
-                                {/* Ліва частина: Аватар та інфо */}
-                                <div className={styles.artistLeftInfo}>
-                                    <img src={artist.avatar} alt={artist.name} className={styles.artistAvatar} />
-                                    <h3 className={styles.artistName}>{artist.name}</h3>
-                                    <div className={styles.artistDetails}>
-                                        <span>Style: {artist.style}</span><br/>
-                                        <span>Likes: {artist.likesCount}</span>
+                            return (
+                                <div key={artist.id} className={styles.artistSection}>
+
+                                    {/* ... (Ліва частина: Аватар та інфо - без змін) ... */}
+                                    <div className={styles.artistLeftInfo}>
+                                        <img src={artist.avatar} alt={artist.name} className={styles.artistAvatar} />
+                                        <h3 className={styles.artistName}>{artist.name}</h3>
+                                        <div className={styles.artistDetails}>
+                                            <span>Style: {artist.style}</span><br/>
+                                            <span>Likes: {artist.likesCount}</span>
+                                        </div>
                                     </div>
-                                </div>
 
-                                {/* Права частина: Галерея робіт з навігацією */}
-                                <div className={styles.artistRightGallery}>
-                                    {/* Кнопка "Вліво" */}
-                                        <button
-                                            className={`${styles.navButton} ${styles.left}`}
-                                            onClick={() => scrollGallery(artist.id, 'left')}
+                                    {/* Права частина: Галерея робіт з навігацією */}
+                                    <div className={styles.artistRightGallery}>
+
+                                        {/* --- ЗМІНЕНО: Умовне відображення кнопок --- */}
+
+                                        {/* Кнопка "Вліво" */}
+                                        {state.hasOverflow && state.showLeft && (
+                                            <button
+                                                className={`${styles.navButton} ${styles.left}`}
+                                                onClick={() => scrollGallery(artist.id, 'left')}
+                                            >
+                                                <img src="/assets/leftArrow.svg" alt="Scroll left" />
+                                            </button>
+                                        )}
+
+                                        {/* Внутрішній контейнер для скролу */}
+                                        <div
+                                            className={styles.artistGalleryInner}
+                                            ref={el => galleryRefs.current[artist.id] = el}
+                                            onScroll={() => handleGalleryScroll(artist.id)} /* --- НОВЕ --- */
                                         >
-                                            <img src="/assets/leftArrow.svg" alt="Scroll left" />
-                                        </button>
-                                    {/* Внутрішній контейнер для скролу */}
-                                    <div
-                                        className={styles.artistGalleryInner}
-                                        ref={el => galleryRefs.current[artist.id] = el}
-                                    >
-                                        {artist.artworks.map(card => (
-                                            <ArtCard
-                                                key={card.id}
-                                                imageUrl={card.imageUrl}
-                                                title={card.title}
-                                                artistName={card.artistName}
-                                                artistStyle={card.artistStyle}
-                                                likes={card.likes}
-                                                price={card.price}
-                                            />
-                                        ))}
-                                    </div>
+                                            {artist.artworks.map(card => (
+                                                <ArtCard
+                                                    key={card.id}
+                                                    imageUrl={card.imageUrl}
+                                                    title={card.title}
+                                                    artistName={card.artistName}
+                                                    artistStyle={card.artistStyle}
+                                                    likes={card.likes}
+                                                    price={card.price}
+                                                />
+                                            ))}
+                                        </div>
 
-                                    {/* Кнопка "Вправо" */}
-                                    <button
-                                        className={`${styles.navButton} ${styles.right}`}
-                                        onClick={() => scrollGallery(artist.id, 'right')}
-                                    >
-                                        <img src="/assets/rightArrow.svg" alt="Scroll right" />
-                                    </button>
+                                        {/* Кнопка "Вправо" */}
+                                        {state.hasOverflow && state.showRight && (
+                                            <button
+                                                className={`${styles.navButton} ${styles.right}`}
+                                                onClick={() => scrollGallery(artist.id, 'right')}
+                                            >
+                                                <img src="/assets/rightArrow.svg" alt="Scroll right" />
+                                            </button>
+                                        )}
+                                    </div>
                                 </div>
-                            </div>
-                        ))
+                            );
+                        })
                     ) : (
                         <div className={styles.noResults}>No artists found</div>
                     )}

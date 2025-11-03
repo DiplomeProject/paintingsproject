@@ -159,11 +159,15 @@
 
 /* Права частина: Галерея робіт */
 .artistRightGallery {
-    flex-grow: 1; /* Займе весь доступний простір */
-    position: relative; /* Для кнопок навігації */
-    overflow: hidden; /* Обрізаємо контент, що виходить за межі */
-    /*height: 350px; !* Фіксована висота для каруселі *!*/
-    /*display: flex;*/
+    flex-grow: 1;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+
+    /* --- ДОДАНО --- */
+    /* Центруємо .artistGalleryInner, який тепер має фіксовану ширину */
+    justify-content: center;
     align-items: center;
 }
 
@@ -175,9 +179,13 @@
     -webkit-overflow-scrolling: touch;
     padding-top: 20px;
     scrollbar-width: none;
-    grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+    grid-auto-flow: column;
+    grid-auto-columns: 210px;
+    /*padding-left: 70px;*/
+    /*padding-right: 70px;*/
+    /*width: 1360px;*/
+    width: 91.6%;
 }
-
 /* Сховати скролбар для WebKit браузерів (Chrome, Safari) */
 .artistGalleryInner::-webkit-scrollbar {
     display: none;
@@ -252,10 +260,16 @@
         height: auto; /* Дозволимо автоматичну висоту */
     }
     .artistGalleryInner {
+        /* --- ЗМІНЕНО: Переключаємо на flex для мобільних --- */
+        display: flex;
         flex-wrap: wrap; /* Дозволяємо переносити картки */
         justify-content: center;
         overflow-x: hidden; /* Вимикаємо горизонтальний скрол */
         padding-bottom: 0;
+
+        /* Скидаємо горизонтальні відступи на мобільних */
+        padding-left: 0;
+        padding-right: 0;
     }
     .navButton {
         display: none; /* Сховати кнопки навігації на малих екранах */
