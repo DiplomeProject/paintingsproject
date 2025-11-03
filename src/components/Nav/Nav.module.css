@@ -84,7 +84,13 @@
     gap: 1.5rem;
 }
 
-.languageSelector {
+.iconsLeft {
+    display: flex;
+    align-items: center;
+    gap: 25px;
+}
+
+.settingsAndBasket {
     display: flex;
     align-items: center;
     gap: 0.5rem;

@@ -87,26 +87,29 @@ function GalleryArtist({ user }) {
         }
     };
 
-    const handleAddNewPainting = async (e) => {
-        e.preventDefault();
-        try {
-            const formDataToSend = new FormData();
-            formDataToSend.append('title', formData.title);
-            formDataToSend.append('description', formData.description);
-            if (formData.image) formDataToSend.append('image', formData.image);
+const handleAddNewPainting = async (e) => {
+  e.preventDefault();
+  try {
+    const formDataToSend = new FormData();
+    formDataToSend.append('title', formData.title);
+    formDataToSend.append('description', formData.description);
+    if (formData.image) formDataToSend.append('image', formData.image);
 
-            const response = await axios.post('http://localhost:8080/upload', formDataToSend, {
-                withCredentials: true,
-            });
+    console.log('Sending upload request with:', formDataToSend);
+    const response = await axios.post('http://localhost:8080/upload', formDataToSend, {
+      withCredentials: true,
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    console.log('Upload response:', response);
+    setPaintings((prev) => [...prev, response.data]);
+    setShowAddModal(false);
+    alert('Нова картина додана');
+  } catch (error) {
+    console.error('Error adding painting:', error);
+    alert('Помилка при додаванні');
+  }
+};
 
-            setPaintings((prev) => [...prev, response.data]);
-            setShowAddModal(false);
-            alert('Нова картина додана');
-        } catch (error) {
-            console.error('Error adding:', error);
-            alert('Помилка при додаванні');
-        }
-    };
 
     const handleDeletePainting = async (paintingId) => {
         if (!window.confirm('Видалити цю картину?')) return;

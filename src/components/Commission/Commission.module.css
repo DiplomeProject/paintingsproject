@@ -1,0 +1,316 @@
+.commissionPage {
+    width: 100%;
+    min-height: 100vh;
+    padding: 0 51px;
+    box-sizing: border-box;
+}
+
+.contentWrapper {
+    width: 100%;
+    margin: 0 auto;
+    padding-top: 70px;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 30px;
+    flex-wrap: wrap;
+}
+
+.headerLeft {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+    flex-wrap: wrap;
+    flex: 1;
+    min-width: 300px;
+}
+
+.commissionTitle {
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 800;
+    font-size: 60px;
+    text-transform: uppercase;
+    flex-shrink: 0;
+}
+
+.searchBarContainer {
+    display: flex;
+    align-items: center;
+    max-width: 791px;
+    height: 55px;
+    background: white;
+    border-radius: 18px;
+    padding: 0 15px;
+    flex-grow: 1;
+}
+
+.searchInput {
+    flex-grow: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    font-size: 14px;
+}
+
+.searchButton {
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+.addCommissionButton {
+    background: transparent;
+    color: white;
+    border: 1px solid transparent;
+    padding: 15px 25px;
+    border-radius: 12px;
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: color 0.3s ease, border-color 0.3s ease;
+}
+
+.addCommissionButton:hover {
+    color: #a5b4fc;
+    border-color: rgba(255, 255, 255, 0.5);
+}
+
+.filtersWrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    margin-bottom: 40px;
+}
+
+.additionalFilters {
+    background: none;
+    border: none;
+    color: #fff;
+    font-family: 'Roboto', sans-serif;
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    opacity: 0.8;
+    transition: opacity 0.3s ease;
+}
+
+.additionalFilters:hover {
+    opacity: 1;
+}
+
+.additionalFilters.active svg {
+    transform: rotate(180deg);
+}
+
+.commissionGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(444px, 1fr));
+    gap: 14px;
+    padding-bottom: 60px;
+}
+
+.commissionCard {
+    overflow: hidden;
+    display: flex;
+    opacity: 1;
+    padding: 17px;
+    position: relative;
+    background: linear-gradient(rgba(70, 70, 71, 0.6), rgba(70, 70, 71, 0.6)) padding-box,
+    linear-gradient(168deg, rgba(89, 92, 100, 1), rgba(71, 77, 95, 0.44)) border-box;
+    background-clip: padding-box, border-box;
+    border: 3px solid transparent;
+    border-radius: 12px;
+    max-width: 444px;
+    /* ЗМІНЕНО: max-height на height, щоб зафіксувати розмір */
+    height: 304px;
+    gap: 17px;
+}
+
+.imagePriceWrapper {
+    width: 45%;
+    flex-shrink: 0;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    /*margin-right: 17px;*/
+    box-sizing: border-box;
+    border: 3px solid transparent;
+    border-radius: 5px;
+    background: linear-gradient(168.05deg, #595C64 1.51%, rgba(71, 77, 95, 0.44) 90.56%) border-box;
+    aspect-ratio: 268/192;
+}
+
+.imageWrapper {
+    width: 100%;
+    height: 80%;
+    overflow: hidden;
+    border-radius: 1px 1px 0 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    z-index: 1;
+}
+
+.cardImage {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.priceOverlay {
+    height: 20%;
+    background: #2c2c33;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0 0 1px 1px;
+    backdrop-filter: blur(52.5px);
+    position: relative;
+    z-index: 1;
+}
+
+.cardPrice {
+    color: white;
+    font-family: Roboto, sans-serif;
+    font-weight: 400;
+    font-size: 24px;
+    line-height: 100%;
+    letter-spacing: 0;
+}
+
+.cardContent {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    position: relative;
+    /* ДОДАНО: Це розштовхне текстовий блок і кнопку */
+    justify-content: space-between;
+}
+
+.cardTitle {
+    margin: 0 0 13px 0;
+    font-family: Roboto, sans-serif;
+    font-weight: 400;
+    font-size: 19px;
+    line-height: 100%;
+    letter-spacing: 0;
+    text-transform: uppercase;
+}
+
+.cardDescription {
+    color: rgba(255, 255, 255, 0.85);
+    font-family: Roboto, sans-serif;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 100%;
+    letter-spacing: 0;
+    /* ДОДАНО: Відступ для охайності */
+    margin-top: 12px;
+}
+
+.cardTags {
+    color: rgba(255, 255, 255, 0.7);
+    /* ВИДАЛЕНО: Цей відступ заважав кнопці "прилипнути" до низу */
+    /* margin-bottom: 35px; */
+    font-family: Roboto, sans-serif;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 100%;
+    letter-spacing: 0;
+    /* ДОДАНО: Відступ для охайності */
+    margin-top: 12px;
+}
+
+.takeButton {
+    background: #5454FE;
+    font-family: Roboto, sans-serif;
+    font-weight: 400;
+    font-size: 25px;
+    line-height: 100%;
+    letter-spacing: 0;
+    color: white;
+    border: none;
+    padding: 15px 35px;
+    border-radius: 2px;
+    cursor: pointer;
+    width: 100%;
+    transition: color 0.2s;
+    margin-bottom: 4px;
+    margin-top: 15px;
+}
+
+.takeButton:hover {
+    background: #4f4fe8;
+}
+
+/* --- Стилі пагінації (без змін) --- */
+.paginationContainer {
+    display: flex;
+    justify-content: center;
+    margin: 60px 0;
+}
+
+.pagination {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(30, 30, 50, 0.8);
+    padding: 8px;
+    border-radius: 12px;
+}
+
+.pageBtn, .pageNumber {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 16px;
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.pageBtn:hover, .pageNumber:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.pageNumber.active {
+    background: linear-gradient(90deg, #9600ff 0%, #ff00cc 100%);
+    font-weight: 700;
+}
+
+.pageBtn:disabled {
+    opacity: 0.4;
+    cursor: default;
+}
+
+.paginationDots {
+    color: white;
+    font-size: 16px;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.noResults {
+    text-align: center;
+    padding: 80px 20px;
+    font-size: 1.2rem;
+    color: rgba(255, 255, 255, 0.7);
+}

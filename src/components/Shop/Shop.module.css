@@ -113,6 +113,9 @@
     opacity: 1;
 }
 
+.additionalFilters.active svg {
+    transform: rotate(180deg);
+}
 .artGridFull {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(212px, 1fr));

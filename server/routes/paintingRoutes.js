@@ -4,6 +4,8 @@ const path = require('path');
 const fs = require('fs');
 const { upload } = require('../config/multerConfig');
 const auth = require('../middleware/authMiddleware');
+const multer = require('multer');
+const uploadMemory = multer({ storage: multer.memoryStorage() });
 
 const router = express.Router();
 
@@ -22,25 +24,29 @@ router.get('/api/paintings', async (req, res) => {
     }
 });
 
-// Завантажити нову картину
-router.post('/upload', auth, upload.single('image'), async (req, res) => {
-    const { title, description } = req.body;
-    const image = req.file ? req.file.filename : null;
-    if (!title || !description || !image) return res.status(400).json({ success: false, message: 'All fields required' });
 
-    const email = req.session.user.email;
-    const imagePath = path.join(email.split('@')[0], image);
+router.post('/upload', auth, uploadMemory.single('image'), async (req, res) => {
 
-    try {
-        await db.query(
-            `INSERT INTO Paintings (Title, Description, Creator_ID, Creation_Date, Image) VALUES (?, ?, ?, NOW(), ?)`,
-            [title, description, req.session.user.id, imagePath]
-        );
-        res.status(201).json({ success: true, message: 'Painting added successfully' });
-    } catch (err) {
-        console.error('SQL error:', err);
-        res.status(500).json({ success: false, message: 'Database error' });
-    }
+  const { title, description } = req.body;
+  const Author = req.session.user ? req.session.user.name : null;
+  const Creator_ID = req.session.user ? req.session.user.id : null;
+  const imageBuffer = req.file ? req.file.buffer : null;
+
+
+
+  try {
+    await db.query(
+      `INSERT INTO paintings (Title, Description, Author, Creation_Date, Image, Creator_ID)
+      VALUES (?, ?, ?, NOW(), ?, ?)`,
+      [title, description, Author, imageBuffer, Creator_ID]
+    );
+
+    console.log('Painting successfully added to database');
+    res.status(201).json({ success: true, message: 'Painting added successfully' });
+  } catch (err) {
+    console.error('SQL error:', err);
+    res.status(500).json({ success: false, message: 'Database error' });
+  }
 });
 
 // Видалити картину
