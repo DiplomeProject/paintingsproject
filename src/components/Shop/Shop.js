@@ -54,7 +54,7 @@ const Shop = () => {
     }, [currentPage]); // Залежність: ефект спрацює щоразу, коли currentPage зміниться
 
     const cards = useMemo(() => {
-        return Array.from({ length: 5000 }, (_, i) => ({
+        return Array.from({ length: 400 }, (_, i) => ({
             id: i,
             imageUrl: `/images/shopAndOtherPageImages/image${(i % 4) + 1}.png`,
             title: `Artwork #${i + 1}`,
