@@ -1,32 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import axios from "axios";
+import GalleryArtist from "../../GalleryArtist/GalleryArtist";
 import Login from "../Login/Login";
 import Register from "../Register/Register";
-import ForgotPassword from "../Login/ForgotPassword/ForgotPassword";
-import styles from './Profile.module.css';
-import DigitalBrushProfile from "./UserProfile/DigitalBrushProfile";
-
-const mockUser = {
-    name: "Kira",
-    surname: "Kudo",
-    bio: "I create visual solutions that not only look good, but also work helping businesses stand out and users enjoy the interaction.",
-    email: "kira.kudo@example.com",
-    profileImage: "/images/profileImg.jpg",
-};
+import emailjs from '@emailjs/browser';
 
 function Profile() {
-    const [user, setUser] = useState(null);
-    //const [user, setUser] = useState(mockUser);
-    const [view, setView] = useState('login');
+    const [user, setUser] = useState();
     const [isLogin, setIsLogin] = useState(true);
     const [formData, setFormData] = useState({
         name: '',
-        surname: '',
         bio: '',
         email: '',
         password: ''
     });
-    const [imagePreview, setImagePreview] = useState(null);
+    const [imagePreview, setImagePreview] = useState('img/icons/profile.jpg');
     const [showModal, setShowModal] = useState(false);
     const [selectedFile, setSelectedFile] = useState(null);
 
@@ -36,21 +24,11 @@ function Profile() {
             .then(data => {
                 if (data.loggedIn) {
                     setUser(data.user);
-                    setFormData({
-                        name: data.user.name || '',
-                        surname: data.user.surname || '',
-                        bio: data.user.bio || '',
-                        email: data.user.email || '',
-                        password: ''
-                    });
-                    if (data.user.profileImage) {
-                        setImagePreview(data.user.profileImage);
-                    }
                 } else {
                     setUser(null);
                 }
             })
-            .catch(error => console.error('Error checking session:', error));
+            .catch(error => console.error('Error:', error));
     }, []);
 
     const handleInputChange = (e) => {
@@ -71,7 +49,6 @@ function Profile() {
         try {
             const formDataToSend = new FormData();
             formDataToSend.append('name', formData.name || user.name);
-            formDataToSend.append('surname', formData.surname || user.surname);
             formDataToSend.append('bio', formData.bio || user.bio);
             formDataToSend.append('email', formData.email || user.email);
 
@@ -101,14 +78,12 @@ function Profile() {
             localStorage.setItem("user", JSON.stringify(response.data.user));
             setFormData({
                 name: response.data.user.name || '',
-                surname: response.data.user.surname || '',
                 bio: response.data.user.bio || '',
                 email: response.data.user.email
             });
             if (response.data.user.profileImage) {
                 setImagePreview(response.data.user.profileImage);
             }
-            setView('profile');
         } catch (error) {
             console.error('Login failed:', error);
             alert('Ошибка при авторизации');
@@ -122,7 +97,6 @@ function Profile() {
         "http://localhost:8080/register",
         {
             name: formData.name,
-            surname: formData.surname,
             email: formData.email,
             password: formData.password,
         },
@@ -137,88 +111,111 @@ function Profile() {
     }
     };
 
+
+    const toggleForm = () => setIsLogin(!isLogin);
+
     const handleLogout = async () => {
         try {
             await axios.post('http://localhost:8080/logout', {}, { withCredentials: true });
             setUser(null);
-            setView('login');
         } catch (error) {
             console.error('Logout failed:', error);
         }
     };
 
-    const showLogin = () => setView('login');
-    const showRegister = () => setView('register');
-    const showForgotPassword = () => setView('forgotPassword');
-
     return (
-        <div className={styles.profilePage}>
-            {user ? (
-                // --- Секція для залогіненого користувача ---
-                <DigitalBrushProfile
-                    user={user}
-                    onEditProfile={() => setShowModal(true)}
-                    onLogout={handleLogout}
-                />
-            ) : (
-                // --- Секція для гостя (форми входу/реєстрації) ---
-                <div className={styles.authFormsContainer}>
-                    {view === 'login' && (
-                        <Login
-                            handleLogin={handleLogin}
-                            handleInputChange={handleInputChange} // Передаємо єдиний обробник
-                            toggleForm={showRegister}
-                            onForgotPassword={showForgotPassword}
-                        />
-                    )}
-                    {view === 'register' && (
-                        <Register
-                            // Передаємо handleRegister з Profile, щоб він міг викликати API
-                            handleRegister={handleRegister}
-                            toggleForm={showLogin}
-                        />
-                    )}
-                    {view === 'forgotPassword' && (
-                        <ForgotPassword
-                            onBack={showLogin} // Функція для повернення до логіну
-                        />
-                    )}
-                </div>
-            )}
-
-            {/* --- Модальне вікно редагування --- */}
-            {showModal && (
-                <div className={styles.modalOverlay}>
-                    <div className={styles.modalContent}>
-                        <div className={styles.modalHeader}>
-                            <h5>Редагувати профіль</h5>
-                            <button type="button" className={styles.closeButton} onClick={() => { setShowModal(false); setImagePreview(user.profileImage || null); }} >&times;</button> {/* Скидаємо прев'ю при закритті */}
-                        </div>
-                        <div className={styles.modalBody}>
-                            <form onSubmit={handleProfileUpdate}>
-                                <div className={styles.formGroup}>
-                                    <label htmlFor="name">Ім'я</label>
-                                    <input type="text" id="name" name="name" defaultValue={formData.name} onChange={handleInputChange}/>
+        <div className="Profile">
+            <section>
+                {user ? (
+                    <div className="container2 py-5">
+                        <div className="row d-flex justify-content-center align-items-center">
+                            <div className="col col-lg-6 mb-4 mb-lg-0">
+                                <div className="card mb-3" style={{ borderRadius: '.5rem', background: 'rgba(255, 255, 255, 0.05)', backdropFilter: 'blur(10px)', border: 'none' }}>
+                                    <div className="row g-0">
+                                        <div className="profile col-md-4 gradient-custom text-center text-white"
+                                             style={{
+                                                 borderTopLeftRadius: '.5rem',
+                                                 borderBottomLeftRadius: '.5rem',
+                                                 background: 'linear-gradient(to right bottom, rgba(246, 211, 101, 1), rgba(253, 160, 133, 1))'
+                                             }}>
+                                            <img id="profile-image" src={user.profileImage || imagePreview} alt="Avatar"
+                                                 className="img-fluid rounded-circle"
+                                                 style={{ width: '250px', height: '250px' }} />
+                                            <h2>{user.name}</h2>
+                                            <button onClick={() => setShowModal(true)} className="btn btn-info">Редагувати профіль</button>
+                                            <button onClick={handleLogout} className="btn btn-danger">Вийти</button>
+                                            <div className="about">
+                                                <h3>Про себе:</h3>
+                                                <p>{user.bio || ''}</p>
+                                                <div className="contact">
+                                                    <h3>Контактна інформація:</h3>
+                                                    <p>{user.email}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="col-md-8" style={{ background: 'transparent' }}>
+                                            <div className="card-body p-4" style={{ background: 'transparent' }}>
+                                                <h6>Paintings</h6>
+                                                <hr className="mt-0 mb-4" />
+                                                <GalleryArtist user={user} />
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div className={styles.formGroup}>
-                                    <label htmlFor="surname">Прізвище</label>
-                                    <input type="text" id="surname" name="surname" defaultValue={formData.surname} onChange={handleInputChange}/>
-                                </div>
-                                <div className={styles.formGroup}>
-                                    <label htmlFor="bio">Про себе</label>
-                                    <textarea id="bio" name="bio" defaultValue={formData.bio} onChange={handleInputChange}></textarea>
-                                </div>
-                                <div className={styles.formGroup}>
-                                    <label htmlFor="profileImage">Змінити зображення</label>
-                                    <input type="file" id="profileImage" onChange={handleImageChange}/>
-                                    {imagePreview && <img src={imagePreview} alt="Preview" className={styles.imagePreview}/>}
-                                </div>
-                                <button type="submit" className={styles.saveButton}>Зберегти зміни</button>
-                            </form>
+                            </div>
                         </div>
                     </div>
-                </div>
-            )}
+                ) : (
+                    <div className="container">
+                        {isLogin ? (
+                            <Login
+                                handleLogin={handleLogin}
+                                handleInputChange={handleInputChange}
+                                toggleForm={toggleForm}
+                            />
+                            ) : (
+                            <Register handleRegister={handleRegister} toggleForm={toggleForm} />
+                            )}
+                    </div>
+                )}
+
+                {/* Модальное окно редактирования профиля */}
+                {showModal && (
+                    <div className="modal fade show" style={{ display: 'block', backgroundColor: 'rgba(0, 0, 0, 0.7)' }}>
+                        <div className="modal-dialog">
+                            <div className="modal-content">
+                                <div className="modal-header">
+                                    <h5 className="modal-title">Редагувати профіль</h5>
+                                    <button type="button" className="btn-close" onClick={() => setShowModal(false)}></button>
+                                </div>
+                                <div className="modal-body">
+                                    <form onSubmit={handleProfileUpdate}>
+                                        <div className="mb-3">
+                                            <label htmlFor="name" className="form-label">Ім'я</label>
+                                            <input type="text" id="name" name="name" className="form-control"
+                                                   value={formData.name || (user ? user.name : '')}
+                                                   onChange={handleInputChange}/>
+                                        </div>
+                                        <div className="mb-3">
+                                            <label htmlFor="bio" className="form-label">Про себе</label>
+                                            <textarea id="bio" name="bio" className="form-control"
+                                                      value={formData.bio || (user ? user.bio : '')}
+                                                      onChange={handleInputChange}></textarea>
+                                        </div>
+                                        <div className="mb-3">
+                                            <label htmlFor="profileImage" className="form-label">Змінити зображення</label>
+                                            <input type="file" className="form-control" onChange={handleImageChange}/>
+                                            {imagePreview &&
+                                                <img src={imagePreview} alt="Image preview" className="img-fluid mt-3" style={{ width: '100px' }}/>}
+                                        </div>
+                                        <button type="submit" className="btn btn-primary">Зберегти зміни</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
+            </section>
         </div>
     );
 }
