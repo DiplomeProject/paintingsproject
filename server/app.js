@@ -7,6 +7,7 @@ const paintingRoutes = require('./routes/paintingRoutes');
 const profileRoutes = require('./routes/profileRoutes');
 const searchRoutes = require('./routes/searchRoutes');
 const commissions = require('./commissions/Commissions');
+const artists = require('./Artists/Artists');
 
 const app = express();
 
@@ -28,6 +29,7 @@ app.use(paintingRoutes);
 app.use(profileRoutes);
 app.use(searchRoutes);
 app.use(commissions);
+app.use(artists);
 
 
 module.exports = app;
