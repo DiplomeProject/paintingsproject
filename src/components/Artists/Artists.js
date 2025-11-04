@@ -3,6 +3,8 @@ import styles from "./Artists.module.css";
 import ArtCard from '../ArtCard/ArtCard';
 import CategoryFilters from "../CategoryFilters/CategoryFilters";
 import AdvancedFilters from '../AdvancedFilters/AdvancedFilters';
+import { usePagination } from '../hooks/Pagination/usePagination';
+import Pagination from '../hooks/Pagination/Pagination';
 
 // --- Конфігурація фільтрів ---
 const categories = [
@@ -70,17 +72,13 @@ const generateRandomArtist = (i) => {
 };
 
 // Створюємо масив з 10 рандомних артистів
-const artistsData = Array.from({ length: 12 }, (_, i) => generateRandomArtist(i));
+const artistsData = Array.from({ length: 30 }, (_, i) => generateRandomArtist(i));
 
 export default function Artists() {
     const [searchQuery, setSearchQuery] = useState("");
     const [activeCategory, setActiveCategory] = useState(null);
     const [showAdvanced, setShowAdvanced] = useState(false);
     const [galleryStates, setGalleryStates] = useState({});
-
-    useEffect(() => {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    }, [activeCategory]);
 
     // Референси для скролу галерей кожного артиста
     const galleryRefs = useRef({});
@@ -101,8 +99,6 @@ export default function Artists() {
         }
     };
 
-
-
     const filteredArtists = useMemo(() => {
         let items = artistsData;
         if (activeCategory) {
@@ -114,22 +110,24 @@ export default function Artists() {
         return items;
     }, [activeCategory, searchQuery]);
 
+    const itemsPerPage = 12;
+    const {
+        currentPage,
+        setCurrentPage,
+        totalPages,
+        displayedData: displayedArtists
+    } = usePagination(filteredArtists, itemsPerPage);
+
     useEffect(() => {
         const galleries = galleryRefs.current;
         const artistIds = Object.keys(galleries);
-
-        // Початкова перевірка
         artistIds.forEach(id => checkGalleryOverflow(id));
-
-        // Перевірка при ресайзі
         const handleResize = () => {
             artistIds.forEach(id => checkGalleryOverflow(id));
         };
-
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
-
-    }, [filteredArtists]);
+    }, [displayedArtists]);
 
     const handleGalleryScroll = (artistId) => {
         const gallery = galleryRefs.current[artistId];
@@ -178,6 +176,12 @@ export default function Artists() {
         } else {
             setActiveCategory(category);
         }
+        setCurrentPage(0);
+    };
+
+    const handleSearchChange = (e) => {
+        setSearchQuery(e.target.value);
+        setCurrentPage(0);
     };
 
     return (
@@ -228,9 +232,8 @@ export default function Artists() {
 
                 {/* --- Список артистів (Оновлена розмітка) --- */}
                 <div className={styles.artistsList}>
-                    {filteredArtists.length > 0 ? (
-                        filteredArtists.map(artist => {
-                            // Отримуємо стан для поточної галереї
+                    {displayedArtists.length > 0 ? (
+                        displayedArtists.map(artist => {
                             const state = galleryStates[artist.id] || { hasOverflow: false, showLeft: false, showRight: false };
 
                             return (
@@ -297,6 +300,11 @@ export default function Artists() {
                         <div className={styles.noResults}>No artists found</div>
                     )}
                 </div>
+                <Pagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    onPageChange={setCurrentPage}
+                />
             </div>
         </div>
     );
