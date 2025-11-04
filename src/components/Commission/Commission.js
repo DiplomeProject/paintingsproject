@@ -2,6 +2,8 @@ import React, { useState, useMemo, useEffect } from 'react';
 import styles from './Commission.module.css';
 import CategoryFilters from "../CategoryFilters/CategoryFilters";
 import AdvancedFilters from '../AdvancedFilters/AdvancedFilters';
+import { usePagination } from '../hooks/Pagination/usePagination';
+import Pagination from '../hooks/Pagination/Pagination';
 import axios from 'axios';
 
 // ОНОВЛЕНО: Визначаємо конфігурацію фільтрів для Commission
@@ -41,25 +43,16 @@ const mockTitles = [
 ];
 
 const mockDescriptions = [
-    'To convey the spirit of retro - to combine the vintage aesthetics of the past with a modern visual language.',
-    'A deep dive into neon-lit streets and future tech.',
-    'Exploring the mystical connection between nature and magic.',
-    'Modern UI/UX kit for a sleek and fast web application.',
-    'Capturing the essence of the 80s with a modern twist.',
-    'A 3D model designed for next-gen gaming engines.',
-    'Hand-drawn sketches of fantastical creatures and lands.'
+    'To convey the spirit of retro - to combine the vintage aesthetics of the past with a modern visual language. Feelings: nostalgia, creativity, free spirit, experiment.',
+    'A deep dive into neon-lit streets and future tech. Feelings: nostalgia, creativity, free spirit, experiment.',
+    'Exploring the mystical connection between nature and magic. Feelings: nostalgia, creativity, free spirit, experiment.',
+    'Modern UI/UX kit for a sleek and fast web application. Feelings: nostalgia, creativity, free spirit, experiment.',
+    'Capturing the essence of the 80s with a modern twist. Feelings: nostalgia, creativity, free spirit, experiment.',
+    'A 3D model designed for next-gen gaming engines. Feelings: nostalgia, creativity, free spirit, experiment.',
+    'Hand-drawn sketches of fantastical creatures and lands. Feelings: nostalgia, creativity, free spirit, experiment.'
 ];
 
-const allFeelings = ['nostalgia', 'creativity', 'free spirit', 'experiment', 'dark', 'peaceful', 'energetic', 'minimalist', 'complex', 'vibrant'];
-
-// Функція для отримання 2-4 випадкових тегів
-const getRandomFeelings = () => {
-    const num = getRandomInt(2, 4); // Вибираємо 2, 3 або 4 теги
-    const shuffled = [...allFeelings].sort(() => 0.5 - Math.random()); // Тасуємо масив
-    return shuffled.slice(0, num); // Беремо перші 'num' елементів
-};
-
-const commissionsData = Array.from({ length: 24 }, (_, i) => ({
+const commissionsData = Array.from({ length: 1000 }, (_, i) => ({
     id: i,
     // Випадкова картинка (припускаємо, що у вас є image1.png ... image4.png)
     imageUrl: `/images/shopAndOtherPageImages/image${getRandomInt(1, 4)}.png`,
@@ -67,8 +60,6 @@ const commissionsData = Array.from({ length: 24 }, (_, i) => ({
     title: getRandomElement(mockTitles),
     // Випадковий опис
     description: getRandomElement(mockDescriptions),
-    // Випадковий набір тегів
-    feelings: getRandomFeelings(),
     // Випадкова ціна від 10 до 250
     price: getRandomInt(10, 250),
     // Категорія залишається циклічною для різноманітності
@@ -78,9 +69,8 @@ const commissionsData = Array.from({ length: 24 }, (_, i) => ({
 function Commission() {
     const [activeCategory, setActiveCategory] = useState(null);
     const [searchQuery, setSearchQuery] = useState('');
-    const [currentPage, setCurrentPage] = useState(0);
     const [showAdvanced, setShowAdvanced] = useState(false);
-    const itemsPerPage = 12;
+    const itemsPerPage = 52;
 
     // const [commissions, setCommissions] = useState([]);
     // const [loading, setLoading] = useState(true);
@@ -103,10 +93,6 @@ function Commission() {
     //     fetchCommissions();
     // }, []);
 
-    useEffect(() => {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    }, [currentPage]);
-
     const filteredCommissions = useMemo(() => {
         let items = commissionsData;
         // let items = commissions;
@@ -119,9 +105,12 @@ function Commission() {
         return items;
     }, [activeCategory, searchQuery]);
 
-    const totalPages = Math.ceil(filteredCommissions.length / itemsPerPage);
-    const startIndex = currentPage * itemsPerPage;
-    const displayedCommissions = filteredCommissions.slice(startIndex, startIndex + itemsPerPage);
+    const {
+        currentPage,
+        setCurrentPage,
+        totalPages,
+        displayedData: displayedCommissions
+    } = usePagination(filteredCommissions, itemsPerPage);
 
     const handleCategoryClick = (category) => {
         if (activeCategory === category) {
@@ -130,38 +119,6 @@ function Commission() {
             setActiveCategory(category);
         }
         setCurrentPage(0);
-    };
-
-    const renderPageNumbers = () => {
-        if (totalPages <= 7) {
-            const pageNumbers = [];
-            for (let i = 0; i < totalPages; i++) {
-                pageNumbers.push(
-                    <button key={i} className={`${styles.pageNumber} ${i === currentPage ? styles.active : ""}`} onClick={() => setCurrentPage(i)}>
-                        {i + 1}
-                    </button>
-                );
-            }
-            return pageNumbers;
-        }
-        const pages = [];
-        const siblingCount = 1;
-        pages.push(<button key={0} className={`${styles.pageNumber} ${0 === currentPage ? styles.active : ""}`} onClick={() => setCurrentPage(0)}>1</button>);
-        if (currentPage > siblingCount + 1) {
-            pages.push(<span key="dots1" className={styles.paginationDots}>...</span>);
-        }
-        const startPage = Math.max(1, currentPage - siblingCount);
-        const endPage = Math.min(totalPages - 2, currentPage + siblingCount);
-        for (let i = startPage; i <= endPage; i++) {
-            pages.push(<button key={i} className={`${styles.pageNumber} ${i === currentPage ? styles.active : ""}`} onClick={() => setCurrentPage(i)}>{i + 1}</button>);
-        }
-        if (currentPage < totalPages - siblingCount - 2) {
-            pages.push(<span key="dots2" className={styles.paginationDots}>...</span>);
-        }
-        if (totalPages > 1) {
-            pages.push(<button key={totalPages - 1} className={`${styles.pageNumber} ${totalPages - 1 === currentPage ? styles.active : ""}`} onClick={() => setCurrentPage(totalPages - 1)}>{totalPages}</button>);
-        }
-        return pages;
     };
 
     // if (loading) {
@@ -234,7 +191,6 @@ function Commission() {
                                         <div>
                                             <h3 className={styles.cardTitle}>{commission.title}</h3>
                                             <p className={styles.cardDescription}>{commission.description}</p>
-                                            <p className={styles.cardTags}>Feelings: {commission.feelings.join(', ')}</p>
                                         </div>
                                         <button className={styles.takeButton}>Take</button>
                                     </div>
@@ -242,25 +198,11 @@ function Commission() {
                             ))}
                         </div>
 
-                        <div className={styles.paginationContainer}>
-                            <div className={styles.pagination}>
-                                <button
-                                    className={styles.pageBtn}
-                                    onClick={() => setCurrentPage(p => Math.max(p - 1, 0))}
-                                    disabled={currentPage === 0}
-                                >
-                                    ‹
-                                </button>
-                                {renderPageNumbers()}
-                                <button
-                                    className={styles.pageBtn}
-                                    onClick={() => setCurrentPage(p => Math.min(p + 1, totalPages - 1))}
-                                    disabled={currentPage === totalPages - 1 || totalPages === 0}
-                                >
-                                    ›
-                                </button>
-                            </div>
-                        </div>
+                        <Pagination
+                            currentPage={currentPage}
+                            totalPages={totalPages}
+                            onPageChange={setCurrentPage}
+                        />
                     </>
                 ) : (
                     <div className={styles.noResults}>There are no commissions available at the moment</div>

@@ -42,11 +42,10 @@ export function Navbar() {
             <div className={styles.navbarMain}>
                 <div className={styles.navbarContainer}>
                     {/* ОНОВЛЕНО: Додано нову обгортку .navbarLeft */}
+                    <div className={styles.navbarLogo}>
+                        <div className={styles.logoText}>Digital<br/>Brush</div>
+                    </div>
                     <div className={styles.navbarLeft}>
-                        <div className={styles.navbarLogo}>
-                            <div className={styles.logoText}>Digital Brush</div>
-                        </div>
-
                         <div className={styles.navbarLinks}>
                             <button
                                 className={getButtonClass('/homepage', 'MAIN')}

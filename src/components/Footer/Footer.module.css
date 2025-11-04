@@ -1,85 +1,106 @@
 .footer {
-    background-color: #0D0B1F; /* Фон как у основного контейнера */
-    color: #a0aec0; /* Светло-серый текст */
-    padding: 60px 51px 20px;
-    margin-top: auto; /* Прижимает футер к низу */
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    margin-top: auto;
+}
+
+.footerTop {
+    background-color: rgba(70, 70, 71, 0.6);
+    backdrop-filter: blur(79px);
+    padding: 25px 51px;
+    border-top-width: 3px;
+    border-top-style: solid;
+    border-bottom-width: 3px;
+    border-bottom-style: solid;
+    border-image-source: linear-gradient(168.05deg, #595C64 1.51%, rgba(71, 77, 95, 0.44) 90.56%);
+    border-image-slice: 1;
 }
 
 .footerContainer {
-    max-width: 1400px;
     margin: 0 auto;
     display: flex;
     justify-content: space-between;
     flex-wrap: wrap;
-    gap: 40px;
 }
 
 .footerLeft {
     flex: 2;
     min-width: 300px;
 }
-
 .footerLogo {
     font-family: 'Orbitron', sans-serif;
-    font-size: 24px;
-    font-weight: 600;
+    font-size: 48px;
+    font-weight: 800;
     color: #ffffff;
-    margin-bottom: 20px;
+    margin-bottom: 98px;
 }
-
 .footerText {
     font-family: 'Roboto', sans-serif;
-    font-size: 14px;
+    font-weight: 400;
+    font-size: 16px;
     line-height: 1.6;
-    max-width: 450px;
+    max-width: 65%;
 }
 
 .footerRight {
     flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 30px;
+    gap: 34px;
     min-width: 250px;
 }
 
+/*.footerContact{*/
+/*    margin-bottom: 64px;*/
+/*}*/
+
 .footerContact p, .footerSocial p {
+    font-family: Roboto, sans-serif;
+    font-weight: 400;
+    font-size: 30px;
+    line-height: 100%;
+    letter-spacing: 0;
+
     margin: 0 0 10px 0;
-    font-size: 16px;
     color: #ffffff;
 }
-
 .footerContact a {
+    font-family: Roboto, sans-serif;
+    font-weight: 300;
+    font-size: 26px;
+    line-height: 97%;
     color: #a0aec0;
     text-decoration: none;
     transition: color 0.3s ease;
 }
-
 .footerContact a:hover {
     color: #ffffff;
 }
 
 .socialIconsContainer {
     display: flex;
-    gap: 15px;
+    gap: 20px;
+}
+
+.socialIconLink {
+    display: block;
+    transition: transform 0.3s ease;
+}
+.socialIconLink:hover {
+    transform: scale(1.1);
 }
 
 .socialIcon {
-    color: #ffffff;
-    width: 24px;
-    height: 24px;
-    transition: transform 0.3s ease;
-}
-
-.socialIcon:hover {
-    transform: scale(1.1);
+    width: 36px;
+    height: 36px;
+    object-fit: contain;
 }
 
 
 .footerBottom {
     text-align: center;
-    margin-top: 60px;
-    padding-top: 20px;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
     font-size: 14px;
+    padding: 20px 51px;
+}
+
+.footerBottom p {
+    margin: 0;
 }
