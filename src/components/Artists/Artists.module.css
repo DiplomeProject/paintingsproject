@@ -42,7 +42,7 @@
 .searchBarContainer {
     display: flex;
     align-items: center;
-    max-width: 791px;
+    max-width: 42%;
     height: 55px;
     background: white;
     border-radius: 18px;
