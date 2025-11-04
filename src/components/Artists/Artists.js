@@ -70,7 +70,7 @@ const generateRandomArtist = (i) => {
 };
 
 // Створюємо масив з 10 рандомних артистів
-const artistsData = Array.from({ length: 10 }, (_, i) => generateRandomArtist(i));
+const artistsData = Array.from({ length: 12 }, (_, i) => generateRandomArtist(i));
 
 export default function Artists() {
     const [searchQuery, setSearchQuery] = useState("");
@@ -239,7 +239,7 @@ export default function Artists() {
                                     {/* ... (Ліва частина: Аватар та інфо - без змін) ... */}
                                     <div className={styles.artistLeftInfo}>
                                         <img src={artist.avatar} alt={artist.name} className={styles.artistAvatar} />
-                                        <h3 className={styles.artistName}>{artist.name}</h3>
+                                        <span className={styles.artistName}>{artist.name}</span>
                                         <div className={styles.artistDetails}>
                                             <span>Style: {artist.style}</span><br/>
                                             <span>Likes: {artist.likesCount}</span>
