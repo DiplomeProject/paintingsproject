@@ -25,6 +25,7 @@
 .navbarLogo {
     display: flex;
     align-items: center;
+    margin-left: 6%;
 }
 
 .logoText {
