@@ -1,25 +1,66 @@
-import React from "react";
+import React, {useEffect, useState} from "react";
 import styles from "./CommissionModal.module.css";
 
 const CommissionModal = ({ commission, onClose, variant = "basic" }) => {
-    if (!commission) return null;
+    const [mainImage, setMainImage] = useState(commission ? commission.image : null);
+
+    useEffect(() => {
+        if (commission) {
+            setMainImage(commission.image);
+        }
+    }, [commission]);
+
+    if (!commission) {
+        return null;
+    }
+
+    const allPreviews = [commission.image, ...(commission.previews || [])];
+    const uniquePreviews = [...new Set(allPreviews)];
+    const hasMultipleImages = uniquePreviews.length > 1;
 
     return (
         <div className={styles.overlay}>
-            <div className={styles.modal}>
+            <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
                 <button className={styles.closeBtn} onClick={onClose}>
-                    ✕
+                    <img src="/assets/closeCross.svg" alt="Close" />
                 </button>
 
                 <div className={styles.topSection}>
-                    <img
-                        src={commission.image}
-                        alt={commission.title}
-                        className={styles.image}
-                    />
+                    {hasMultipleImages ? (
+
+                        // 1. ВАРІАНТ: Декілька картинок (як на дизайні)
+                        <div className={styles.imageColumn}>
+                            <img
+                                src={mainImage}
+                                alt={commission.title}
+                                className={styles.image} // Головна картинка
+                            />
+                            {/* Рядок з прев'юшками */}
+                            <div className={styles.previewRow}>
+                                {uniquePreviews.map((img, index) => (
+                                    <img
+                                        key={index}
+                                        src={img}
+                                        alt={`preview ${index + 1}`}
+                                        className={`${styles.previewImg} ${img === mainImage ? styles.activePreview : ''}`}
+                                        onClick={() => setMainImage(img)}
+                                    />
+                                ))}
+                            </div>
+                        </div>
+
+                    ) : (
+
+                        // 2. ВАРІАНТ: Тільки одна картинка
+                        <img
+                            src={mainImage}
+                            alt={commission.title}
+                            className={styles.singleImage} // Клас для великої картинки
+                        />
+                    )}
 
                     <div className={styles.info}>
-                        <h2 className={styles.title}>{commission.title}</h2>
+                        <p className={styles.title}>{commission.title}</p>
 
                         <p className={styles.field}>
                             <span>Category</span> {commission.category}
@@ -34,30 +75,15 @@ const CommissionModal = ({ commission, onClose, variant = "basic" }) => {
                             <span>Size</span> {commission.size}
                         </p>
 
-                        {variant === "detailed" && (
-                            <img
-                                src={commission.authorIcon}
-                                alt="author"
-                                className={styles.authorIcon}
-                            />
-                        )}
                     </div>
                 </div>
 
-                {variant === "detailed" && commission.previews && (
-                    <div className={styles.previewRow}>
-                        {commission.previews.map((img, index) => (
-                            <img key={index} src={img} alt="" className={styles.previewImg} />
-                        ))}
-                    </div>
-                )}
-
                 <div className={styles.about}>
-                    <h3>About</h3>
-                    <p>{commission.about}</p>
-                    <p className={styles.feelings}>
-                        <b>Feelings:</b> {commission.feelings}
-                    </p>
+                    <p>About</p>
+                    <span>{commission.about}</span>
+                    {/*<p className={styles.feelings}>*/}
+                    {/*    <b>Feelings:</b> {commission.feelings}*/}
+                    {/*</p>*/}
                 </div>
 
                 <div className={styles.actions}>
@@ -67,6 +93,6 @@ const CommissionModal = ({ commission, onClose, variant = "basic" }) => {
             </div>
         </div>
     );
-};
+}
 
 export default CommissionModal;
