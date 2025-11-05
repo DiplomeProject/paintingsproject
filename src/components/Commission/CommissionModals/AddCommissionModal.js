@@ -72,16 +72,37 @@ const AddCommissionModal = ({ onClose }) => {
     };
 
     const handleImageDelete = (e, type, index = -1) => {
-        e.stopPropagation();
+        e.stopPropagation(); // Зупиняємо клік, щоб не спрацював input file
 
         if (type === 'main') {
-            URL.revokeObjectURL(mainImage.preview); // Очистка пам'яті
-            setMainImage(null);
+            // --- Видалення головного зображення ---
+            URL.revokeObjectURL(mainImage.preview); // 1. Очистка пам'яті
+
+            // 2. Знаходимо перше доступне прев'ю, щоб "підвищити" його
+            const firstValidPreviewIndex = previews.findIndex(p => p !== null);
+
+            if (firstValidPreviewIndex === -1) {
+                // Якщо прев'ю немає, просто очищуємо mainImage
+                setMainImage(null);
+            } else {
+                // 3. "Підвищуємо" перше прев'ю до mainImage
+                const newMainImage = previews[firstValidPreviewIndex];
+                setMainImage(newMainImage);
+
+                // 4. Очищуємо слот прев'ю, звідки взяли зображення (БЕЗ ЗСУВУ)
+                const newPreviews = [...previews];
+                newPreviews[firstValidPreviewIndex] = null;
+                setPreviews(newPreviews);
+            }
+
         } else if (type === 'preview') {
+            // --- Видалення прев'ю-зображення ---
             const newPreviews = [...previews];
             if (newPreviews[index]) {
-                URL.revokeObjectURL(newPreviews[index].preview); // Очистка пам'яті
+                URL.revokeObjectURL(newPreviews[index].preview); // 1. Очистка пам'яті
             }
+
+            // 2. Просто очищуємо слот (БЕЗ ЗСУВУ)
             newPreviews[index] = null;
             setPreviews(newPreviews);
         }
