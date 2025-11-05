@@ -250,10 +250,10 @@
     width: 100%;
 }
 
-.sizeInputGroup span {
-    font-size: 18px;
-    color: #aaa;
-}
+/*.sizeInputGroup span {*/
+/*    font-size: 18px;*/
+/*    color: #aaa;*/
+/*}*/
 
 
 /* --- КНОПКИ --- */
@@ -324,4 +324,140 @@
 
 .errorBorderInput {
     border: 1px solid #ff6b6b !important;
+}
+
+/* ... (весь ваш існуючий код з AddCommissionModal.module.css) ... */
+
+/* --- АДАПТАЦІЯ --- */
+
+/* 1. Широкі екрани (наприклад, > 1400px) */
+@media (min-width: 1400px) {
+    .modal {
+        /* Робимо модалку трохи ширшою на великих моніторах */
+        width: 1200px;
+        gap: 30px; /* Збільшуємо вертикальний відступ */
+    }
+
+    .contentWrapper {
+        gap: 120px; /* Збільшуємо відступ між колонками */
+    }
+
+    /* (Решта елементів автоматично адаптується завдяки flex-box) */
+}
+
+
+/* 2. Планшети (наприклад, < 1000px) */
+/* (Ваш поточний дизайн 985px вже добре виглядає тут,
+   але ми змінимо flex-напрямок, коли місця стане зовсім мало) */
+@media (max-width: 900px) {
+    .modal {
+        /* Зменшуємо падінги */
+        padding: 50px 40px;
+        /* Дозволяємо модалці займати більше місця на екрані */
+        width: 90vw;
+    }
+
+    .contentWrapper {
+        /* Ставимо колонки одну під одною */
+        flex-direction: column;
+        gap: 40px; /* Зменшуємо відступ між ними */
+        align-items: center; /* Центруємо контент */
+    }
+
+    .leftColumn, .rightColumn {
+        width: 100%; /* Обидві колонки на повну ширину */
+        /* Скидаємо вирівнювання, щоб права колонка була 100% ширини */
+        align-self: auto;
+    }
+
+    .imageUploadArea {
+        width: 100%; /* Завантажувач на повну ширину */
+        height: 400px; /* Зменшуємо висоту */
+    }
+
+    .imageUploadArea.withPreviews {
+        height: 300px; /* І "стиснуту" висоту */
+    }
+
+    .formInputAbout {
+        height: 200px; /* Трохи менше */
+    }
+
+    /* Вирівнюємо хедер форми по-новому */
+    .formHeader {
+        justify-content: space-between;
+    }
+}
+
+
+/* 3. Телефони (наприклад, < 600px) */
+@media (max-width: 600px) {
+    .modal {
+        padding: 30px 15px; /* Мінімальні падінги */
+        font-size: 18px; /* Зменшуємо базовий шрифт (був 30px!) */
+        gap: 20px; /* Зменшуємо головний gap */
+    }
+
+    .contentWrapper {
+        gap: 25px; /* Ще менший відступ */
+    }
+
+    .imageUploadArea {
+        height: 250px; /* Ще менша висота */
+    }
+
+    .imageUploadArea.withPreviews {
+        height: 200px;
+    }
+
+    .uploadIcon {
+        width: 70px; /* Менша іконка-заглушка */
+        height: 70px;
+    }
+
+    .previewImg {
+        width: 50px; /* Менші прев'ю */
+        height: 50px;
+        border-radius: 10px;
+    }
+
+    .uploadIconPreview {
+        width: 24px;
+        height: 24px;
+    }
+
+    /* Зменшуємо гігантські поля вводу */
+    .formInputName {
+        height: 50px;
+    }
+
+    .formInputAbout {
+        height: 150px;
+    }
+
+    .formInput, .formSelect {
+        font-size: 16px; /* Шрифт в полях вводу */
+    }
+
+    .formGroup p {
+        font-size: 20px; /* Лейбли (Name, Category...) */
+    }
+
+    .sizeInputGroup {
+        gap: 20px; /* Зменшуємо відступ 'X' */
+    }
+
+    /* Кнопки */
+    .actions {
+        flex-direction: column; /* Кнопки одна під одною */
+        gap: 15px;
+    }
+
+    .priceInputWrapper, .createBtn {
+        width: 100%; /* Кнопки на повну ширину */
+    }
+
+    .priceInput, .createBtn {
+        font-size: 18px; /* Зменшуємо шрифт кнопок (був 30px) */
+    }
 }
