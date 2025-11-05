@@ -1,7 +1,8 @@
 import React, {useEffect, useState} from "react";
-import styles from "./CommissionModal.module.css";
+import styles from "./CommissionModalDetails.module.css";
+import closeIcon from '../../../assets/closeCross.svg';
 
-const CommissionModal = ({ commission, onClose, variant = "basic" }) => {
+const CommissionModalDetails = ({ commission, onClose, variant = "basic" }) => {
     const [mainImage, setMainImage] = useState(commission ? commission.image : null);
 
     useEffect(() => {
@@ -22,7 +23,7 @@ const CommissionModal = ({ commission, onClose, variant = "basic" }) => {
         <div className={styles.overlay}>
             <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
                 <button className={styles.closeBtn} onClick={onClose}>
-                    <img src="/assets/closeCross.svg" alt="Close" />
+                    <img src={closeIcon} alt="Close" />
                 </button>
 
                 <div className={styles.topSection}>
@@ -95,4 +96,4 @@ const CommissionModal = ({ commission, onClose, variant = "basic" }) => {
     );
 }
 
-export default CommissionModal;
+export default CommissionModalDetails;

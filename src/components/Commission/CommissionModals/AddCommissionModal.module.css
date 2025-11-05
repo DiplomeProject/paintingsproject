@@ -1,0 +1,327 @@
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.65);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal {
+    background-color: rgba(52, 46, 76, 0.95);
+    border-radius: 16px;
+    padding: 65px 83px;
+    width: 985px;
+    max-width: 95vw;
+    color: white;
+    font-family: "Roboto", sans-serif;
+    font-weight: 400;
+    position: relative;
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+    max-height: 95vh;
+    overflow-y: auto;
+    font-size: 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+}
+
+/* --- ЗМІНЕНО: Кнопка закриття --- */
+.closeBtn {
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+}
+
+.contentWrapper {
+    display: flex;
+    gap: 99px;
+    align-items: stretch;
+}
+
+.leftColumn {
+    display: flex;
+    flex-direction: column;
+}
+
+.rightColumn {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    width: 100%;
+    align-self: flex-start;
+}
+
+.formHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+/* --- ЗМІНЕНО: Зона завантаження (ліва колонка) --- */
+.imageUploadArea {
+    width: 320px;
+    flex-grow: 1;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    cursor: pointer;
+    background-image: url("../../../assets/image-placeholder.svg");
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center;
+    overflow: hidden;
+    transition: height 0.3s ease;
+}
+
+.imageUploadArea:hover {
+    box-shadow: 0 0 15px rgba(150, 0, 255, 0.3);
+}
+
+.uploadIcon {
+    width: 92px;
+    height: 92px;
+}
+
+.fileInput {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.imagePreview {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Змінено з fill на cover для кращих пропорцій */
+}
+
+/* --- Прев'ю-референси (ліва колонка) --- */
+.previewRow {
+    display: flex;
+    gap: 20px;
+    margin-top: 10px;
+}
+
+.previewImg {
+    width: 64px;
+    height: 64px;
+    border-radius: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    cursor: pointer;
+    overflow: hidden;
+    /* Стилізуємо фон-заглушку прямо тут */
+    background-image: url("../../../assets/image-placeholder.svg");
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center;
+}
+
+.previewImg:hover {
+    box-shadow: 0 0 10px rgba(150, 0, 255, 0.3);
+}
+
+/* --- ДОДАНО: Стиль для іконки-заглушки в прев'ю --- */
+.uploadIconPreview {
+    width: 30px; /* Менший розмір */
+    height: 30px;
+}
+
+.deleteOverlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255, 0, 0, 0.5); /* Червоний напівпрозорий фон */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0; /* Сховано за замовчуванням */
+    transition: opacity 0.2s ease;
+    cursor: pointer;
+    border-radius: 14px; /* Для головного зображення */
+}
+
+/* Окремий стиль для оверлея прев'ю (інший border-radius) */
+.previewImg .deleteOverlay {
+    border-radius: 18px;
+}
+
+/* Показуємо оверлей при наведенні на батьківський елемент */
+.imageUploadArea:hover .deleteOverlay,
+.previewImg:hover .deleteOverlay {
+    opacity: 1;
+}
+
+.deleteIcon {
+    width: 30px; /* Розмір хрестика */
+    height: 30px;
+    /* (Якщо ваш closeIcon - це SVG, він може успадкувати 'color: white') */
+}
+
+
+/* --- Форма (без змін) --- */
+.formGroup {
+    /*margin-bottom: 15px;*/
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+.formGroup p {
+    /*color: #d5d5d5;*/
+    margin-bottom: 8px;
+    margin-top: 0;
+}
+
+.formInput, .formSelect {
+    background-color: #7E7E7E;
+    border-radius: 7px;
+    height: 33px;
+    padding: 0 15px;
+    color: white;
+    font-size: 16px;
+    border: none; /* Переконуємось, що рамки немає */
+}
+
+.formInputName {
+    height: 60px;
+}
+
+.formInputAbout {
+    height: 235px;
+}
+
+.formSelect {
+    appearance: none;
+    background-image: url('data:image/svg+xml;utf8,<svg fill="white" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>');
+    background-repeat: no-repeat;
+    background-position: right 15px center;
+}
+
+.formInput:focus,
+.formSelect:focus,
+.priceInput:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(84, 84, 254, 0.5);
+}
+
+.formInput:hover,
+.formSelect:hover {
+    background-color: #7E7E7E;
+}
+
+.formTextarea {
+    background-color: rgba(0, 0, 0, 0.2);
+    border: 1px solid #555;
+    border-radius: 6px;
+    padding: 15px;
+    color: white;
+    font-size: 16px;
+    min-height: 180px;
+    resize: vertical;
+    font-family: "Roboto", sans-serif;
+}
+
+.sizeInputGroup {
+    display: flex;
+    align-items: center;
+    gap: 45px;
+}
+
+.sizeInputGroup input {
+    width: 100%;
+}
+
+.sizeInputGroup span {
+    font-size: 18px;
+    color: #aaa;
+}
+
+
+/* --- КНОПКИ --- */
+.actions {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    align-items: flex-start;
+}
+
+.priceInputWrapper {
+    position: relative;
+    min-width: 150px;
+    width: 30%;
+    align-items: center;
+    display: flex;
+    background-color: #2E2E2E99;
+}
+
+.priceInput {
+    background: none;
+    border: 3px solid #5454FE;
+    color: white;
+    padding: 12px 30px 12px 15px;
+    border-radius: 3px;
+    font-size: 30px;
+    font-weight: 400;
+    width: 100%;
+    box-sizing: border-box;
+    text-align: center;
+}
+
+.createBtn {
+    background: #5454FE;
+    border: none;
+    color: white;
+    padding: 14px 35px;
+    border-radius: 3px;
+    font-size: 30px;
+    font-weight: 400;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    width: 30%;
+}
+
+.createBtn:hover {
+    background: #4f4fe8;
+}
+
+/* --- СТИЛІ ВАЛІДАЦІЇ (без змін) --- */
+.error {
+    color: #ff6b6b;
+    font-size: 12px;
+    margin-top: 5px;
+}
+
+.errorPrice {
+    position: absolute;
+    bottom: -18px;
+    left: 0;
+    color: #ff6b6b;
+    font-size: 12px;
+}
+
+.errorBorder {
+    border: 2px dashed #ff6b6b !important;
+}
+
+.errorBorderInput {
+    border: 1px solid #ff6b6b !important;
+}
