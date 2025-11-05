@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import styles from "./Login.module.css";
-import { EyeIcon, EyeSlashIcon } from "../Register/AuthIcons"; // Видалено непотрібні іконки
+import { EyeIcon, EyeSlashIcon } from "../Register/AuthIcons";
 
 function Login({ toggleForm, handleLogin, handleInputChange, onForgotPassword }) {
     const [showPassword, setShowPassword] = useState(false);
@@ -44,15 +44,26 @@ function Login({ toggleForm, handleLogin, handleInputChange, onForgotPassword })
                 </div>
             </div>
 
-            <button type="submit" className={styles.submitBtn}>Log in</button>
+            <div className={styles.buttonsRow}>
+                <button type="submit" className={styles.submitBtn}>
+                    Log in
+                </button>
+                <a
+                    type="button"
+                    className={styles.forgotPassword}
+                    onClick={onForgotPassword}
+                >
+                    Password forgotten?
+                </a>
+            </div>
 
-            <a type="button" className={styles.forgotPassword} onClick={onForgotPassword}>
-                Password forgotten?
-            </a>
+            <div className={styles.separator}></div>
 
             <button type="button" className={styles.switchFormBtn} onClick={toggleForm}>
                 Create account
             </button>
+
+            <div className={styles.blackLine}></div>
         </form>
     );
 }

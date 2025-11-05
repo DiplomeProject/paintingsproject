@@ -40,7 +40,6 @@ function ForgotPassword({ onBack }) {
         return (
             <div className={styles.authCard}>
                 <h2 className={styles.logo}>DIGITAL BRUSH</h2>
-                <p className={styles.instructionText}>Enter your email to reset password</p>
 
                 <form onSubmit={handleEmailSubmit}>
                     <div className={styles.field}>
@@ -58,14 +57,14 @@ function ForgotPassword({ onBack }) {
 
                     <div className={styles.actions}>
                         <button type="submit" className={styles.submitBtn}>
-                            Send code
+                            Send mail
                         </button>
                         <button
                             type="button"
                             className={styles.backBtn}
                             onClick={onBack}
                         >
-                            Back to login
+                            Back
                         </button>
                     </div>
                 </form>

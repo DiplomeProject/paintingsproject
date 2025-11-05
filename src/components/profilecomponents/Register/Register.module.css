@@ -114,3 +114,66 @@
     cursor: pointer;
     text-align: center;
 }
+
+/* Додайте ці стилі для другого кроку */
+.buttonsRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 20px;
+    gap: 15px;
+}
+
+.nextBtn {
+    padding: 12px 25px;
+    font-size: 14px;
+    font-weight: bold;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    background: #5454FE;
+    color: white;
+    white-space: nowrap;
+}
+
+.backBtn {
+    padding: 12px 25px;
+    font-size: 14px;
+    font-weight: bold;
+    border-radius: 8px;
+    border: 1px solid #5454FE;
+    cursor: pointer;
+    background: none;
+    color: #5454FE;
+    white-space: nowrap;
+}
+
+.codeInput {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 16px;
+    background-color: white;
+    color: #333;
+    box-sizing: border-box;
+    text-align: center;
+    letter-spacing: 3px;
+    font-weight: bold;
+}
+
+.verificationTitle {
+    font-size: 18px;
+    color: #333;
+    text-align: center;
+    margin-bottom: 10px;
+    font-weight: bold;
+}
+
+.verificationText {
+    font-size: 14px;
+    color: #555;
+    text-align: center;
+    margin-bottom: 20px;
+    line-height: 1.4;
+}
