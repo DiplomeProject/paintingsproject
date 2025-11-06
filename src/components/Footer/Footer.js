@@ -1,16 +1,17 @@
 import React from 'react';
 import styles from './Footer.module.css';
+import twitterIcon from '../../assets/twitterIcon.svg';
+import instagramIcon from '../../assets/instagram-icon.svg';
 
 /*
  * Цей компонент SocialIcon використовує <img> теги,
- * щоб показувати повноколірні логотипи, як у дизайні.
- * Це ПРАВИЛЬНА версія для футера.
+ * щоб показувати повноколірні логотипи.
 */
 const SocialIcon = ({ type }) => {
     const icons = {
-        twitter: '/assets/twitter-icon.svg',
+        twitter: twitterIcon,
         facebook: '/assets/facebook-icon.svg',
-        instagram: '/assets/instagram-icon.svg',
+        instagram: instagramIcon,
     };
 
     return (

@@ -39,7 +39,8 @@
 .navbarLinks {
     display: flex;
     align-items: center;
-    gap: 2rem;
+    gap: 15px;
+    margin-left: 3%;
 }
 
 .navLink {
@@ -55,7 +56,7 @@
     font-family: 'Roboto', sans-serif;
     cursor: pointer;
     transition: color 0.2s, border-color 0.2s;
-    width: 215px;
+    width: 214px;
     height: 55px;
 }
 
@@ -69,7 +70,7 @@
     font-weight: bold;
     background: linear-gradient(90deg, rgba(1, 0, 38, 0.2) 0%, rgba(253, 76, 204, 0.2) 100%);
     border-color: rgba(255, 255, 255, 0.8);
-    width: 215px;
+    width: 214px;
     height: 55px;
 }
 
