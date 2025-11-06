@@ -1,5 +1,4 @@
 /* Register.module.css */
-/* Багато стилів схожі на Login.module.css */
 .authCard {
     display: flex;
     flex-direction: column;
@@ -11,56 +10,32 @@
     font-family: 'Roboto', sans-serif;
 }
 
-.title {
-    font-size: 14px;
-    color: #555;
-    text-align: center;
-    margin-bottom: 15px;
+.mainTitle {
+    font-size: 18px;
+    color: #333;
+    text-align: left;
+    margin-bottom: 5px;
+    font-weight: bold;
 }
 
 .emailTitle {
-    margin-top: 25px;
-}
-
-.socialLogin {
-    display: flex;
-    justify-content: center;
-    gap: 20px;
-}
-
-.socialButton {
-    width: 50px;
-    height: 50px;
-    border: none;
-    border-radius: 12px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    cursor: pointer;
-}
-
-.twitter {
-    background-color: #1DA1F2;
-}
-
-.facebook {
-    background-color: #1877F2;
-}
-
-.mail {
-    background-color: #EA4335;
+    font-size: 14px;
+    color: #555;
+    text-align: left;
+    margin-bottom: 25px;
 }
 
 .field {
     display: flex;
     flex-direction: column;
-    margin-bottom: 15px;
+    margin-bottom: 20px;
 }
 
 .field label {
     font-size: 14px;
     color: #555;
     margin-bottom: 8px;
+    font-weight: 500;
 }
 
 .field input {
@@ -93,38 +68,15 @@
     color: white;
 }
 
-.submitBtn {
-    padding: 15px;
-    font-size: 16px;
-    font-weight: bold;
-    border-radius: 10px;
-    border: none;
-    cursor: pointer;
-    background: #5454FE;
-    color: white;
-    margin-top: 10px;
-    margin-bottom: 20px;
-}
-
-.switchFormBtn {
-    background: none;
-    border: none;
-    color: #5454FE;
-    font-size: 14px;
-    cursor: pointer;
-    text-align: center;
-}
-
-/* Додайте ці стилі для другого кроку */
 .buttonsRow {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-top: 20px;
+    margin-top: 30px;
     gap: 15px;
 }
 
-.nextBtn {
+.submitBtn {
     padding: 12px 25px;
     font-size: 14px;
     font-weight: bold;
@@ -133,7 +85,7 @@
     cursor: pointer;
     background: #5454FE;
     color: white;
-    white-space: nowrap;
+    width: 25%;
 }
 
 .backBtn {
@@ -141,13 +93,14 @@
     font-size: 14px;
     font-weight: bold;
     border-radius: 8px;
-    border: 1px solid #5454FE;
+    border: none;
     cursor: pointer;
-    background: none;
-    color: #5454FE;
-    white-space: nowrap;
+    background: #5454FE;
+    color: white;
+    width: 25%;
 }
 
+/* Стили для второго шага */
 .codeInput {
     width: 100%;
     padding: 12px;
@@ -176,4 +129,53 @@
     text-align: center;
     margin-bottom: 20px;
     line-height: 1.4;
+}
+
+.verificationField {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 15px;
+}
+
+.verificationField input {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 10px;
+    font-size: 16px;
+    background-color: #361950;
+    color: white;
+    box-sizing: border-box;
+    text-align: center;
+    letter-spacing: 3px;
+}
+
+.verificationButtons {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.verifyBtn {
+    padding: 12px;
+    font-size: 14px;
+    font-weight: bold;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    background: #5454FE;
+    color: white;
+    width: 25%;
+}
+
+.backStepBtn {
+    padding: 12px;
+    font-size: 14px;
+    font-weight: bold;
+    border-radius: 8px;
+    border: 1px solid #5454FE;
+    cursor: pointer;
+    background: none;
+    color: #5454FE;
+    width: 30%;
 }
