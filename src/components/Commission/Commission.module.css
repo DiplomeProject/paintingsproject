@@ -314,3 +314,70 @@
     font-size: 1.2rem;
     color: rgba(255, 255, 255, 0.7);
 }
+
+/* --- АДАПТАЦІЯ --- */
+
+/* 1. Планшети (наприклад, < 1024px) */
+@media (max-width: 1024px) {
+    .header {
+        /* Складаємо хедер вертикально */
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 20px;
+    }
+
+    .searchBarContainer {
+        max-width: 100%; /* Пошук на повну ширину */
+        width: 100%;
+    }
+}
+
+/* 2. Маленькі планшети та великі телефони (наприклад, < 768px) */
+@media (max-width: 768px) {
+    .commissionPage {
+        padding: 0 20px; /* Зменшуємо бічні відступи */
+    }
+
+    .commissionTitle {
+        font-size: 40px; /* Зменшуємо заголовок */
+    }
+
+    .commissionGrid {
+        /* Дозволяємо карткам бути вужчими */
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 20px;
+    }
+
+    .commissionCard {
+        /* Дозволяємо картці бути вищою, якщо потрібно */
+        height: auto;
+    }
+}
+
+/* 3. Телефони (наприклад, < 480px) */
+@media (max-width: 480px) {
+    .commissionGrid {
+        /* Картки на повну ширину, одна під одною */
+        grid-template-columns: 1fr;
+    }
+
+    /* Зменшуємо шрифти на самій картці */
+    .cardTitle {
+        font-size: 16px;
+    }
+    .cardDescription {
+        font-size: 14px;
+    }
+    .takeButton {
+        font-size: 20px;
+        padding: 10px 20px;
+    }
+
+    .filtersWrapper {
+        margin-bottom: 20px;
+    }
+
+    .additionalFilters {
+        font-size: 16px;
+    }
+}

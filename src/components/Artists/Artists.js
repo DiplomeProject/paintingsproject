@@ -5,6 +5,8 @@ import CategoryFilters from "../CategoryFilters/CategoryFilters";
 import AdvancedFilters from '../AdvancedFilters/AdvancedFilters';
 import { usePagination } from '../hooks/Pagination/usePagination';
 import Pagination from '../hooks/Pagination/Pagination';
+import leftArrow from '../../assets/leftArrow.svg';
+import rightArrow from '../../assets/rightArrow.svg';
 
 // --- Конфігурація фільтрів ---
 const categories = [
@@ -260,7 +262,7 @@ export default function Artists() {
                                                 className={`${styles.navButton} ${styles.left}`}
                                                 onClick={() => scrollGallery(artist.id, 'left')}
                                             >
-                                                <img src="/assets/leftArrow.svg" alt="Scroll left" />
+                                                <img src={leftArrow} alt="Scroll left" />
                                             </button>
                                         )}
 
@@ -289,7 +291,7 @@ export default function Artists() {
                                                 className={`${styles.navButton} ${styles.right}`}
                                                 onClick={() => scrollGallery(artist.id, 'right')}
                                             >
-                                                <img src="/assets/rightArrow.svg" alt="Scroll right" />
+                                                <img src={rightArrow} alt="Scroll right" />
                                             </button>
                                         )}
                                     </div>
