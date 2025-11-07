@@ -98,4 +98,7 @@ router.get('/getuserpaintings', auth, async (req, res) => {
 });
 
 
+
+   
+
 module.exports = router;

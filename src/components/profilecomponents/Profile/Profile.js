@@ -9,9 +9,11 @@ import DigitalBrushProfile from "./UserProfile/DigitalBrushProfile";
 
 
 function Profile() {
-    const [user, setUser] = useState(null);
+    //const [user, setUser] = useState(null);
+    const [user, setUser] = useState('');
     const [view, setView] = useState('login');
     const [isLogin, setIsLogin] = useState(true);
+
     const [formData, setFormData] = useState({
         name: '',
         surname: '',
