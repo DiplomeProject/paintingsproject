@@ -5,20 +5,54 @@ const { upload } = require('../config/multerConfig');
 const express = require('express');
 const router = express.Router();
 
+// new helpers to normalize images to data URIs
+function bufferToDataUri(buffer, fallbackExt = 'png') {
+  if (!buffer) return null;
+  const ext = (fallbackExt || 'png').toLowerCase();
+  const mime = ext === 'jpg' || ext === 'jpeg' ? 'image/jpeg' : `image/${ext}`;
+  return `data:${mime};base64,${Buffer.from(buffer).toString('base64')}`;
+}
 
+function filePathToDataUri(filePath) {
+  try {
+    if (!filePath) return null;
+    if (String(filePath).startsWith('data:')) return filePath; // already a data URI
 
-// 1. СТВОРЕННЯ ПУБЛІЧНОГО КОМІШЕНУ
+    // try a few candidate locations relative to server
+    const candidates = [
+      path.join(__dirname, '..', 'public', filePath),
+      path.join(__dirname, '..', filePath),
+      path.join(__dirname, 'public', filePath),
+      path.resolve(filePath)
+    ];
+
+    for (const c of candidates) {
+      if (fs.existsSync(c)) {
+        const buffer = fs.readFileSync(c);
+        const ext = path.extname(c).slice(1) || 'png';
+        return bufferToDataUri(buffer, ext);
+      }
+    }
+
+    return null;
+  } catch (err) {
+    console.error('filePathToDataUri error:', err);
+    return null;
+  }
+}
+
+// 1. СТВОРЕННЯ ПУБЛІЧНОГО КОМІШЕНУ (із збереженням зображення в base64)
 router.post('/api/commissions/public', upload.single('referenceImage'), async (req, res) => {
-    /*if (!req.session.user) {
-        return res.status(401).json({ success: false, message: 'Not authorized' });
-    }*/
-
     const { title, description, category, style, size, format, price } = req.body;
-    const user = req.session.user || { id: 1, email: 'test@example.com' }; // for testing
+    const user = req.session.user || { id: 1, email: 'test@example.com' }; // fallback for testing
 
-    const referenceImage = req.file
-        ? path.join(user.email.split('@')[0], req.file.filename)
-        : null;
+    // Convert file to base64 if uploaded
+    let referenceImageBase64 = null;
+    if (req.file) {
+        const fileBuffer = fs.readFileSync(req.file.path);
+        const mimeType = req.file.mimetype || 'image/png';
+        referenceImageBase64 = `data:${mimeType};base64,${fileBuffer.toString('base64')}`;
+    }
 
     if (!title || !description) {
         return res.status(400).json({
@@ -27,10 +61,11 @@ router.post('/api/commissions/public', upload.single('referenceImage'), async (r
         });
     }
 
+    // ✅ FIXED SQL — includes Customer_ID
     const sql = `
         INSERT INTO commissions 
-        (Title, Description, Category, Style, Size, Format, Price, ReferenceImage, Type, Customer_ID, Status, Created_At)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'public', ?, 'open', NOW())
+        (Title, Description, Category, Style, Size, Format, Price, ReferenceImage, Type, Customer_ID, Creator_ID, Status, Created_At)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'public', ?, ?, 'open', NOW())
     `;
 
     const values = [
@@ -41,8 +76,9 @@ router.post('/api/commissions/public', upload.single('referenceImage'), async (r
         size || null,
         format || null,
         price || null,
-        referenceImage,
-        user.id 
+        referenceImageBase64,
+        user.id,   // 👈 Customer_ID
+        null       // 👈 Creator_ID (not assigned yet)
     ];
 
     try {
@@ -62,435 +98,93 @@ router.post('/api/commissions/public', upload.single('referenceImage'), async (r
 });
 
 
-// 2. СТВОРЕННЯ ПРЯМОГО КОМІШЕНУ (для конкретного художника)
-router.post('/api/commissions/direct/:creatorId', upload.single('referenceImage'), (req, res) => {
-    if (!req.session.user) {
-        return res.status(401).json({ success: false, message: 'Not authorized' });
-    }
 
-    const creatorId = req.params.creatorId;
-    const {
-        title,
-        description,
-        category,
-        style,
-        size,
-        format,
-        price
-    } = req.body;
-
-    const referenceImage = req.file ? path.join(req.session.user.email.split('@')[0], req.file.filename) : null;
-
-    // Валідація
-    if (!title || !description) {
-        return res.status(400).json({ 
-            success: false, 
-            message: 'Title and description are required' 
-        });
-    }
-
-    // Перевірка, чи існує художник
-    const checkCreatorSql = 'SELECT Creator_ID, styles FROM creators WHERE Creator_ID = ?';
-    db.query(checkCreatorSql, [creatorId], (err, results) => {
-        if (err) {
-            console.error('Error checking creator:', err);
-            return res.status(500).json({ success: false, message: 'Database error' });
-        }
-
-        if (results.length === 0) {
-            return res.status(404).json({ 
-                success: false, 
-                message: 'Creator not found' 
-            });
-        }
-
-        // Перевірка стилю (якщо вказано)
-        if (style && results[0].styles) {
-            const creatorStyles = JSON.parse(results[0].styles || '[]');
-            if (!creatorStyles.includes(style)) {
-                return res.status(400).json({ 
-                    success: false, 
-                    message: 'Selected style is not available for this creator' 
-                });
-            }
-        }
-
-        // Створення комішену
-        const sql = `
-            INSERT INTO commissions 
-            (Title, Description, Category, Style, Size, Format, Price, ReferenceImage, Type, Customer_ID, Creator_ID, Status, Created_At)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'direct', ?, ?, 'open', NOW())
-        `;
-
-        const values = [
-            title,
-            description,
-            category || null,
-            style || null,
-            size || null,
-            format || null,
-            price || null,
-            referenceImage,
-            req.session.user.id,
-            creatorId
-        ];
-
-        db.query(sql, values, (err, result) => {
-            if (err) {
-                console.error('Error creating direct commission:', err);
-                return res.status(500).json({ 
-                    success: false, 
-                    message: 'Database error while creating commission' 
-                });
-            }
-
-            res.status(201).json({ 
-                success: true, 
-                message: 'Direct commission created successfully',
-                commissionId: result.insertId
-            });
-        });
-    });
-});
+// Updated GET route for Commissions.js backend
 
 router.get('/api/commissions/public', async (req, res) => {
-    // Corrected SQL for /api/commissions/public
-    const sql = `
+  const sql = `
     SELECT 
-        c.*,
-        cr.Name as customer_name,
-        cr.Email as customer_email
+      c.*,
+      cr.Name AS customer_name,
+      cr.Email AS customer_email
     FROM commissions c
     LEFT JOIN creators cr ON c.Customer_ID = cr.Creator_ID
     WHERE c.Type = 'public' AND c.Status = 'open'
     ORDER BY c.Created_At DESC
-    `;
+  `;
 
+  try {
+    const [results] = await db.query(sql);
+    console.log(`Found ${results.length} commissions`);
 
-    try {
-        const [results] = await db.query(sql); // Use the pool with async/await
-        res.json({ 
-            success: true, 
-            commissions: results 
-        });
-    } catch (err) {
-        console.error('Error fetching public commissions:', err);
-        return res.status(500).json({ 
-            success: false, 
-            message: 'Error fetching commissions' 
-        });
-    }
-});
+    const commissionsWithImages = results.map((commission) => {
+      let imageUrl = null;
+      const ref = commission.ReferenceImage;
 
-// 4. ОТРИМАННЯ КОМІШЕНІВ КОНКРЕТНОГО ХУДОЖНИКА (прямі замовлення)
-router.get('/api/commissions/creator/:creatorId', (req, res) => {
-    const creatorId = req.params.creatorId;
+      console.log(`Commission ${commission.Commission_ID} (${commission.Title}):`);
+      console.log(`  - ReferenceImage type: ${ref ? (Buffer.isBuffer(ref) ? 'Buffer' : typeof ref) : 'null'}`);
+      console.log(`  - ReferenceImage length: ${ref ? (Buffer.isBuffer(ref) ? ref.length : ref.length) : 0}`);
 
-    const sql = `
-        SELECT 
-            c.*,
-            cr.Name as customer_name,
-            cr.Email as customer_email
-        FROM commissions c
-        JOIN creators cr ON c.Customer_ID = cr.Creator_ID
-        WHERE c.Creator_ID = ? AND c.Type = 'direct'
-        ORDER BY c.Created_At DESC
-    `;
-
-    db.query(sql, [creatorId], (err, results) => {
-        if (err) {
-            console.error('Error fetching creator commissions:', err);
-            return res.status(500).json({ 
-                success: false, 
-                message: 'Error fetching commissions' 
-            });
+      if (ref) {
+        // Case 1: LONGBLOB (Buffer) - most common from DB
+        if (Buffer.isBuffer(ref)) {
+          imageUrl = bufferToDataUri(ref, 'png');
+          console.log(`  - Converted Buffer to data URI, length: ${imageUrl.length}`);
         }
+        // Case 2: Already a data URI string
+        else if (typeof ref === 'string') {
+          const trimmed = ref.trim();
+          if (trimmed.startsWith('data:image')) {
+            imageUrl = trimmed;
+            console.log(`  - Already data URI`);
+          } 
+          // Case 3: Base64 string without data URI prefix
+          else if (/^[A-Za-z0-9+/=]+$/.test(trimmed) && trimmed.length > 100) {
+            imageUrl = `data:image/png;base64,${trimmed}`;
+            console.log(`  - Converted base64 string to data URI`);
+          } 
+          // Case 4: File path
+          else {
+            imageUrl = filePathToDataUri(trimmed);
+            console.log(`  - Tried file path, result: ${imageUrl ? 'success' : 'failed'}`);
+          }
+        }
+      } else {
+        console.log(`  - No image data`);
+      }
 
-        res.json({ 
-            success: true, 
-            commissions: results 
-        });
+      // Return normalized commission object
+      return {
+        id: commission.Commission_ID,
+        Commission_ID: commission.Commission_ID,
+        Title: commission.Title,
+        Description: commission.Description,
+        Category: commission.Category,
+        Style: commission.Style,
+        Size: commission.Size,
+        Format: commission.Format,
+        Price: commission.Price,
+        Type: commission.Type,
+        Status: commission.Status,
+        Customer_ID: commission.Customer_ID,
+        Creator_ID: commission.Creator_ID,
+        Created_At: commission.Created_At,
+        customer_name: commission.customer_name,
+        customer_email: commission.customer_email,
+        imageUrl: imageUrl // This is the key field for frontend
+      };
     });
+
+    console.log(`Sending ${commissionsWithImages.length} commissions to frontend`);
+    res.json({ success: true, commissions: commissionsWithImages });
+  } catch (err) {
+    console.error('Error fetching public commissions:', err);
+    res.status(500).json({ success: false, message: 'Error fetching commissions' });
+  }
 });
 
-// 5. ОТРИМАННЯ КОМІШЕНІВ КОРИСТУВАЧА (замовника)
-router.get('/api/commissions/my-orders', (req, res) => {
-    if (!req.session.user) {
-        return res.status(401).json({ success: false, message: 'Not authorized' });
-    }
 
-    const sql = `
-        SELECT 
-            c.*,
-            cr.Name as creator_name,
-            cr.Email as creator_email
-        FROM commissions c
-        LEFT JOIN creators cr ON c.Creator_ID = cr.Creator_ID
-        WHERE c.Customer_ID = ?
-        ORDER BY c.Created_At DESC
-    `;
 
-    db.query(sql, [req.session.user.id], (err, results) => {
-        if (err) {
-            console.error('Error fetching user commissions:', err);
-            return res.status(500).json({ 
-                success: false, 
-                message: 'Error fetching commissions' 
-            });
-        }
 
-        res.json({ 
-            success: true, 
-            commissions: results 
-        });
-    });
-});
-
-// 6. ВЗЯТИ ПУБЛІЧНИЙ КОМІШЕН В РОБОТУ (для художника)
-router.post('/api/commissions/:id/accept', (req, res) => {
-    if (!req.session.user) {
-        return res.status(401).json({ success: false, message: 'Not authorized' });
-    }
-
-    const commissionId = req.params.id;
-    const creatorId = req.session.user.id;
-
-    // Перевірка, чи комішен публічний і відкритий
-    const checkSql = `
-        SELECT * FROM commissions 
-        WHERE Commission_ID = ? AND Type = 'public' AND Status = 'open' AND Creator_ID IS NULL
-    `;
-
-    db.query(checkSql, [commissionId], (err, results) => {
-        if (err) {
-            console.error('Error checking commission:', err);
-            return res.status(500).json({ success: false, message: 'Database error' });
-        }
-
-        if (results.length === 0) {
-            return res.status(404).json({ 
-                success: false, 
-                message: 'Commission not found or already taken' 
-            });
-        }
-
-        // Присвоєння художника і зміна статусу
-        const updateSql = `
-            UPDATE commissions 
-            SET Creator_ID = ?, Status = 'in_progress', Updated_At = NOW()
-            WHERE Commission_ID = ?
-        `;
-
-        db.query(updateSql, [creatorId, commissionId], (err) => {
-            if (err) {
-                console.error('Error accepting commission:', err);
-                return res.status(500).json({ 
-                    success: false, 
-                    message: 'Error accepting commission' 
-                });
-            }
-
-            res.json({ 
-                success: true, 
-                message: 'Commission accepted successfully' 
-            });
-        });
-    });
-});
-
-// 7. ОНОВЛЕННЯ СТАТУСУ КОМІШЕНУ
-router.put('/api/commissions/:id/status', (req, res) => {
-    if (!req.session.user) {
-        return res.status(401).json({ success: false, message: 'Not authorized' });
-    }
-
-    const commissionId = req.params.id;
-    const { status } = req.body;
-    const userId = req.session.user.id;
-
-    const validStatuses = ['open', 'in_progress', 'completed', 'cancelled'];
-    if (!validStatuses.includes(status)) {
-        return res.status(400).json({ 
-            success: false, 
-            message: 'Invalid status' 
-        });
-    }
-
-    // Перевірка прав доступу (замовник або виконавець)
-    const checkSql = `
-        SELECT * FROM commissions 
-        WHERE Commission_ID = ? AND (Customer_ID = ? OR Creator_ID = ?)
-    `;
-
-    db.query(checkSql, [commissionId, userId, userId], (err, results) => {
-        if (err) {
-            console.error('Error checking commission:', err);
-            return res.status(500).json({ success: false, message: 'Database error' });
-        }
-
-        if (results.length === 0) {
-            return res.status(403).json({ 
-                success: false, 
-                message: 'Access denied' 
-            });
-        }
-
-        const updateSql = `
-            UPDATE commissions 
-            SET Status = ?, Updated_At = NOW()
-            WHERE Commission_ID = ?
-        `;
-
-        db.query(updateSql, [status, commissionId], (err) => {
-            if (err) {
-                console.error('Error updating commission status:', err);
-                return res.status(500).json({ 
-                    success: false, 
-                    message: 'Error updating status' 
-                });
-            }
-
-            res.json({ 
-                success: true, 
-                message: 'Commission status updated successfully' 
-            });
-        });
-    });
-});
-
-// 8. ОТРИМАННЯ СТИЛІВ ХУДОЖНИКА
-router.get('/api/creator/:id/styles', (req, res) => {
-    const creatorId = req.params.id;
-
-    const sql = 'SELECT styles FROM creators WHERE Creator_ID = ?';
-
-    db.query(sql, [creatorId], (err, results) => {
-        if (err) {
-            console.error('Error fetching creator styles:', err);
-            return res.status(500).json({ 
-                success: false, 
-                message: 'Error fetching styles' 
-            });
-        }
-
-        if (results.length === 0) {
-            return res.status(404).json({ 
-                success: false, 
-                message: 'Creator not found' 
-            });
-        }
-
-        const styles = JSON.parse(results[0].styles || '[]');
-        res.json({ 
-            success: true, 
-            styles: styles 
-        });
-    });
-});
-
-// 9. ОНОВЛЕННЯ СТИЛІВ ХУДОЖНИКА В ПРОФІЛІ
-router.put('/api/creator/update-styles', (req, res) => {
-    if (!req.session.user) {
-        return res.status(401).json({ success: false, message: 'Not authorized' });
-    }
-
-    const { styles } = req.body;
-    const userId = req.session.user.id;
-
-    if (!Array.isArray(styles)) {
-        return res.status(400).json({ 
-            success: false, 
-            message: 'Styles must be an array' 
-        });
-    }
-
-    const sql = 'UPDATE creators SET styles = ? WHERE Creator_ID = ?';
-
-    db.query(sql, [JSON.stringify(styles), userId], (err) => {
-        if (err) {
-            console.error('Error updating styles:', err);
-            return res.status(500).json({ 
-                success: false, 
-                message: 'Error updating styles' 
-            });
-        }
-
-        res.json({ 
-            success: true, 
-            message: 'Styles updated successfully' 
-        });
-    });
-});
-
-// 10. ВИДАЛЕННЯ КОМІШЕНУ
-router.delete('/api/commissions/:id', (req, res) => {
-    if (!req.session.user) {
-        return res.status(401).json({ success: false, message: 'Not authorized' });
-    }
-
-    const commissionId = req.params.id;
-    const userId = req.session.user.id;
-
-    // Спочатку отримуємо інформацію про комішен
-    const selectSql = `
-        SELECT ReferenceImage, Customer_ID 
-        FROM commissions 
-        WHERE Commission_ID = ?
-    `;
-
-    db.query(selectSql, [commissionId], (err, results) => {
-        if (err) {
-            console.error('Error fetching commission:', err);
-            return res.status(500).json({ success: false, message: 'Database error' });
-        }
-
-        if (results.length === 0) {
-            return res.status(404).json({ 
-                success: false, 
-                message: 'Commission not found' 
-            });
-        }
-
-        // Перевірка, чи користувач є власником
-        if (results[0].Customer_ID !== userId) {
-            return res.status(403).json({ 
-                success: false, 
-                message: 'Access denied' 
-            });
-        }
-
-        const imagePath = results[0].ReferenceImage;
-
-        // Видалення з бази даних
-        const deleteSql = 'DELETE FROM commissions WHERE Commission_ID = ?';
-
-        db.query(deleteSql, [commissionId], (err) => {
-            if (err) {
-                console.error('Error deleting commission:', err);
-                return res.status(500).json({ 
-                    success: false, 
-                    message: 'Error deleting commission' 
-                });
-            }
-
-            // Видалення файлу зображення, якщо він існує
-            if (imagePath) {
-                const fullPath = path.join(__dirname, 'public', imagePath);
-                if (fs.existsSync(fullPath)) {
-                    fs.unlink(fullPath, (err) => {
-                        if (err) {
-                            console.error('Error deleting reference image:', err);
-                        }
-                    });
-                }
-            }
-
-            res.json({ 
-                success: true, 
-                message: 'Commission deleted successfully' 
-            });
-        });
-    });
-});
 
 module.exports = router;
