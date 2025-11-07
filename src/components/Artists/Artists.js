@@ -7,6 +7,7 @@ import { usePagination } from '../hooks/Pagination/usePagination';
 import Pagination from '../hooks/Pagination/Pagination';
 import leftArrow from '../../assets/leftArrow.svg';
 import rightArrow from '../../assets/rightArrow.svg';
+import ArtDetailsModal from "../ArtCard/Modals/ArtDetailsModal";
 
 // --- Конфігурація фільтрів ---
 const categories = [
@@ -47,13 +48,24 @@ const mockStyles = ["Digital Art", "Fantasy", "Synthwave", "Minimalism", "Cyberp
 // Генерує 3-6 рандомних карток для одного артиста
 const generateRandomArtworks = (artistName) => {
     return Array.from({ length: getRandomInt(3, 12) }, (_, i) => ({
-        id: `p-${artistName.replace(/\s/g, '-')}-${i}`, // Унікальний ID
+        id: `p-${artistName.replace(/\s/g, '-')}-${i}`,
         title: getRandomElement(mockTitles),
-        imageUrl: `/images/shopAndOtherPageImages/image${getRandomInt(1, 4)}.png`, // Використовуємо ваші 4 картинки
+        imageUrl: `/images/shopAndOtherPageImages/image${getRandomInt(1, 4)}.png`,
         artistName: artistName,
         artistStyle: getRandomElement(mockStyles),
-        likes: getRandomInt(50, 500),
-        price: getRandomInt(20, 250),
+        likes: `${getRandomInt(50, 500)}k`, // Змінено на 'k' для відповідності дизайну
+        price: getRandomInt(20, 250).toFixed(2),
+
+        // --- Додані поля для ArtDetailsModal ---
+        images: [ // Масив зображень
+            `/images/shopAndOtherPageImages/image${getRandomInt(1, 4)}.png`,
+            `/images/shopAndOtherPageImages/image${getRandomInt(1, 4)}.png`
+        ],
+        category: "Neo-minimalism",
+        style: "Neo-minimalism",
+        fileFormat: "PNG",
+        size: "1080 x 1920",
+        description: "The composition features two large, metallic, ring-like sculptures with reflective chrome surfaces, symmetrically placed on a stark white background."
     }));
 };
 
@@ -81,6 +93,7 @@ export default function Artists() {
     const [activeCategory, setActiveCategory] = useState(null);
     const [showAdvanced, setShowAdvanced] = useState(false);
     const [galleryStates, setGalleryStates] = useState({});
+    const [selectedArt, setSelectedArt] = useState(null);
 
     // Референси для скролу галерей кожного артиста
     const galleryRefs = useRef({});
@@ -275,12 +288,8 @@ export default function Artists() {
                                             {artist.artworks.map(card => (
                                                 <ArtCard
                                                     key={card.id}
-                                                    imageUrl={card.imageUrl}
-                                                    title={card.title}
-                                                    artistName={card.artistName}
-                                                    artistStyle={card.artistStyle}
-                                                    likes={card.likes}
-                                                    price={card.price}
+                                                    art={card} // 1. Передаємо весь об'єкт
+                                                    onArtClick={setSelectedArt} // 2. Передаємо функцію
                                                 />
                                             ))}
                                         </div>
@@ -308,6 +317,12 @@ export default function Artists() {
                     onPageChange={setCurrentPage}
                 />
             </div>
+            {selectedArt && (
+                <ArtDetailsModal
+                    art={selectedArt}
+                    onClose={() => setSelectedArt(null)}
+                />
+            )}
         </div>
     );
 }
