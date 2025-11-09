@@ -90,6 +90,7 @@ jobs:
     needs: [my_ci_part]
     runs-on: self-hosted
     environment: test-srv
+    
     steps:
       - name: SSH and Deploy to Server
         uses: appleboy/ssh-action@v1
