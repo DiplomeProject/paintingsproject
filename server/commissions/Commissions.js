@@ -102,85 +102,89 @@ router.post('/api/commissions/public', upload.single('referenceImage'), async (r
 // Updated GET route for Commissions.js backend
 
 router.get('/api/commissions/public', async (req, res) => {
-  const sql = `
-    SELECT 
-      c.*,
-      cr.Name AS customer_name,
-      cr.Email AS customer_email
-    FROM commissions c
-    LEFT JOIN creators cr ON c.Customer_ID = cr.Creator_ID
-    WHERE c.Type = 'public' AND c.Status = 'open'
-    ORDER BY c.Created_At DESC
-  `;
+    const sql = `
+        SELECT
+            c.*,
+            cr.Name AS customer_name,
+            cr.Email AS customer_email
+        FROM commissions c
+                 LEFT JOIN creators cr ON c.Customer_ID = cr.Creator_ID
+        WHERE c.Type = 'public' AND c.Status = 'open'
+        ORDER BY c.Created_At DESC
+    `;
 
-  try {
-    const [results] = await db.query(sql);
-    console.log(`Found ${results.length} commissions`);
+    try {
+        const [results] = await db.query(sql);
+        console.log(`Found ${results.length} commissions`);
 
-    const commissionsWithImages = results.map((commission) => {
-      let imageUrl = null;
-      const ref = commission.ReferenceImage;
+        const commissionsWithImages = results.map((commission) => {
+            let imageUrl = null;
+            const ref = commission.ReferenceImage;
 
-      console.log(`Commission ${commission.Commission_ID} (${commission.Title}):`);
-      console.log(`  - ReferenceImage type: ${ref ? (Buffer.isBuffer(ref) ? 'Buffer' : typeof ref) : 'null'}`);
-      console.log(`  - ReferenceImage length: ${ref ? (Buffer.isBuffer(ref) ? ref.length : ref.length) : 0}`);
+            console.log(`Commission ${commission.Commission_ID} (${commission.Title}):`);
+            console.log(`  - ReferenceImage type: ${ref ? (Buffer.isBuffer(ref) ? 'Buffer' : typeof ref) : 'null'}`);
 
-      if (ref) {
-        // Case 1: LONGBLOB (Buffer) - most common from DB
-        if (Buffer.isBuffer(ref)) {
-          imageUrl = bufferToDataUri(ref, 'png');
-          console.log(`  - Converted Buffer to data URI, length: ${imageUrl.length}`);
-        }
-        // Case 2: Already a data URI string
-        else if (typeof ref === 'string') {
-          const trimmed = ref.trim();
-          if (trimmed.startsWith('data:image')) {
-            imageUrl = trimmed;
-            console.log(`  - Already data URI`);
-          } 
-          // Case 3: Base64 string without data URI prefix
-          else if (/^[A-Za-z0-9+/=]+$/.test(trimmed) && trimmed.length > 100) {
-            imageUrl = `data:image/png;base64,${trimmed}`;
-            console.log(`  - Converted base64 string to data URI`);
-          } 
-          // Case 4: File path
-          else {
-            imageUrl = filePathToDataUri(trimmed);
-            console.log(`  - Tried file path, result: ${imageUrl ? 'success' : 'failed'}`);
-          }
-        }
-      } else {
-        console.log(`  - No image data`);
-      }
+            if (ref) {
+                let refAsString = null;
 
-      // Return normalized commission object
-      return {
-        id: commission.Commission_ID,
-        Commission_ID: commission.Commission_ID,
-        Title: commission.Title,
-        Description: commission.Description,
-        Category: commission.Category,
-        Style: commission.Style,
-        Size: commission.Size,
-        Format: commission.Format,
-        Price: commission.Price,
-        Type: commission.Type,
-        Status: commission.Status,
-        Customer_ID: commission.Customer_ID,
-        Creator_ID: commission.Creator_ID,
-        Created_At: commission.Created_At,
-        customer_name: commission.customer_name,
-        customer_email: commission.customer_email,
-        imageUrl: imageUrl // This is the key field for frontend
-      };
-    });
+                // --- ПОЧАТОК ВИПРАВЛЕННЯ ---
+                // 1. Перетворюємо буфер на рядок, якщо це буфер.
+                // Ми припускаємо, що в БД зберігається рядок (Data URI або шлях до файлу).
+                if (Buffer.isBuffer(ref)) {
+                    refAsString = ref.toString('utf8');
+                } else if (typeof ref === 'string') {
+                    refAsString = ref;
+                }
 
-    console.log(`Sending ${commissionsWithImages.length} commissions to frontend`);
-    res.json({ success: true, commissions: commissionsWithImages });
-  } catch (err) {
-    console.error('Error fetching public commissions:', err);
-    res.status(500).json({ success: false, message: 'Error fetching commissions' });
-  }
+                // 2. Тепер працюємо з рядком
+                if (refAsString) {
+                    const trimmed = refAsString.trim();
+
+                    // 3. Перевіряємо, чи це ВЖЕ готовий Data URI
+                    if (trimmed.startsWith('data:image')) {
+                        imageUrl = trimmed;
+                        console.log(`  - Successfully processed data URI from DB`);
+                    }
+                    // 4. Якщо ні, припускаємо, що це шлях до файлу
+                    else {
+                        imageUrl = filePathToDataUri(trimmed);
+                        console.log(`  - Tried file path, result: ${imageUrl ? 'success' : 'failed'}`);
+                    }
+                }
+                // --- КІНЕЦЬ ВИПРАВЛЕННЯ ---
+
+            } else {
+                console.log(`  - No image data`);
+            }
+
+            // Return normalized commission object
+            return {
+                id: commission.Commission_ID,
+                Commission_ID: commission.Commission_ID,
+                Title: commission.Title,
+                Description: commission.Description,
+                Category: commission.Category,
+                Style: commission.Style,
+                Size: commission.Size,
+                Format: commission.Format,
+                Price: commission.Price,
+                Type: commission.Type,
+                Status: commission.Status,
+                Customer_ID: commission.Customer_ID,
+                Creator_ID: commission.Creator_ID,
+                Created_At: commission.Created_At,
+                customer_name: commission.customer_name,
+                customer_email: commission.customer_email,
+                imageUrl: imageUrl // This is the key field for frontend
+            };
+        });
+
+        console.log(`Sending ${commissionsWithImages.length} commissions to frontend`);
+        res.json({ success: true, commissions: commissionsWithImages });
+    } catch (err) {
+        console.error('Error fetching public commissions:', err);
+        res.status(500).json({ success: false, message: 'Error fetching commissions' });
+    }
 });
 
 

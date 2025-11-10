@@ -26,7 +26,7 @@ const categories = [
     "ADVERTISING", "BRENDING", "POSTER", "ARCHITECTURE", "FASHION", "SKETCH", "PHOTOGRAPHY"
 ];
 
-// Функція для отримання випадкового цілого числа
+/*// Функція для отримання випадкового цілого числа
 const getRandomInt = (min, max) => {
     min = Math.ceil(min);
     max = Math.floor(max);
@@ -87,7 +87,7 @@ const commissionsData = Array.from({ length: 1000 }, (_, i) => {
         about: getRandomElement(mockAbout),
         previews: generatedPreviews
     };
-});
+});*/
 
 function Commission() {
     const [activeCategory, setActiveCategory] = useState(null);
@@ -110,9 +110,9 @@ useEffect(() => {
             const response = await axios.get("http://localhost:8080/api/commissions/public", {
                 withCredentials: true
             });
-            
+
             console.log('Fetched commissions:', response.data);
-            
+
             if (response.data.success && Array.isArray(response.data.commissions)) {
                 // Map server data to match your component's expected format
                 const mapped = response.data.commissions.map(c => {
@@ -214,9 +214,9 @@ useEffect(() => {
         setIsAddModalOpen(false);
     };
 
-    // if (loading) {
-    //     return <div className={styles.loading}>Loading commissions...</div>;
-    // }
+    if (loading) {
+        return <div className={styles.loading}>Loading commissions...</div>;
+    }
 
     return (
         <div className={styles.commissionPage}>
@@ -300,7 +300,7 @@ useEffect(() => {
                     Take
                 </button>
             </div>
-        </div>  
+        </div>
     ))}
 </div>
 

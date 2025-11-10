@@ -3,11 +3,11 @@ import styles from "./CommissionModalDetails.module.css";
 import closeIcon from '../../../assets/closeCross.svg';
 
 const CommissionModalDetails = ({ commission, onClose, variant = "basic" }) => {
-    const [mainImage, setMainImage] = useState(commission ? commission.image : null);
+    const [mainImage, setMainImage] = useState(commission ? commission.imageUrl : null);
 
     useEffect(() => {
         if (commission) {
-            setMainImage(commission.image);
+            setMainImage(commission.imageUrl);
         }
     }, [commission]);
 
@@ -15,9 +15,9 @@ const CommissionModalDetails = ({ commission, onClose, variant = "basic" }) => {
         return null;
     }
 
-    const allPreviews = [commission.image, ...(commission.previews || [])];
-    const uniquePreviews = [...new Set(allPreviews)];
-    const hasMultipleImages = uniquePreviews.length > 1;
+    // const allPreviews = [commission.image, ...(commission.previews || [])];
+    // const uniquePreviews = [...new Set(allPreviews)];
+    // const hasMultipleImages = uniquePreviews.length > 1;
 
     return (
         <div className={styles.overlay}>
@@ -27,38 +27,47 @@ const CommissionModalDetails = ({ commission, onClose, variant = "basic" }) => {
                 </button>
 
                 <div className={styles.topSection}>
-                    {hasMultipleImages ? (
+                    {/*{hasMultipleImages ? (*/}
 
-                        // 1. ВАРІАНТ: Декілька картинок (як на дизайні)
-                        <div className={styles.imageColumn}>
-                            <img
-                                src={mainImage}
-                                alt={commission.title}
-                                className={styles.image} // Головна картинка
-                            />
-                            {/* Рядок з прев'юшками */}
-                            <div className={styles.previewRow}>
-                                {uniquePreviews.map((img, index) => (
-                                    <img
-                                        key={index}
-                                        src={img}
-                                        alt={`preview ${index + 1}`}
-                                        className={`${styles.previewImg} ${img === mainImage ? styles.activePreview : ''}`}
-                                        onClick={() => setMainImage(img)}
-                                    />
-                                ))}
-                            </div>
-                        </div>
+                    {/*    // 1. ВАРІАНТ: Декілька картинок (як на дизайні)*/}
+                    {/*    <div className={styles.imageColumn}>*/}
+                    {/*        <img*/}
+                    {/*            src={mainImage}*/}
+                    {/*            alt={commission.title}*/}
+                    {/*            className={styles.image} // Головна картинка*/}
+                    {/*        />*/}
+                    {/*        /!* Рядок з прев'юшками *!/*/}
+                    {/*        <div className={styles.previewRow}>*/}
+                    {/*            {uniquePreviews.map((img, index) => (*/}
+                    {/*                <img*/}
+                    {/*                    key={index}*/}
+                    {/*                    src={img}*/}
+                    {/*                    alt={`preview ${index + 1}`}*/}
+                    {/*                    className={`${styles.previewImg} ${img === mainImage ? styles.activePreview : ''}`}*/}
+                    {/*                    onClick={() => setMainImage(img)}*/}
+                    {/*                />*/}
+                    {/*            ))}*/}
+                    {/*        </div>*/}
+                    {/*    </div>*/}
 
-                    ) : (
+                    {/*) : (*/}
 
-                        // 2. ВАРІАНТ: Тільки одна картинка
-                        <img
-                            src={mainImage}
-                            alt={commission.title}
-                            className={styles.singleImage} // Клас для великої картинки
-                        />
-                    )}
+                    {/*    // 2. ВАРІАНТ: Тільки одна картинка*/}
+                    {/*    <img*/}
+                    {/*        src={mainImage}*/}
+                    {/*        alt={commission.title}*/}
+                    {/*        className={styles.singleImage} // Клас для великої картинки*/}
+                    {/*    />*/}
+                    {/*)}*/}
+                    <img
+                        src={mainImage || "/images/placeholder.png"} // Додано placeholder
+                        alt={commission.title}
+                        className={styles.singleImage} // Використовуємо клас для однієї великої картинки
+                        onError={(e) => {
+                            // Якщо завантаження не вдалося, показуємо placeholder
+                            e.target.src = "/images/placeholder.png";
+                        }}
+                    />
 
                     <div className={styles.info}>
                         <p className={styles.title}>{commission.title}</p>
