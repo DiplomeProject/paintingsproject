@@ -126,6 +126,7 @@ const AddCommissionModal = ({ onClose }) => {
     };
 
 
+    // В файлі AddCommissionModal.js
     const handleCreate = async () => {
         if (!validate()) return;
 
@@ -139,28 +140,37 @@ const AddCommissionModal = ({ onClose }) => {
             formData.append("format", fileFormat);
             formData.append("price", price);
 
-            // main image (backend expects 'referenceImage')
+            // --- (ОНОВЛЕНО) Додаємо всі файли під назвою 'images' ---
+            // 1. Додаємо головне зображення
             if (mainImage?.file) {
-            formData.append("referenceImage", mainImage.file);
+                formData.append("images", mainImage.file);
             }
 
+            // 2. Додаємо всі прев'ю
+            previews.forEach(p => {
+                if (p?.file) {
+                    formData.append("images", p.file);
+                }
+            });
+            // --- Кінець оновлення ---
+
             const response = await axios.post("http://localhost:8080/api/commissions/public", formData, {
-            headers: { "Content-Type": "multipart/form-data" },
-            withCredentials: true
+                headers: { "Content-Type": "multipart/form-data" },
+                withCredentials: true
             });
 
             if (response.data.success) {
-            alert("Commission created successfully!");
-            onClose();
-            window.location.reload(); // reload to show new item (optional)
+                alert("Commission created successfully!");
+                onClose();
+                window.location.reload();
             } else {
-            alert("Error: " + (response.data.message || "Failed to create commission"));
+                alert("Error: " + (response.data.message || "Failed to create commission"));
             }
         } catch (error) {
             console.error("Error creating commission:", error);
             alert("Server error while creating commission");
         }
-        };
+    };
 
     return (
         <div className={styles.overlay} onClick={onClose}>

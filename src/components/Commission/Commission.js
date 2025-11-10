@@ -2,7 +2,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import styles from './Commission.module.css';
 import CategoryFilters from "../CategoryFilters/CategoryFilters";
 import AdvancedFilters from '../AdvancedFilters/AdvancedFilters';
-import { usePagination } from '../hooks/Pagination/usePagination';
+// import { usePagination } from '../hooks/Pagination/usePagination';
 import Pagination from '../hooks/Pagination/Pagination';
 import CommissionModalDetails from './CommissionModals/CommissionModalDetails';
 import AddCommissionModal from './CommissionModals/AddCommissionModal';
@@ -100,70 +100,71 @@ function Commission() {
 
     const [commissions, setCommissions] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [currentPage, setCurrentPage] = useState(0);
+    const [totalPages, setTotalPages] = useState(0);
 
     // In Commission.js, update your commission card mapping section:
 
-useEffect(() => {
-    const fetchCommissions = async () => {
-        setLoading(true);
-        try {
-            const response = await axios.get("http://localhost:8080/api/commissions/public", {
-                withCredentials: true
-            });
-
-            console.log('Fetched commissions:', response.data);
-
-            if (response.data.success && Array.isArray(response.data.commissions)) {
-                // Map server data to match your component's expected format
-                const mapped = response.data.commissions.map(c => {
-                    console.log('Commission:', c.Title, 'has imageUrl:', !!c.imageUrl);
-                    return {
-                        id: c.Commission_ID || c.id,
-                        title: c.Title || '',
-                        description: c.Description || '',
-                        price: c.Price || 0,
-                        category: c.Category || '',
-                        style: c.Style || '',
-                        fileFormat: c.Format || '',
-                        size: c.Size || '',
-                        imageUrl: c.imageUrl || null, // This comes from your backend
-                        about: c.Description || '',
-                        authorIcon: "/images/profileImg.jpg",
-                    };
+// В файлі Commission.js
+    useEffect(() => {
+        const fetchCommissions = async () => {
+            setLoading(true);
+            try {
+                const response = await axios.get("http://localhost:8080/api/commissions/public", {
+                    params: {
+                        page: currentPage + 1,
+                        limit: itemsPerPage
+                    },
+                    withCredentials: true
                 });
-                console.log('Mapped commissions:', mapped);
-                setCommissions(mapped);
-            } else {
+
+                console.log('Fetched commissions:', response.data);
+
+                if (response.data.success && Array.isArray(response.data.commissions)) {
+
+                    // --- (ВИПРАВЛЕНО) ---
+                    // Прибираємо непотрібний .map()
+                    // Дані з сервера (response.data.commissions)
+                    // ВЖЕ містять всі потрібні поля: Title, Description, Price, imageUrl і т.д.
+                    setCommissions(response.data.commissions);
+                    // --- (КІНЕЦЬ ВИПРАВЛЕННЯ) ---
+
+                    setTotalPages(response.data.totalPages);
+                } else {
+                    setCommissions([]);
+                    setTotalPages(0);
+                }
+            } catch (error) {
+                console.error("Error fetching commissions:", error);
                 setCommissions([]);
+                setTotalPages(0);
+            } finally {
+                setLoading(false);
             }
-        } catch (error) {
-            console.error("Error fetching commissions:", error);
-            setCommissions([]);
-        } finally {
-            setLoading(false);
-        }
-    };
-    fetchCommissions();
-}, []);
+        };
+        fetchCommissions();
+    }, [currentPage, itemsPerPage]);
 
     const filteredCommissions = useMemo(() => {
-    let items = commissions;
-    if (activeCategory) {
-        items = items.filter(c => (c.Category || '').toUpperCase() === activeCategory.toUpperCase());
-    }
-    if (searchQuery) {
-        items = items.filter(c => (c.Title || '').toLowerCase().includes(searchQuery.toLowerCase()));
-    }
-    return items;
+        let items = commissions; // 'commissions' - це ВЖЕ дані поточної сторінки
+        if (activeCategory) {
+            items = items.filter(c => (c.Category || '').toUpperCase() === activeCategory.toUpperCase());
+        }
+        if (searchQuery) {
+            items = items.filter(c => (c.Title || '').toLowerCase().includes(searchQuery.toLowerCase()));
+        }
+        return items;
     }, [activeCategory, searchQuery, commissions]);
 
 
-    const {
-        currentPage,
-        setCurrentPage,
-        totalPages,
-        displayedData: displayedCommissions
-    } = usePagination(filteredCommissions, itemsPerPage);
+    // const {
+    //     currentPage,
+    //     setCurrentPage,
+    //     totalPages,
+    //     displayedData: displayedCommissions
+    // } = usePagination(filteredCommissions, itemsPerPage);
+
+    const displayedCommissions = filteredCommissions;
 
     useEffect(() => {
         if (isModalOpen) {
@@ -270,44 +271,54 @@ useEffect(() => {
                 {displayedCommissions.length > 0 ? (
                     <>
                         <div className={styles.commissionGrid}>
-    {displayedCommissions.map(commission => (
-        <div key={commission.id} className={styles.commissionCard}>
-            <div className={styles.imagePriceWrapper}>
-                <div className={styles.imageWrapper}>
-                    <img
-                        src={commission.imageUrl || "/images/placeholder.png"}
-                        alt={commission.title || "Commission"}
-                        className={styles.cardImage}
-                        onError={(e) => {
-                            console.error('Image load error for:', commission.title);
-                            e.target.src = "/images/placeholder.png";
-                        }}
-                    />
-                </div>
-                <div className={styles.priceOverlay}>
-                    <span className={styles.cardPrice}>${commission.price}</span>
-                </div>
-            </div>
-            <div className={styles.cardContent}>
-                <div>
-                    <h3 className={styles.cardTitle}>{commission.title}</h3>
-                    <p className={styles.cardDescription}>{commission.description}</p>
-                </div>
-                <button
-                    className={styles.takeButton}
-                    onClick={() => handleOpenModal(commission)}
-                >
-                    Take
-                </button>
-            </div>
-        </div>
-    ))}
-</div>
+                            {displayedCommissions.map(commission => (
+                                <div key={commission.id} className={styles.commissionCard}>
+                                    <div className={styles.imagePriceWrapper}>
+                                        <div className={styles.imageWrapper}>
+                                            <img
+                                                src={commission.imageUrl || "/images/placeholder.png"}
+
+                                                alt={commission.Title || "Commission"}
+
+                                                className={styles.cardImage}
+                                                onError={(e) => {
+                                                    if (!e.target.src.endsWith("/images/placeholder.png")) {
+                                                        console.error('Image load error for:', commission.Title);
+                                                        e.target.src = "/images/placeholder.png";
+                                                    }
+                                                }}
+                                            />
+                                        </div>
+                                        <div className={styles.priceOverlay}>
+
+                                            {/* --- ВИПРАВЛЕНО --- */}
+                                            <span className={styles.cardPrice}>${commission.Price}</span>
+
+                                        </div>
+                                    </div>
+                                    <div className={styles.cardContent}>
+                                        <div>
+
+                                            {/* --- ВИПРАВЛЕНО --- */}
+                                            <h3 className={styles.cardTitle}>{commission.Title}</h3>
+                                            <p className={styles.cardDescription}>{commission.Description}</p>
+
+                                        </div>
+                                        <button
+                                            className={styles.takeButton}
+                                            onClick={() => handleOpenModal(commission)}
+                                        >
+                                            Take
+                                        </button>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
 
                         <Pagination
                             currentPage={currentPage}
                             totalPages={totalPages}
-                            onPageChange={setCurrentPage}
+                            onPageChange={setCurrentPage} // setCurrentPage тепер тригерить useEffect
                         />
                     </>
                 ) : (

@@ -7,6 +7,8 @@ import { usePagination } from '../hooks/Pagination/usePagination';
 import Pagination from '../hooks/Pagination/Pagination';
 import leftArrow from '../../assets/leftArrow.svg';
 import rightArrow from '../../assets/rightArrow.svg';
+import axios from 'axios';
+import ArtDetailsModal from "../ArtCard/Modals/ArtDetailsModal";
 
 // --- Конфігурація фільтрів ---
 const categories = [
@@ -24,7 +26,7 @@ const artistFilterConfig = [
         ]}
 ];
 
-// --- Функції для генерації рандомних даних ---
+/*// --- Функції для генерації рандомних даних ---
 const getRandomInt = (min, max) => {
     min = Math.ceil(min);
     max = Math.floor(max);
@@ -85,7 +87,7 @@ const generateRandomArtist = (i) => {
 };
 
 // Створюємо масив з 10 рандомних артистів
-const artistsData = Array.from({ length: 30 }, (_, i) => generateRandomArtist(i));
+const artistsData = Array.from({ length: 30 }, (_, i) => generateRandomArtist(i));*/
 
 export default function Artists() {
     const [searchQuery, setSearchQuery] = useState("");

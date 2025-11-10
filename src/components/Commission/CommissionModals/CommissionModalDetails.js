@@ -1,23 +1,66 @@
 import React, {useEffect, useState} from "react";
 import styles from "./CommissionModalDetails.module.css";
 import closeIcon from '../../../assets/closeCross.svg';
+import axios from 'axios';
 
-const CommissionModalDetails = ({ commission, onClose, variant = "basic" }) => {
-    const [mainImage, setMainImage] = useState(commission ? commission.imageUrl : null);
+const CommissionModalDetails = ({ commission, onClose }) => {
 
+    // 1. Стан для індикатора завантаження
+    const [isLoading, setIsLoading] = useState(true);
+
+    // 2. Початковий стан - 'allImages' містить ТІЛЬКИ головне зображення, яке прийшло
+    const [allImages, setAllImages] = useState(
+        commission ? (commission.imageUrl ? [commission.imageUrl] : []) : []
+    );
+    // 3. Головне зображення встановлюємо одразу з пропсів
+    const [mainImage, setMainImage] = useState(
+        commission ? commission.imageUrl : null
+    );
+
+    // 4. Завантажуємо решту зображень, коли модалка відкривається
     useEffect(() => {
-        if (commission) {
-            setMainImage(commission.imageUrl);
+        if (commission && commission.id) {
+            setIsLoading(true);
+
+            // Встановлюємо початковий стан з пропсів
+            const initialMain = commission.imageUrl || null;
+            setMainImage(initialMain);
+            setAllImages(initialMain ? [initialMain] : []);
+
+            // Робимо запит на всі зображення, використовуючи НОВИЙ РОУТ
+            axios.get(`http://localhost:8080/api/commissions/${commission.id}/images`, { withCredentials: true })
+                .then(response => {
+                    if (response.data.success && response.data.images.length > 0) {
+                        // Ми отримали повний масив зображень
+                        setAllImages(response.data.images);
+                        // Переконуємось, що головне зображення - це перше з отриманих
+                        setMainImage(response.data.images[0]);
+                    }
+                    // Якщо зображень немає (окрім головного), залишаємо як є
+                })
+                .catch(err => {
+                    console.error("Failed to fetch all commission images", err);
+                    // У разі помилки, просто покажемо головне зображення, яке вже є
+                })
+                .finally(() => {
+                    setIsLoading(false); // Завершуємо завантаження
+                });
         }
-    }, [commission]);
+    }, [commission]); // Залежність від 'commission'
+
+    // 5. hasMultipleImages тепер динамічно розраховується
+    const hasMultipleImages = allImages.length > 1;
+    // --- (КІНЕЦЬ ОНОВЛЕННЯ) ---
 
     if (!commission) {
         return null;
     }
 
-    // const allPreviews = [commission.image, ...(commission.previews || [])];
-    // const uniquePreviews = [...new Set(allPreviews)];
-    // const hasMultipleImages = uniquePreviews.length > 1;
+    const onImageError = (e) => {
+        if (!e.target.src.endsWith("/images/placeholder.png")) {
+            e.target.src = "/images/placeholder.png";
+        }
+    };
 
     return (
         <div className={styles.overlay}>
@@ -27,77 +70,81 @@ const CommissionModalDetails = ({ commission, onClose, variant = "basic" }) => {
                 </button>
 
                 <div className={styles.topSection}>
-                    {/*{hasMultipleImages ? (*/}
 
-                    {/*    // 1. ВАРІАНТ: Декілька картинок (як на дизайні)*/}
-                    {/*    <div className={styles.imageColumn}>*/}
-                    {/*        <img*/}
-                    {/*            src={mainImage}*/}
-                    {/*            alt={commission.title}*/}
-                    {/*            className={styles.image} // Головна картинка*/}
-                    {/*        />*/}
-                    {/*        /!* Рядок з прев'юшками *!/*/}
-                    {/*        <div className={styles.previewRow}>*/}
-                    {/*            {uniquePreviews.map((img, index) => (*/}
-                    {/*                <img*/}
-                    {/*                    key={index}*/}
-                    {/*                    src={img}*/}
-                    {/*                    alt={`preview ${index + 1}`}*/}
-                    {/*                    className={`${styles.previewImg} ${img === mainImage ? styles.activePreview : ''}`}*/}
-                    {/*                    onClick={() => setMainImage(img)}*/}
-                    {/*                />*/}
-                    {/*            ))}*/}
-                    {/*        </div>*/}
-                    {/*    </div>*/}
+                    {isLoading ? (
+                        <div className={`${styles.imageColumn} ${styles.loadingContainer}`}>
+                            <p>Loading images...</p>
+                        </div>
+                    ) : (
+                        hasMultipleImages ? (
+                            <div className={styles.imageColumn}>
+                                <img
+                                    src={mainImage || "/images/placeholder.png"}
 
-                    {/*) : (*/}
+                                    // --- ВИПРАВЛЕНО ---
+                                    alt={commission.Title}
 
-                    {/*    // 2. ВАРІАНТ: Тільки одна картинка*/}
-                    {/*    <img*/}
-                    {/*        src={mainImage}*/}
-                    {/*        alt={commission.title}*/}
-                    {/*        className={styles.singleImage} // Клас для великої картинки*/}
-                    {/*    />*/}
-                    {/*)}*/}
-                    <img
-                        src={mainImage || "/images/placeholder.png"} // Додано placeholder
-                        alt={commission.title}
-                        className={styles.singleImage} // Використовуємо клас для однієї великої картинки
-                        onError={(e) => {
-                            // Якщо завантаження не вдалося, показуємо placeholder
-                            e.target.src = "/images/placeholder.png";
-                        }}
-                    />
+                                    className={styles.image}
+                                    onError={onImageError}
+                                />
+                                {/* ... (решта галереї без змін) ... */}
+                                <div className={styles.previewRow}>
+                                    {allImages.map((img, index) => (
+                                        <img
+                                            key={index}
+                                            src={img || "/images/placeholder.png"}
+                                            alt={`preview ${index + 1}`}
+                                            className={`${styles.previewImg} ${img === mainImage ? styles.activePreview : ''}`}
+                                            onClick={() => setMainImage(img)}
+                                            onError={onImageError}
+                                        />
+                                    ))}
+                                </div>
+                            </div>
+                        ) : (
+                            <img
+                                src={mainImage || "/images/placeholder.png"}
 
+                                // --- ВИПРАВЛЕНО ---
+                                alt={commission.Title}
+
+                                className={styles.singleImage}
+                                onError={onImageError}
+                            />
+                        )
+                    )}
+
+                    {/* --- (ВИПРАВЛЕНО) Вся ця секція --- */}
                     <div className={styles.info}>
-                        <p className={styles.title}>{commission.title}</p>
-
+                        <p className={styles.title}>{commission.Title}</p>
                         <p className={styles.field}>
-                            <span>Category</span> {commission.category}
+                            <span>Category</span> {commission.Category}
                         </p>
                         <p className={styles.field}>
-                            <span>Style</span> {commission.style}
+                            <span>Style</span> {commission.Style}
                         </p>
                         <p className={styles.field}>
-                            <span>File format</span> {commission.fileFormat}
+                            <span>File format</span> {commission.Format}
                         </p>
                         <p className={styles.field}>
-                            <span>Size</span> {commission.size}
+                            <span>Size</span> {commission.Size}
                         </p>
-
                     </div>
                 </div>
 
                 <div className={styles.about}>
                     <p>About</p>
-                    <span>{commission.about}</span>
-                    {/*<p className={styles.feelings}>*/}
-                    {/*    <b>Feelings:</b> {commission.feelings}*/}
-                    {/*</p>*/}
+
+                    {/* --- ВИПРАВЛЕНО --- */}
+                    <span>{commission.Description}</span>
+
                 </div>
 
                 <div className={styles.actions}>
-                    <button className={styles.priceBtn}>{commission.price}$</button>
+
+                    {/* --- ВИПРАВЛЕНО --- */}
+                    <button className={styles.priceBtn}>{commission.Price}$</button>
+
                     <button className={styles.takeBtn}>Take</button>
                 </div>
             </div>
