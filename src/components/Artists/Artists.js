@@ -7,7 +7,6 @@ import { usePagination } from '../hooks/Pagination/usePagination';
 import Pagination from '../hooks/Pagination/Pagination';
 import leftArrow from '../../assets/leftArrow.svg';
 import rightArrow from '../../assets/rightArrow.svg';
-import ArtDetailsModal from "../ArtCard/Modals/ArtDetailsModal";
 
 // --- Конфігурація фільтрів ---
 const categories = [
@@ -102,28 +101,68 @@ export default function Artists() {
         const gallery = galleryRefs.current[artistId];
         if (gallery) {
             const hasOverflow = gallery.scrollWidth > gallery.clientWidth;
-
             setGalleryStates(prev => ({
                 ...prev,
                 [artistId]: {
-                    hasOverflow: hasOverflow,
-                    showLeft: false, // На початку кнопка "вліво" завжди схована
-                    showRight: hasOverflow // Кнопка "вправо" показана, тільки якщо є скрол
+                    hasOverflow,
+                    showLeft: false,
+                    showRight: hasOverflow
                 }
             }));
         }
     };
 
+    const [artistsData, setArtistsData] = useState([]);
+
+    useEffect(() => {
+        const fetchArtists = async () => {
+            try {
+                const res = await axios.get('http://localhost:8080/getartists', { withCredentials: true });
+                const serverArtists = Array.isArray(res.data) ? res.data : (res.data.artists || []);
+                const mapped = serverArtists.map((a, idx) => {
+                    const name = a.Name || a.name || `Artist ${idx}`;
+                    const artworks = Array.isArray(a.paintings)
+                        ? a.paintings.map(p => ({
+                            id: p.id || p.Painting_ID || p.PaintingId || `${idx}-${Math.random()}`,
+                            title: p.title || p.Title || '',
+                            // prefer normalized image_url produced by server, fallback to other fields
+                            imageUrl: p.image_url || p.imageBase64 || p.Image || p.image || null,
+                            artistName: name,
+                            artistStyle: p.style || a.Style || a.style || '',
+                            likes: p.likes || 0,
+                            price: p.price || ''
+                        }))
+                        : [];
+                    return {
+                        id: a.Creator_ID || a.Creator_Id || a.id || idx,
+                        name,
+                        country: a.Country || a.country || 'Unknown',
+                        style: a.Style || a.style || 'Unknown',
+                        avatar: a.imageBase64 || a.profileImage || '/images/profileImg.jpg',
+                        likesCount: a.likesCount || 0,
+                        artworks
+                    };
+                });
+                setArtistsData(mapped);
+            } catch (err) {
+                console.error('Error fetching artists from backend:', err);
+                setArtistsData([]); // remove stubs/fallbacks — show real data only
+            }
+        };
+
+        fetchArtists();
+    }, []);
+
     const filteredArtists = useMemo(() => {
         let items = artistsData;
         if (activeCategory) {
-            items = items.filter(a => a.style.toUpperCase() === activeCategory.toUpperCase());
+            items = items.filter(a => (a.style || '').toUpperCase() === activeCategory.toUpperCase());
         }
         if (searchQuery) {
             items = items.filter(a => a.name.toLowerCase().includes(searchQuery.toLowerCase()));
         }
         return items;
-    }, [activeCategory, searchQuery]);
+    }, [activeCategory, searchQuery, artistsData]);
 
     const itemsPerPage = 12;
     const {
@@ -137,9 +176,7 @@ export default function Artists() {
         const galleries = galleryRefs.current;
         const artistIds = Object.keys(galleries);
         artistIds.forEach(id => checkGalleryOverflow(id));
-        const handleResize = () => {
-            artistIds.forEach(id => checkGalleryOverflow(id));
-        };
+        const handleResize = () => artistIds.forEach(id => checkGalleryOverflow(id));
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
     }, [displayedArtists]);
@@ -147,14 +184,13 @@ export default function Artists() {
     const handleGalleryScroll = (artistId) => {
         const gallery = galleryRefs.current[artistId];
         if (gallery) {
-            const tolerance = 5; // Похибка в 5px
+            const tolerance = 5;
             const atStart = gallery.scrollLeft <= tolerance;
             const atEnd = gallery.scrollLeft + gallery.clientWidth >= gallery.scrollWidth - tolerance;
-
             setGalleryStates(prev => ({
                 ...prev,
                 [artistId]: {
-                    ...prev[artistId], // Зберігаємо 'hasOverflow'
+                    ...prev[artistId],
                     showLeft: !atStart,
                     showRight: !atEnd
                 }
@@ -162,35 +198,19 @@ export default function Artists() {
         }
     };
 
-    /* --- ЗМІНЕНО: Логіка скролу --- */
     const scrollGallery = (artistId, direction) => {
         const gallery = galleryRefs.current[artistId];
         if (gallery) {
-
-            /* --- ЗМІНЕНО: Розрахунок прокрутки на 6 елементів --- */
-            const cardWidth = 210; // 210px from CSS
-            const gap = 20; // 20px from CSS
+            const cardWidth = 210;
+            const gap = 20;
             const itemsToScroll = 6;
-
-            // Прокручуємо 6 карток + 6 проміжків,
-            // щоб 7-а картка стала першою на позиції 0
             const scrollAmount = (itemsToScroll * cardWidth) + (itemsToScroll * gap);
-            // (6 * 210) + (6 * 20) = 1260 + 120 = 1380px
-
-            if (direction === 'left') {
-                gallery.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
-            } else {
-                gallery.scrollBy({ left: scrollAmount, behavior: 'smooth' });
-            }
+            gallery.scrollBy({ left: direction === 'left' ? -scrollAmount : scrollAmount, behavior: 'smooth' });
         }
     };
 
     const handleCategoryClick = (category) => {
-        if (activeCategory === category) {
-            setActiveCategory(null);
-        } else {
-            setActiveCategory(category);
-        }
+        setActiveCategory(prev => prev === category ? null : category);
         setCurrentPage(0);
     };
 
@@ -202,8 +222,6 @@ export default function Artists() {
     return (
         <div className={styles.artistsPage}>
             <div className={styles.contentWrapper}>
-
-                {/* --- Хедер --- */}
                 <header className={styles.header}>
                     <div className={styles.headerLeft}>
                         <h1 className={styles.artistsTitle}>Artists</h1>
@@ -213,7 +231,7 @@ export default function Artists() {
                                 className={styles.searchInput}
                                 placeholder="Search by artist name..."
                                 value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
+                                onChange={handleSearchChange}
                             />
                             <button className={styles.searchButton}>
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20">
@@ -224,7 +242,6 @@ export default function Artists() {
                     </div>
                 </header>
 
-                {/* --- Фільтри --- */}
                 <div className={styles.filtersWrapper}>
                     <CategoryFilters
                         categories={categories}
@@ -245,7 +262,6 @@ export default function Artists() {
                 </div>
                 {showAdvanced && <AdvancedFilters filterConfig={artistFilterConfig} />}
 
-                {/* --- Список артистів (Оновлена розмітка) --- */}
                 <div className={styles.artistsList}>
                     {displayedArtists.length > 0 ? (
                         displayedArtists.map(artist => {
@@ -253,8 +269,6 @@ export default function Artists() {
 
                             return (
                                 <div key={artist.id} className={styles.artistSection}>
-
-                                    {/* ... (Ліва частина: Аватар та інфо - без змін) ... */}
                                     <div className={styles.artistLeftInfo}>
                                         <img src={artist.avatar} alt={artist.name} className={styles.artistAvatar} />
                                         <span className={styles.artistName}>{artist.name}</span>
@@ -264,12 +278,7 @@ export default function Artists() {
                                         </div>
                                     </div>
 
-                                    {/* Права частина: Галерея робіт з навігацією */}
                                     <div className={styles.artistRightGallery}>
-
-                                        {/* --- ЗМІНЕНО: Умовне відображення кнопок --- */}
-
-                                        {/* Кнопка "Вліво" */}
                                         {state.hasOverflow && state.showLeft && (
                                             <button
                                                 className={`${styles.navButton} ${styles.left}`}
@@ -279,19 +288,26 @@ export default function Artists() {
                                             </button>
                                         )}
 
-                                        {/* Внутрішній контейнер для скролу */}
                                         <div
                                             className={styles.artistGalleryInner}
                                             ref={el => galleryRefs.current[artist.id] = el}
-                                            onScroll={() => handleGalleryScroll(artist.id)} /* --- НОВЕ --- */
+                                            onScroll={() => handleGalleryScroll(artist.id)}
                                         >
-                                            {artist.artworks.map(card => (
-                                                <ArtCard
-                                                    key={card.id}
-                                                    art={card} // 1. Передаємо весь об'єкт
-                                                    onArtClick={setSelectedArt} // 2. Передаємо функцію
-                                                />
-                                            ))}
+                                            {artist.artworks && artist.artworks.length > 0 ? (
+                                                artist.artworks.map(card => (
+                                                    <ArtCard
+                                                        key={card.id}
+                                                        imageUrl={card.imageUrl}
+                                                        title={card.title}
+                                                        artistName={card.artistName}
+                                                        artistStyle={card.artistStyle}
+                                                        likes={card.likes}
+                                                        price={card.price}
+                                                    />
+                                                ))
+                                            ) : (
+                                                <div className={styles.noArtworks}>No artworks available</div>
+                                            )}
                                         </div>
 
                                         {/* Кнопка "Вправо" */}
