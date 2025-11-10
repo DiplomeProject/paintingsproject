@@ -2,6 +2,7 @@ import React, {useEffect, useState} from 'react';
 import styles from './AddCommissionModal.module.css';
 import closeIcon from '../../../assets/closeCross.svg';
 import addImageIcon from '../../../assets/image-placeholder-icon.svg';
+import axios from "axios";
 
 // ... (const categories, mockStyles, mockFormats) ...
 const categories = ["2D AVATARS", "3D MODELS", "BOOKS", "ANIME", "ICONS", "GAMES", "MOCKUPS", "UI/UX"];
@@ -125,24 +126,41 @@ const AddCommissionModal = ({ onClose }) => {
     };
 
 
-    const handleCreate = () => {
-        // 1. Запускаємо валідацію
-        if (!validate()) {
-            console.log("Validation Failed", errors);
-            return; // Зупиняємо відправку
+    const handleCreate = async () => {
+        if (!validate()) return;
+
+        try {
+            const formData = new FormData();
+            formData.append("title", name);
+            formData.append("description", about);
+            formData.append("category", category);
+            formData.append("style", style);
+            formData.append("size", `${sizeW}x${sizeH}`);
+            formData.append("format", fileFormat);
+            formData.append("price", price);
+
+            // main image (backend expects 'referenceImage')
+            if (mainImage?.file) {
+            formData.append("referenceImage", mainImage.file);
+            }
+
+            const response = await axios.post("http://localhost:8080/api/commissions/public", formData, {
+            headers: { "Content-Type": "multipart/form-data" },
+            withCredentials: true
+            });
+
+            if (response.data.success) {
+            alert("Commission created successfully!");
+            onClose();
+            window.location.reload(); // reload to show new item (optional)
+            } else {
+            alert("Error: " + (response.data.message || "Failed to create commission"));
+            }
+        } catch (error) {
+            console.error("Error creating commission:", error);
+            alert("Server error while creating commission");
         }
-
-        // 2. Якщо валідація пройшла
-        const allFiles = [mainImage, ...previews.filter(p => p)].map(p => p.file);
-        console.log("Submitting data:", {
-            name, category, style, fileFormat,
-            size: `${sizeW}x${sizeH}`,
-            about, price,
-            files: allFiles
-        });
-
-        onClose();
-    };
+        };
 
     return (
         <div className={styles.overlay} onClick={onClose}>

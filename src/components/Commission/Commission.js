@@ -98,38 +98,65 @@ function Commission() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
-    // const [commissions, setCommissions] = useState([]);
-    // const [loading, setLoading] = useState(true);
+    const [commissions, setCommissions] = useState([]);
+    const [loading, setLoading] = useState(true);
 
-    // useEffect(() => {
-    //     const fetchCommissions = async () => {
-    //         setLoading(true);
-    //         try {
-    //             // Використовуємо наш API endpoint
-    //             const response = await axios.get('http://localhost:8080/api/commissions/public', {
-    //                 withCredentials: true
-    //             });
-    //             setCommissions(response.data); // Зберігаємо дані в стані
-    //         } catch (error) {
-    //             console.error('Error fetching commissions:', error);
-    //         } finally {
-    //             setLoading(false);
-    //         }
-    //     };
-    //     fetchCommissions();
-    // }, []);
+    // In Commission.js, update your commission card mapping section:
+
+useEffect(() => {
+    const fetchCommissions = async () => {
+        setLoading(true);
+        try {
+            const response = await axios.get("http://localhost:8080/api/commissions/public", {
+                withCredentials: true
+            });
+            
+            console.log('Fetched commissions:', response.data);
+            
+            if (response.data.success && Array.isArray(response.data.commissions)) {
+                // Map server data to match your component's expected format
+                const mapped = response.data.commissions.map(c => {
+                    console.log('Commission:', c.Title, 'has imageUrl:', !!c.imageUrl);
+                    return {
+                        id: c.Commission_ID || c.id,
+                        title: c.Title || '',
+                        description: c.Description || '',
+                        price: c.Price || 0,
+                        category: c.Category || '',
+                        style: c.Style || '',
+                        fileFormat: c.Format || '',
+                        size: c.Size || '',
+                        imageUrl: c.imageUrl || null, // This comes from your backend
+                        about: c.Description || '',
+                        authorIcon: "/images/profileImg.jpg",
+                    };
+                });
+                console.log('Mapped commissions:', mapped);
+                setCommissions(mapped);
+            } else {
+                setCommissions([]);
+            }
+        } catch (error) {
+            console.error("Error fetching commissions:", error);
+            setCommissions([]);
+        } finally {
+            setLoading(false);
+        }
+    };
+    fetchCommissions();
+}, []);
 
     const filteredCommissions = useMemo(() => {
-        let items = commissionsData;
-        // let items = commissions;
-        if (activeCategory) {
-            items = items.filter(c => c.category.toUpperCase() === activeCategory.toUpperCase());
-        }
-        if (searchQuery) {
-            items = items.filter(c => c.title.toLowerCase().includes(searchQuery.toLowerCase()));
-        }
-        return items;
-    }, [activeCategory, searchQuery]);
+    let items = commissions;
+    if (activeCategory) {
+        items = items.filter(c => (c.Category || '').toUpperCase() === activeCategory.toUpperCase());
+    }
+    if (searchQuery) {
+        items = items.filter(c => (c.Title || '').toLowerCase().includes(searchQuery.toLowerCase()));
+    }
+    return items;
+    }, [activeCategory, searchQuery, commissions]);
+
 
     const {
         currentPage,
@@ -243,31 +270,39 @@ function Commission() {
                 {displayedCommissions.length > 0 ? (
                     <>
                         <div className={styles.commissionGrid}>
-                            {displayedCommissions.map(commission => (
-                                <div key={commission.id} className={styles.commissionCard}>
-                                    <div className={styles.imagePriceWrapper}>
-                                        <div className={styles.imageWrapper}>
-                                            <img src={commission.imageUrl} alt={commission.title} className={styles.cardImage} />
-                                        </div>
-                                        <div className={styles.priceOverlay}>
-                                            <span className={styles.cardPrice}>{commission.price}$</span>
-                                        </div>
-                                    </div>
-                                    <div className={styles.cardContent}>
-                                        <div>
-                                            <h3 className={styles.cardTitle}>{commission.title}</h3>
-                                            <p className={styles.cardDescription}>{commission.description}</p>
-                                        </div>
-                                        <button
-                                            className={styles.takeButton}
-                                            onClick={() => handleOpenModal(commission)}
-                                        >
-                                            Take
-                                        </button>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
+    {displayedCommissions.map(commission => (
+        <div key={commission.id} className={styles.commissionCard}>
+            <div className={styles.imagePriceWrapper}>
+                <div className={styles.imageWrapper}>
+                    <img
+                        src={commission.imageUrl || "/images/placeholder.png"}
+                        alt={commission.title || "Commission"}
+                        className={styles.cardImage}
+                        onError={(e) => {
+                            console.error('Image load error for:', commission.title);
+                            e.target.src = "/images/placeholder.png";
+                        }}
+                    />
+                </div>
+                <div className={styles.priceOverlay}>
+                    <span className={styles.cardPrice}>${commission.price}</span>
+                </div>
+            </div>
+            <div className={styles.cardContent}>
+                <div>
+                    <h3 className={styles.cardTitle}>{commission.title}</h3>
+                    <p className={styles.cardDescription}>{commission.description}</p>
+                </div>
+                <button
+                    className={styles.takeButton}
+                    onClick={() => handleOpenModal(commission)}
+                >
+                    Take
+                </button>
+            </div>
+        </div>  
+    ))}
+</div>
 
                         <Pagination
                             currentPage={currentPage}
