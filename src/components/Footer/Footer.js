@@ -2,6 +2,7 @@ import React from 'react';
 import styles from './Footer.module.css';
 import twitterIcon from '../../assets/twitterIcon.svg';
 import instagramIcon from '../../assets/instagram-icon.svg';
+import facebookIcon from '../../assets/facebook-icon.svg';
 
 /*
  * Цей компонент SocialIcon використовує <img> теги,
@@ -10,7 +11,7 @@ import instagramIcon from '../../assets/instagram-icon.svg';
 const SocialIcon = ({ type }) => {
     const icons = {
         twitter: twitterIcon,
-        facebook: '/assets/facebook-icon.svg',
+        facebook: facebookIcon,
         instagram: instagramIcon,
     };
 
