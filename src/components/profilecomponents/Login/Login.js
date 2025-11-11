@@ -11,36 +11,38 @@ function Login({ toggleForm, handleLogin, handleInputChange, onForgotPassword })
 
     return (
         <form className={styles.authCard} onSubmit={handleSubmit}>
-            <h2 className={styles.logo}>DIGITAL BRUSH</h2>
+            <h2 className={styles.logo}>Digital<br />Brush</h2>
 
-            <div className={styles.field}>
-                <label htmlFor="login-email">Login</label>
-                <input
-                    id="login-email"
-                    type="email"
-                    name="email"
-                    onChange={handleInputChange}
-                    required
-                />
-            </div>
-
-            <div className={styles.field}>
-                <label htmlFor="login-password">Password</label>
-                <div className={styles.passwordWrapper}>
+            <div className={styles.fieldsContainer}>
+                <div className={styles.field}>
+                    <label htmlFor="login-email">Login</label>
                     <input
-                        id="login-password"
-                        name="password"
-                        type={showPassword ? "text" : "password"}
+                        id="login-email"
+                        type="email"
+                        name="email"
                         onChange={handleInputChange}
                         required
                     />
-                    <button
-                        type="button"
-                        className={styles.eyeBtn}
-                        onClick={() => setShowPassword((s) => !s)}
-                    >
-                        {showPassword ? <EyeSlashIcon /> : <EyeIcon />}
-                    </button>
+                </div>
+
+                <div className={styles.field}>
+                    <label htmlFor="login-password">Password</label>
+                    <div className={styles.passwordWrapper}>
+                        <input
+                            id="login-password"
+                            name="password"
+                            type={showPassword ? "text" : "password"}
+                            onChange={handleInputChange}
+                            required
+                        />
+                        <button
+                            type="button"
+                            className={styles.eyeBtn}
+                            onClick={() => setShowPassword((s) => !s)}
+                        >
+                            {showPassword ? <EyeSlashIcon /> : <EyeIcon />}
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -57,13 +59,12 @@ function Login({ toggleForm, handleLogin, handleInputChange, onForgotPassword })
                 </a>
             </div>
 
-            <div className={styles.separator}></div>
-
-            <button type="button" className={styles.switchFormBtn} onClick={toggleForm}>
-                Create account
-            </button>
-
-            <div className={styles.blackLine}></div>
+            <div className={styles.bottomContainer}>
+                <div className={styles.separator}></div>
+                <button type="button" className={styles.switchFormBtn} onClick={toggleForm}>
+                    Create account
+                </button>
+            </div>
         </form>
     );
 }

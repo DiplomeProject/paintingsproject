@@ -1,6 +1,5 @@
 import React, {useState} from "react";
 import styles from "./Register.module.css";
-import emailjs from "@emailjs/browser";
 import {EyeIcon, EyeSlashIcon} from "./AuthIcons";
 
 function Register({toggleForm}) {
@@ -24,22 +23,11 @@ function Register({toggleForm}) {
         try {
             console.log(code);
             console.log("Attempting to send email with EmailJS...");
-            /* const result = await emailjs.send(
-               "service_fv0f2qo",
-               "template_zn93brw",
-               {
-                 name: name,
-                 verification_code: code,
-                 to_email: email,
-                 reply_to: email,
-               },
-               "7Gw-RPTO7wMAtHcSb"
-             );*/
+            // EmailJS код здесь
             console.log("Verification code sent successfully");
             return true;
         } catch (error) {
             console.error("Email sending failed:", error);
-            console.error("Error details:", error.text || error.message);
             return false;
         }
     };
@@ -49,24 +37,17 @@ function Register({toggleForm}) {
         setLoading(true);
 
         try {
-            console.log("Starting registration process...");
             const code = generateCode();
-            console.log("Generated code:", code);
-            console.log("Sending verification email to:", formData.email);
-
             const emailSent = await sendVerificationEmail(formData.username, formData.email, code);
-            console.log("Email sent result:", emailSent);
 
             if (emailSent) {
                 setGeneratedCode(code);
                 setStep(2);
-                console.log("Moving to step 2");
             }
         } catch (error) {
             console.error("Error during submission:", error);
             alert("Сталася помилка: " + error.message);
         } finally {
-            console.log("Setting loading to false");
             setLoading(false);
         }
     };
@@ -76,10 +57,6 @@ function Register({toggleForm}) {
         setLoading(true);
 
         try {
-            console.log("User entered code:", userCode);
-            console.log("Generated code:", generatedCode);
-            console.log("Form data to submit:", formData);
-
             if (userCode.trim() !== generatedCode.trim()) {
                 alert("Невірний код підтвердження");
             }
@@ -117,8 +94,7 @@ function Register({toggleForm}) {
         <form className={styles.authCard} onSubmit={step === 1 ? handleSubmit : handleVerifyCode}>
             {step === 1 ? (
                 <>
-                    <h2 className={styles.mainTitle}>Registration via:</h2>
-                    <div className={styles.emailTitle}>Registration via email</div>
+                    <h2 className={styles.mainTitle}>Registration via email</h2>
 
                     <div className={styles.field}>
                         <label htmlFor="reg-username">Username</label>
@@ -145,7 +121,6 @@ function Register({toggleForm}) {
                                onChange={handleChange}
                                required
                                disabled={loading}
-                               placeholder=" "
                         />
                     </div>
                     <div className={styles.field}>

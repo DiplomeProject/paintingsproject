@@ -2,20 +2,35 @@
 .authCard {
     display: flex;
     flex-direction: column;
-    width: 100%;
-    max-width: 400px;
+    width: 443px;
+    height: 527px;
     background-color: #f9f9f9;
     padding: 40px 30px;
     border-radius: 20px;
     font-family: 'Roboto', sans-serif;
+    margin: 0;
+    position: absolute;
+    top: 266px;
+    left: 740px;
+    overflow: hidden;
+    opacity: 1;
+    box-sizing: border-box;
 }
 
 .mainTitle {
-    font-size: 18px;
+    font-size: 22px;
     color: #333;
     text-align: left;
     margin-bottom: 5px;
-    font-weight: bold;
+    font-weight: 500;
+    font-family: 'Roboto', sans-serif;
+    line-height: 100%;
+    letter-spacing: 0%;
+    width: 216px;
+    height: 26px;
+    position: absolute;
+    top: 44px; /* 310px - 266px */
+    left: 62px; /* 802px - 740px */
 }
 
 .emailTitle {
@@ -29,6 +44,9 @@
     display: flex;
     flex-direction: column;
     margin-bottom: 20px;
+    position: absolute;
+    width: 319px;
+    left: 62px; /* 802px - 740px */
 }
 
 .field label {
@@ -39,14 +57,32 @@
 }
 
 .field input {
-    width: 100%;
-    padding: 12px;
+    width: 319px;
+    height: 39px;
+    padding: 0 10px;
     border: none;
     border-radius: 10px;
-    font-size: 16px;
+    font-size: 14px;
     background-color: #361950;
     color: white;
     box-sizing: border-box;
+}
+
+/* Позиции полей */
+.field:nth-child(2) { /* Username */
+    top: 127px; /* 393px - 266px */
+}
+
+.field:nth-child(3) { /* Email */
+    top: 207px; /* 473px - 266px */
+}
+
+.field:nth-child(4) { /* Birthday */
+    top: 285px; /* 551px - 266px */
+}
+
+.field:nth-child(5) { /* Password */
+    top: 363px; /* 629px - 266px */
 }
 
 .passwordWrapper {
@@ -66,38 +102,64 @@
     border: none;
     cursor: pointer;
     color: white;
+    padding: 5px;
 }
 
 .buttonsRow {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-top: 30px;
-    gap: 15px;
+    position: absolute;
+    top: 444px; /* 710px - 266px */
+    left: 62px; /* 802px - 740px */
+    width: 319px;
+    gap: 10px;
 }
 
 .submitBtn {
-    padding: 12px 25px;
+    width: 70px;
+    height: 39px;
+    padding: 10px 0;
     font-size: 14px;
     font-weight: bold;
-    border-radius: 8px;
+    border-radius: 10px;
     border: none;
     cursor: pointer;
     background: #5454FE;
     color: white;
-    width: 25%;
+    white-space: nowrap;
+    border-bottom: 1px solid;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.5s ease-out;
+}
+
+.submitBtn:active {
+    transform: scale(0.95);
 }
 
 .backBtn {
-    padding: 12px 25px;
+    width: 104px;
+    height: 39px;
+    padding: 10px 0;
     font-size: 14px;
     font-weight: bold;
-    border-radius: 8px;
+    border-radius: 10px;
     border: none;
     cursor: pointer;
     background: #5454FE;
     color: white;
-    width: 25%;
+    white-space: nowrap;
+    border-bottom: 1px solid;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.5s ease-out;
+}
+
+.backBtn:active {
+    transform: scale(0.95);
 }
 
 /* Стили для второго шага */
