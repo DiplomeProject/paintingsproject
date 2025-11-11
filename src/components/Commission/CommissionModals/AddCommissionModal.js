@@ -28,6 +28,9 @@ const AddCommissionModal = ({ onClose }) => {
     // --- Стан для помилок валідації ---
     const [errors, setErrors] = useState({});
 
+    // --- Стан для відправки форми ---
+    const [submitting, setSubmitting] = useState(false);
+
     useEffect(() => {
         return () => {
             if (mainImage) URL.revokeObjectURL(mainImage.preview);
@@ -129,6 +132,8 @@ const AddCommissionModal = ({ onClose }) => {
     const handleCreate = async () => {
         if (!validate()) return;
 
+        setSubmitting(true); // Початок відправки
+
         try {
             const formData = new FormData();
             formData.append("title", name);
@@ -143,6 +148,13 @@ const AddCommissionModal = ({ onClose }) => {
             if (mainImage?.file) {
             formData.append("referenceImage", mainImage.file);
             }
+
+            // ДОДАНО: Додаємо прев'ю-изображення, якщо вони є
+            previews.forEach((img, index) => {
+                if (img?.file) {
+                    formData.append(`image${index + 2}`, img.file);
+                }
+            });
 
             const response = await axios.post("http://localhost:8080/api/commissions/public", formData, {
             headers: { "Content-Type": "multipart/form-data" },
@@ -159,6 +171,8 @@ const AddCommissionModal = ({ onClose }) => {
         } catch (error) {
             console.error("Error creating commission:", error);
             alert("Server error while creating commission");
+        } finally {
+            setSubmitting(false); // Кінець відправки
         }
         };
 
@@ -320,7 +334,9 @@ const AddCommissionModal = ({ onClose }) => {
                         />
                         {errors.price && <span className={styles.errorPrice}>{errors.price}</span>}
                     </div>
-                    <button className={styles.createBtn} onClick={handleCreate}>Create</button>
+                    <button className={styles.createBtn} onClick={handleCreate} disabled={submitting}>
+                        {submitting ? 'Uploading...' : 'Create'}
+                    </button>
                 </div>
             </div>
         </div>

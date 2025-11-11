@@ -1,23 +1,38 @@
-import React, {useEffect, useState} from "react";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
 import styles from "./CommissionModalDetails.module.css";
 import closeIcon from '../../../assets/closeCross.svg';
 
-const CommissionModalDetails = ({ commission, onClose, variant = "basic" }) => {
-    const [mainImage, setMainImage] = useState(commission ? commission.image : null);
+const CommissionModalDetails = ({ commission, onClose }) => {
+    const [images, setImages] = useState([]);
+    const [mainImage, setMainImage] = useState(commission.imageSrc || null);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        if (commission) {
-            setMainImage(commission.image);
-        }
+        if (!commission?.id) return;
+        const fetchDetails = async () => {
+            try {
+                const response = await axios.get(`http://localhost:8080/api/commissions/${commission.id}`, {
+                    withCredentials: true
+                });
+                if (response.data.success && response.data.commission) {
+                    setImages(response.data.commission.images || []);
+                    setMainImage(response.data.commission.images?.[0] || commission.imageSrc);
+                } else {
+                    setImages([commission.imageSrc]);
+                }
+            } catch (err) {
+                console.error("Error loading full commission details:", err);
+                setImages([commission.imageSrc]);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchDetails();
     }, [commission]);
 
-    if (!commission) {
-        return null;
-    }
-
-    const allPreviews = [commission.image, ...(commission.previews || [])];
-    const uniquePreviews = [...new Set(allPreviews)];
-    const hasMultipleImages = uniquePreviews.length > 1;
+    if (!commission) return null;
+    if (loading) return <div className={styles.loading}>Loading...</div>;
 
     return (
         <div className={styles.overlay}>
@@ -27,64 +42,37 @@ const CommissionModalDetails = ({ commission, onClose, variant = "basic" }) => {
                 </button>
 
                 <div className={styles.topSection}>
-                    {hasMultipleImages ? (
-
-                        // 1. ВАРІАНТ: Декілька картинок (як на дизайні)
+                    {images.length > 1 ? (
                         <div className={styles.imageColumn}>
-                            <img
-                                src={mainImage}
-                                alt={commission.title}
-                                className={styles.image} // Головна картинка
-                            />
-                            {/* Рядок з прев'юшками */}
+                            <img src={mainImage} alt={commission.title} className={styles.image} />
                             <div className={styles.previewRow}>
-                                {uniquePreviews.map((img, index) => (
+                                {images.map((img, i) => (
                                     <img
-                                        key={index}
+                                        key={i}
                                         src={img}
-                                        alt={`preview ${index + 1}`}
+                                        alt={`preview ${i}`}
                                         className={`${styles.previewImg} ${img === mainImage ? styles.activePreview : ''}`}
                                         onClick={() => setMainImage(img)}
                                     />
                                 ))}
                             </div>
                         </div>
-
                     ) : (
-
-                        // 2. ВАРІАНТ: Тільки одна картинка
-                        <img
-                            src={mainImage}
-                            alt={commission.title}
-                            className={styles.singleImage} // Клас для великої картинки
-                        />
+                        <img src={mainImage} alt={commission.title} className={styles.singleImage} />
                     )}
 
                     <div className={styles.info}>
                         <p className={styles.title}>{commission.title}</p>
-
-                        <p className={styles.field}>
-                            <span>Category</span> {commission.category}
-                        </p>
-                        <p className={styles.field}>
-                            <span>Style</span> {commission.style}
-                        </p>
-                        <p className={styles.field}>
-                            <span>File format</span> {commission.fileFormat}
-                        </p>
-                        <p className={styles.field}>
-                            <span>Size</span> {commission.size}
-                        </p>
-
+                        <p><span>Category</span> {commission.category}</p>
+                        <p><span>Style</span> {commission.style}</p>
+                        <p><span>File format</span> {commission.fileFormat}</p>
+                        <p><span>Size</span> {commission.size}</p>
                     </div>
                 </div>
 
                 <div className={styles.about}>
                     <p>About</p>
                     <span>{commission.about}</span>
-                    {/*<p className={styles.feelings}>*/}
-                    {/*    <b>Feelings:</b> {commission.feelings}*/}
-                    {/*</p>*/}
                 </div>
 
                 <div className={styles.actions}>
@@ -94,6 +82,6 @@ const CommissionModalDetails = ({ commission, onClose, variant = "basic" }) => {
             </div>
         </div>
     );
-}
+};
 
 export default CommissionModalDetails;

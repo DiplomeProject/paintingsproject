@@ -42,148 +42,275 @@ function filePathToDataUri(filePath) {
 }
 
 // 1. СТВОРЕННЯ ПУБЛІЧНОГО КОМІШЕНУ (із збереженням зображення в base64)
-router.post('/api/commissions/public', upload.single('referenceImage'), async (req, res) => {
+// Create a public commission (with up to 5 images)
+router.post(
+  '/api/commissions/public',
+  upload.fields([
+    { name: 'referenceImage', maxCount: 1 },
+    { name: 'image2', maxCount: 1 },
+    { name: 'image3', maxCount: 1 },
+    { name: 'image4', maxCount: 1 },
+    { name: 'image5', maxCount: 1 }
+  ]),
+  async (req, res) => {
     const { title, description, category, style, size, format, price } = req.body;
     const user = req.session.user || { id: 1, email: 'test@example.com' }; // fallback for testing
 
-    // Convert file to base64 if uploaded
-    let referenceImageBase64 = null;
-    if (req.file) {
-        const fileBuffer = fs.readFileSync(req.file.path);
-        const mimeType = req.file.mimetype || 'image/png';
-        referenceImageBase64 = `data:${mimeType};base64,${fileBuffer.toString('base64')}`;
-    }
-
     if (!title || !description) {
-        return res.status(400).json({
-            success: false,
-            message: 'Title and description are required'
-        });
+      return res.status(400).json({
+        success: false,
+        message: 'Title and description are required'
+      });
     }
 
-    // ✅ FIXED SQL — includes Customer_ID
+    // helper to safely convert file -> base64 data URI
+    const fileToBase64 = (file) => {
+      if (!file) return null;
+      try {
+        const fileBuffer = fs.readFileSync(file.path);
+        const mimeType = file.mimetype || 'image/png';
+        return `data:${mimeType};base64,${fileBuffer.toString('base64')}`;
+      } catch (err) {
+        console.error(`Error reading ${file.originalname}:`, err);
+        return null;
+      }
+    };
+
+    // convert each possible image
+    const referenceImageBase64 = fileToBase64(req.files?.referenceImage?.[0]);
+    const image2xBase64 = fileToBase64(req.files?.image2?.[0]);
+    const image3xBase64 = fileToBase64(req.files?.image3?.[0]);
+    const image4xBase64 = fileToBase64(req.files?.image4?.[0]);
+    const image5xBase64 = fileToBase64(req.files?.image5?.[0]);
+
     const sql = `
-        INSERT INTO commissions 
-        (Title, Description, Category, Style, Size, Format, Price, ReferenceImage, Type, Customer_ID, Creator_ID, Status, Created_At)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'public', ?, ?, 'open', NOW())
+      INSERT INTO commissions 
+        (Title, Description, Category, Style, Size, Format, Price,
+         ReferenceImage, Image2, Image3, Image4, Image5,
+         Type, Customer_ID, Creator_ID, Status, Created_At)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'public', ?, ?, 'open', NOW())
     `;
 
     const values = [
-        title,
-        description,
-        category || null,
-        style || null,
-        size || null,
-        format || null,
-        price || null,
-        referenceImageBase64,
-        user.id,   // 👈 Customer_ID
-        null       // 👈 Creator_ID (not assigned yet)
+      title,
+      description,
+      category || null,
+      style || null,
+      size || null,
+      format || null,
+      price || null,
+      referenceImageBase64,
+      image2xBase64,
+      image3xBase64,
+      image4xBase64,
+      image5xBase64,
+      user.id, // Customer_ID
+      null // Creator_ID
     ];
 
     try {
-        const [result] = await db.query(sql, values);
-        res.status(201).json({
-            success: true,
-            message: 'Public commission created successfully',
-            commissionId: result.insertId
-        });
+      const [result] = await db.query(sql, values);
+      res.status(201).json({
+        success: true,
+        message: 'Public commission created successfully',
+        commissionId: result.insertId
+      });
     } catch (err) {
-        console.error('Error creating public commission:', err);
-        res.status(500).json({
-            success: false,
-            message: 'Database error while creating commission'
-        });
+      console.error('Error creating public commission:', err);
+      res.status(500).json({
+        success: false,
+        message: 'Database error while creating commission'
+      });
     }
-});
+  }
+);
 
 
 
 // Updated GET route for Commissions.js backend
 
 router.get('/api/commissions/public', async (req, res) => {
+    const sql = `
+        SELECT
+            c.*,
+            cr.Name AS customer_name,
+            cr.Email AS customer_email
+        FROM commissions c
+                 LEFT JOIN creators cr ON c.Customer_ID = cr.Creator_ID
+        WHERE c.Type = 'public' AND c.Status = 'open'
+        ORDER BY c.Created_At DESC
+    `;
+
+    try {
+        const [results] = await db.query(sql);
+        console.log(`Found ${results.length} commissions`);
+
+        const commissionsWithImages = results.map((commission) => {
+            let imageUrl = null;
+            const ref = commission.ReferenceImage;
+
+            console.log(`Commission ${commission.Commission_ID} (${commission.Title}):`);
+            console.log(`  - ReferenceImage type: ${ref ? (Buffer.isBuffer(ref) ? 'Buffer' : typeof ref) : 'null'}`);
+
+            if (ref) {
+                let refAsString = null;
+
+                // --- ПОЧАТОК ВИПРАВЛЕННЯ ---
+                // 1. Перетворюємо буфер на рядок, якщо це буфер.
+                // Ми припускаємо, що в БД зберігається рядок (Data URI або шлях до файлу).
+                if (Buffer.isBuffer(ref)) {
+                    refAsString = ref.toString('utf8');
+                } else if (typeof ref === 'string') {
+                    refAsString = ref;
+                }
+
+                // 2. Тепер працюємо з рядком
+                if (refAsString) {
+                    const trimmed = refAsString.trim();
+
+                    // 3. Перевіряємо, чи це ВЖЕ готовий Data URI
+                    if (trimmed.startsWith('data:image')) {
+                        imageUrl = trimmed;
+                        console.log(`  - Successfully processed data URI from DB`);
+                    }
+                    // 4. Якщо ні, припускаємо, що це шлях до файлу
+                    else {
+                        imageUrl = filePathToDataUri(trimmed);
+                        console.log(`  - Tried file path, result: ${imageUrl ? 'success' : 'failed'}`);
+                    }
+                }
+                // --- КІНЕЦЬ ВИПРАВЛЕННЯ ---
+
+            } else {
+                console.log(`  - No image data`);
+            }
+
+            // Return normalized commission object
+            return {
+                id: commission.Commission_ID,
+                Commission_ID: commission.Commission_ID,
+                Title: commission.Title,
+                Description: commission.Description,
+                Category: commission.Category,
+                Style: commission.Style,
+                Size: commission.Size,
+                Format: commission.Format,
+                Price: commission.Price,
+                Type: commission.Type,
+                Status: commission.Status,
+                Customer_ID: commission.Customer_ID,
+                Creator_ID: commission.Creator_ID,
+                Created_At: commission.Created_At,
+                customer_name: commission.customer_name,
+                customer_email: commission.customer_email,
+                imageUrl: imageUrl // This is the key field for frontend
+            };
+        });
+
+        console.log(`Sending ${commissionsWithImages.length} commissions to frontend`);
+        res.json({ success: true, commissions: commissionsWithImages });
+    } catch (err) {
+        console.error('Error fetching public commissions:', err);
+        res.status(500).json({ success: false, message: 'Error fetching commissions' });
+    }
+});
+
+// Get full details (including all images) - normalized same as public GET
+router.get('/api/commissions/:id', async (req, res) => {
+  const { id } = req.params;
+
   const sql = `
     SELECT 
-      c.*,
-      cr.Name AS customer_name,
-      cr.Email AS customer_email
-    FROM commissions c
-    LEFT JOIN creators cr ON c.Customer_ID = cr.Creator_ID
-    WHERE c.Type = 'public' AND c.Status = 'open'
-    ORDER BY c.Created_At DESC
+      Commission_ID, Title, Description, Category, Style, Size, Format, Price,
+      ReferenceImage, Image2, Image3, Image4, Image5,
+      Customer_ID, Creator_ID, Created_At, Updated_At
+    FROM commissions
+    WHERE Commission_ID = ?
+    LIMIT 1
   `;
 
   try {
-    const [results] = await db.query(sql);
-    console.log(`Found ${results.length} commissions`);
+    const [rows] = await db.query(sql, [id]);
+    if (rows.length === 0) {
+      return res.status(404).json({ success: false, message: 'Commission not found' });
+    }
 
-    const commissionsWithImages = results.map((commission) => {
-      let imageUrl = null;
-      const ref = commission.ReferenceImage;
+    const commission = rows[0];
 
-      console.log(`Commission ${commission.Commission_ID} (${commission.Title}):`);
-      console.log(`  - ReferenceImage type: ${ref ? (Buffer.isBuffer(ref) ? 'Buffer' : typeof ref) : 'null'}`);
-      console.log(`  - ReferenceImage length: ${ref ? (Buffer.isBuffer(ref) ? ref.length : ref.length) : 0}`);
-
-      if (ref) {
-        // Case 1: LONGBLOB (Buffer) - most common from DB
-        if (Buffer.isBuffer(ref)) {
-          imageUrl = bufferToDataUri(ref, 'png');
-          console.log(`  - Converted Buffer to data URI, length: ${imageUrl.length}`);
+    // normalize any stored image value to a data URI or public URL (same logic as list endpoint)
+    const toDataUri = (value) => {
+      if (!value) return null;
+      try {
+        // Buffer (BLOB)
+        if (Buffer.isBuffer(value)) {
+          return bufferToDataUri(value, 'png');
         }
-        // Case 2: Already a data URI string
-        else if (typeof ref === 'string') {
-          const trimmed = ref.trim();
-          if (trimmed.startsWith('data:image')) {
-            imageUrl = trimmed;
-            console.log(`  - Already data URI`);
-          } 
-          // Case 3: Base64 string without data URI prefix
-          else if (/^[A-Za-z0-9+/=]+$/.test(trimmed) && trimmed.length > 100) {
-            imageUrl = `data:image/png;base64,${trimmed}`;
-            console.log(`  - Converted base64 string to data URI`);
-          } 
-          // Case 4: File path
-          else {
-            imageUrl = filePathToDataUri(trimmed);
-            console.log(`  - Tried file path, result: ${imageUrl ? 'success' : 'failed'}`);
+
+        // string cases
+        if (typeof value === 'string') {
+          const trimmed = value.trim();
+
+          // already data URI
+          if (trimmed.startsWith('data:')) return trimmed;
+
+          // raw base64 string -> prefix png
+          const cleaned = trimmed.replace(/[\r\n\s]+/g, '');
+          if (/^[A-Za-z0-9+/=]+$/.test(cleaned) && cleaned.length > 50) {
+            return `data:image/png;base64,${cleaned}`;
           }
+
+          // try file path -> convert to data URI
+          const fileConverted = filePathToDataUri(trimmed);
+          if (fileConverted) return fileConverted;
+
+          // if it's an http(s) url -> return as-is
+          if (/^https?:\/\//i.test(trimmed)) return trimmed;
+
+          // otherwise cannot convert
+          return null;
         }
-      } else {
-        console.log(`  - No image data`);
+
+        return null;
+      } catch (err) {
+        console.error(`[toDataUri] error converting image value for commission ${id}:`, err);
+        return null;
       }
+    };
 
-      // Return normalized commission object
-      return {
+    const image1 = toDataUri(commission.ReferenceImage);
+    const image2 = toDataUri(commission.Image2);
+    const image3 = toDataUri(commission.Image3);
+    const image4 = toDataUri(commission.Image4);
+    const image5 = toDataUri(commission.Image5);
+
+    const images = [image1, image2, image3, image4, image5].filter(Boolean);
+
+    console.log(`[GET /api/commissions/${id}] images normalized: ${images.length}`);
+
+    res.json({
+      success: true,
+      commission: {
         id: commission.Commission_ID,
-        Commission_ID: commission.Commission_ID,
-        Title: commission.Title,
-        Description: commission.Description,
-        Category: commission.Category,
-        Style: commission.Style,
-        Size: commission.Size,
-        Format: commission.Format,
-        Price: commission.Price,
-        Type: commission.Type,
-        Status: commission.Status,
-        Customer_ID: commission.Customer_ID,
-        Creator_ID: commission.Creator_ID,
-        Created_At: commission.Created_At,
-        customer_name: commission.customer_name,
-        customer_email: commission.customer_email,
-        imageUrl: imageUrl // This is the key field for frontend
-      };
+        title: commission.Title,
+        description: commission.Description,
+        category: commission.Category,
+        style: commission.Style,
+        size: commission.Size,
+        format: commission.Format,
+        price: commission.Price,
+        images,   // array of normalized image sources (data: URIs or URLs)
+        image1,   // individual normalized fields (may be null)
+        image2,
+        image3,
+        image4,
+        image5
+      }
     });
-
-    console.log(`Sending ${commissionsWithImages.length} commissions to frontend`);
-    res.json({ success: true, commissions: commissionsWithImages });
   } catch (err) {
-    console.error('Error fetching public commissions:', err);
-    res.status(500).json({ success: false, message: 'Error fetching commissions' });
+    console.error('Error fetching commission details:', err);
+    res.status(500).json({ success: false, message: 'Error fetching commission details' });
   }
 });
-
-
 
 
 
