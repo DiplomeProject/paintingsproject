@@ -9,9 +9,6 @@
     border-radius: 20px;
     font-family: 'Roboto', sans-serif;
     margin: 0;
-    position: absolute;
-    top: 236px;
-    left: 740px;
     overflow: hidden;
     opacity: 1;
     box-sizing: border-box;
@@ -29,12 +26,9 @@
     background-clip: text;
     color: transparent;
     line-height: 97%;
-    letter-spacing: -2.3%;
+    letter-spacing: -2%;
     width: 320px;
     height: 82px;
-    position: absolute;
-    top: 51px; /* 287px - 236px */
-    left: 62px; /* 802px - 740px */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -43,9 +37,6 @@
 
 /* Контейнер для полей ввода под логотипом */
 .fieldsContainer {
-    position: absolute;
-    top: 160px; /* Опустил поля ввода */
-    left: 62px;
     width: 319px;
 }
 
@@ -99,9 +90,6 @@
     align-items: center;
     margin-bottom: 40px;
     gap: 10px;
-    position: absolute;
-    top: 330px; /* Опустил кнопки */
-    left: 62px;
     width: 319px;
 }
 
@@ -137,9 +125,6 @@
 
 /* Контейнер для нижней части с чертой и кнопкой */
 .bottomContainer {
-    position: absolute;
-    bottom: 30px;
-    left: 62px;
     width: 319px;
 }
 

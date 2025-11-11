@@ -9,9 +9,6 @@
     border-radius: 20px;
     font-family: 'Roboto', sans-serif;
     margin: 0;
-    position: absolute;
-    top: 266px;
-    left: 740px;
     overflow: hidden;
     opacity: 1;
     box-sizing: border-box;
@@ -25,12 +22,9 @@
     font-weight: 500;
     font-family: 'Roboto', sans-serif;
     line-height: 100%;
-    letter-spacing: 0%;
+    letter-spacing: 0;
     width: 216px;
     height: 26px;
-    position: absolute;
-    top: 44px; /* 310px - 266px */
-    left: 62px; /* 802px - 740px */
 }
 
 .emailTitle {
@@ -44,9 +38,6 @@
     display: flex;
     flex-direction: column;
     margin-bottom: 20px;
-    position: absolute;
-    width: 319px;
-    left: 62px; /* 802px - 740px */
 }
 
 .field label {
@@ -95,8 +86,8 @@
 
 .eyeBtn {
     position: absolute;
-    right: 10px;
     top: 50%;
+    right: 72px;
     transform: translateY(-50%);
     background: none;
     border: none;
@@ -109,9 +100,6 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    position: absolute;
-    top: 444px; /* 710px - 266px */
-    left: 62px; /* 802px - 740px */
     width: 319px;
     gap: 10px;
 }
