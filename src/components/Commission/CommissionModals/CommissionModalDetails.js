@@ -50,7 +50,6 @@ const CommissionModalDetails = ({ commission, onClose }) => {
 
     // 5. hasMultipleImages тепер динамічно розраховується
     const hasMultipleImages = allImages.length > 1;
-    // --- (КІНЕЦЬ ОНОВЛЕННЯ) ---
 
     if (!commission) {
         return null;
@@ -87,7 +86,6 @@ const CommissionModalDetails = ({ commission, onClose }) => {
                                     className={styles.image}
                                     onError={onImageError}
                                 />
-                                {/* ... (решта галереї без змін) ... */}
                                 <div className={styles.previewRow}>
                                     {allImages.map((img, index) => (
                                         <img
@@ -105,7 +103,6 @@ const CommissionModalDetails = ({ commission, onClose }) => {
                             <img
                                 src={mainImage || "/images/placeholder.png"}
 
-                                // --- ВИПРАВЛЕНО ---
                                 alt={commission.Title}
 
                                 className={styles.singleImage}
@@ -113,8 +110,6 @@ const CommissionModalDetails = ({ commission, onClose }) => {
                             />
                         )
                     )}
-
-                    {/* --- (ВИПРАВЛЕНО) Вся ця секція --- */}
                     <div className={styles.info}>
                         <p className={styles.title}>{commission.Title}</p>
                         <p className={styles.field}>
