@@ -5,7 +5,7 @@
     height: 527px;
     background-color: #f9f9f9;
     padding: 51px 62px 39px 61px;
-    margin: 104px 0 245px 0;
+    /*margin: 104px 0 245px 0;*/
     border-radius: 20px;
     font-family: 'Roboto', sans-serif;
     overflow: hidden;
@@ -15,23 +15,23 @@
 }
 
 .logo {
-    text-align: center;
+    /*text-align: center;*/
     margin-bottom: 28px;
-    margin-top: 0;
-    font-family: 'Orbitron', Arial, sans-serif;
-    font-weight: 700;
-    font-size: 42px;
-    background: linear-gradient(110.32deg, #2090FF 11.04%, #5454FE 25.37%, #853FF6 38.57%, #FD4CCC 58.79%, #F75252 84.36%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    color: transparent;
-    line-height: 97%;
-    width: 320px;
-    height: 82px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    /*margin-top: 0;*/
+    /*font-family: 'Orbitron', Arial, sans-serif;*/
+    /*font-weight: 700;*/
+    /*font-size: 42px;*/
+    /*background: linear-gradient(110.32deg, #2090FF 11.04%, #5454FE 25.37%, #853FF6 38.57%, #FD4CCC 58.79%, #F75252 84.36%);*/
+    /*-webkit-background-clip: text;*/
+    /*-webkit-text-fill-color: transparent;*/
+    /*background-clip: text;*/
+    /*color: transparent;*/
+    /*line-height: 97%;*/
+    width: 80%;
+    /*height: 82px;*/
+    /*display: flex;*/
+    /*align-items: center;*/
+    /*justify-content: center;*/
 }
 
 /* Контейнер для полей ввода под логотипом */
@@ -75,7 +75,7 @@
 .eyeBtn {
     position: absolute;
     right: 10px;
-    top: 50%;
+    top: 55%;
     transform: translateY(-50%);
     background: none;
     border: none;

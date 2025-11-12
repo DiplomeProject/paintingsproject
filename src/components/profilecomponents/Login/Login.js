@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import styles from "./Login.module.css";
 import { EyeIcon, EyeSlashIcon } from "../Register/AuthIcons";
+import logo from '../../../assets/logoWithText.svg';
 
 function Login({ toggleForm, handleLogin, handleInputChange, onForgotPassword }) {
     const [showPassword, setShowPassword] = useState(false);
@@ -11,7 +12,8 @@ function Login({ toggleForm, handleLogin, handleInputChange, onForgotPassword })
 
     return (
         <form className={styles.authCard} onSubmit={handleSubmit}>
-            <h2 className={styles.logo}>Digital<br />Brush</h2>
+            <img src={logo} className={styles.logo} alt="logo" />
+            {/*<h2 className={styles.logo}>Digital<br />Brush</h2>*/}
 
             <div className={styles.fieldsContainer}>
                 <div className={styles.field}>
