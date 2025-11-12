@@ -175,9 +175,9 @@ function Commission() {
         setIsAddModalOpen(false);
     };
 
-    // if (loading) {
-    //     return <div className={styles.loading}>Loading commissions...</div>;
-    // }
+    if (loading) {
+        return <div className={styles.loading}>Loading commissions...</div>;
+    }
 
     return (
         <div className={styles.commissionPage}>
