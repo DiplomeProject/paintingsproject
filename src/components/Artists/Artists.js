@@ -1,5 +1,4 @@
 import React, { useState, useMemo, useEffect, useRef } from "react";
-import axios from 'axios';
 import styles from "./Artists.module.css";
 import ArtCard from '../ArtCard/ArtCard';
 import CategoryFilters from "../CategoryFilters/CategoryFilters";
@@ -8,7 +7,10 @@ import { usePagination } from '../hooks/Pagination/usePagination';
 import Pagination from '../hooks/Pagination/Pagination';
 import leftArrow from '../../assets/leftArrow.svg';
 import rightArrow from '../../assets/rightArrow.svg';
+import axios from 'axios';
+import ArtDetailsModal from "../ArtCard/Modals/ArtDetailsModal";
 
+// --- Конфігурація фільтрів ---
 const categories = [
     "2D AVATARS", "3D MODELS", "BOOKS", "ANIME", "ICONS", "GAMES",
     "MOCKUPS", "UI/UX", "ADVERTISING", "BRENDING", "POSTER",
@@ -24,11 +26,77 @@ const artistFilterConfig = [
         ]}
 ];
 
+/*// --- Функції для генерації рандомних даних ---
+const getRandomInt = (min, max) => {
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+};
+
+const mockTitles = [
+    'Cyberpunk Alley', 'Forest Spirit', 'Oceanic Dread', 'Retro Future Car', 'Zen Garden 3D',
+    'Project "Phoenix"', 'Synthwave Sunset', 'Minimalist Icon Set', 'Space Opera Concept',
+    'Gothic Architecture', 'Vibrant Street Art', 'Abstract Emotions', 'Lunar Colony UI/UX',
+    'Vintage Poster Ad', 'Nomad Sketch', 'EXHIBITION ADVERTISING'
+];
+const getRandomElement = (arr) => arr[Math.floor(Math.random() * arr.length)];
+
+const mockNames = ["Andriy", "Oleksandra", "Max", "Yaroslav", "Danylo", "Sophia", "Ivan", "Olga", "Dmytro", "Viktoria"];
+const mockSurnames = ["Kovalchuk", "Muratov", "Shevchenko", "Petrenko", "Franko", "Lysenko", "Kravchenko", "Bondarenko"];
+const mockCountries = ["Ukraine", "Poland", "USA", "Italy", "Spain", "Germany", "France", "Japan"];
+const mockStyles = ["Digital Art", "Fantasy", "Synthwave", "Minimalism", "Cyberpunk", "3D Render", "Photography", "Illustration"];
+
+// Генерує 3-6 рандомних карток для одного артиста
+const generateRandomArtworks = (artistName) => {
+    return Array.from({ length: getRandomInt(3, 12) }, (_, i) => ({
+        id: `p-${artistName.replace(/\s/g, '-')}-${i}`,
+        title: getRandomElement(mockTitles),
+        imageUrl: `/images/shopAndOtherPageImages/image${getRandomInt(1, 4)}.png`,
+        artistName: artistName,
+        artistStyle: getRandomElement(mockStyles),
+        likes: `${getRandomInt(50, 500)}k`, // Змінено на 'k' для відповідності дизайну
+        price: getRandomInt(20, 250).toFixed(2),
+
+        // --- Додані поля для ArtDetailsModal ---
+        images: [ // Масив зображень
+            `/images/shopAndOtherPageImages/image${getRandomInt(1, 4)}.png`,
+            `/images/shopAndOtherPageImages/image${getRandomInt(1, 4)}.png`
+        ],
+        category: "Neo-minimalism",
+        style: "Neo-minimalism",
+        fileFormat: "PNG",
+        size: "1080 x 1920",
+        description: "The composition features two large, metallic, ring-like sculptures with reflective chrome surfaces, symmetrically placed on a stark white background."
+    }));
+};
+
+// Генерує одного рандомного артиста
+const generateRandomArtist = (i) => {
+    const name = `${getRandomElement(mockNames)} ${getRandomElement(mockSurnames)}`;
+    const style = getRandomElement(mockStyles); // Стиль артиста
+
+    return {
+        id: i,
+        name: name,
+        country: getRandomElement(mockCountries),
+        style: style,
+        avatar: "/images/profileImg.jpg", // Використовуємо заглушку для аватара
+        likesCount: getRandomInt(100, 5000), // Додано для "Likes"
+        artworks: generateRandomArtworks(name), // Генерація робіт
+    };
+};
+
+// Створюємо масив з 10 рандомних артистів
+const artistsData = Array.from({ length: 30 }, (_, i) => generateRandomArtist(i));*/
+
 export default function Artists() {
     const [searchQuery, setSearchQuery] = useState("");
     const [activeCategory, setActiveCategory] = useState(null);
     const [showAdvanced, setShowAdvanced] = useState(false);
     const [galleryStates, setGalleryStates] = useState({});
+    const [selectedArt, setSelectedArt] = useState(null);
+
+    // Референси для скролу галерей кожного артиста
     const galleryRefs = useRef({});
 
     const checkGalleryOverflow = (artistId) => {
@@ -244,6 +312,7 @@ export default function Artists() {
                                             )}
                                         </div>
 
+                                        {/* Кнопка "Вправо" */}
                                         {state.hasOverflow && state.showRight && (
                                             <button
                                                 className={`${styles.navButton} ${styles.right}`}
@@ -266,6 +335,12 @@ export default function Artists() {
                     onPageChange={setCurrentPage}
                 />
             </div>
+            {selectedArt && (
+                <ArtDetailsModal
+                    art={selectedArt}
+                    onClose={() => setSelectedArt(null)}
+                />
+            )}
         </div>
     );
 }

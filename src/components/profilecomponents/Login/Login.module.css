@@ -1,48 +1,64 @@
-/* Login.module.css */
 .authCard {
     display: flex;
     flex-direction: column;
-    width: 100%;
-    max-width: 320px;
+    width: 444px;
+    height: 527px;
     background-color: #f9f9f9;
-    padding: 30px 20px;
-    border-radius: 16px;
+    padding: 51px 62px 39px 61px;
+    /*margin: 104px 0 245px 0;*/
+    border-radius: 20px;
     font-family: 'Roboto', sans-serif;
-    margin: 0 auto;
+    overflow: hidden;
+    opacity: 1;
+    box-sizing: border-box;
+    align-items: center;
 }
 
 .logo {
-    text-align: center;
-    margin-bottom: 20px;
-    font-family: 'Orbitron', Arial, sans-serif;
-    font-weight: 700;
-    font-size: 36px;
-    background: linear-gradient(135deg, #2090FF 0%, #5454FE 33%, #853FF6 66%, #FD4CCC 83%, #F75252 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    color: transparent;
-    line-height: 1;
+    /*text-align: center;*/
+    margin-bottom: 28px;
+    /*margin-top: 0;*/
+    /*font-family: 'Orbitron', Arial, sans-serif;*/
+    /*font-weight: 700;*/
+    /*font-size: 42px;*/
+    /*background: linear-gradient(110.32deg, #2090FF 11.04%, #5454FE 25.37%, #853FF6 38.57%, #FD4CCC 58.79%, #F75252 84.36%);*/
+    /*-webkit-background-clip: text;*/
+    /*-webkit-text-fill-color: transparent;*/
+    /*background-clip: text;*/
+    /*color: transparent;*/
+    /*line-height: 97%;*/
+    width: 80%;
+    /*height: 82px;*/
+    /*display: flex;*/
+    /*align-items: center;*/
+    /*justify-content: center;*/
+}
+
+/* Контейнер для полей ввода под логотипом */
+.fieldsContainer {
+    width: 319px;
+    margin-bottom: 5px;
 }
 
 .field {
     display: flex;
     flex-direction: column;
-    margin-bottom: 15px;
+    margin-bottom: 27px;
 }
 
 .field label {
-    font-size: 12px;
-    color: #555;
-    margin-bottom: 5px;
+    font-size: 14px;
+    color: #000000;
+    margin-bottom: 10px;
 }
 
 .field input {
-    width: 100%;
-    padding: 8px 10px;
+    width: 319px;
+    height: 39px;
+    padding: 0 10px;
     border: none;
-    border-radius: 6px;
-    font-size: 13px;
+    border-radius: 10px;
+    font-size: 14px;
     background-color: #361950;
     color: white;
     box-sizing: border-box;
@@ -53,49 +69,94 @@
 }
 
 .passwordWrapper input {
-    padding-right: 30px;
+    padding-right: 40px;
 }
 
 .eyeBtn {
     position: absolute;
-    right: 6px;
-    top: 50%;
+    right: 10px;
+    top: 55%;
     transform: translateY(-50%);
     background: none;
     border: none;
     cursor: pointer;
     color: white;
-    padding: 4px;
+    padding: 5px;
+}
+
+.buttonsRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 74px;
+    gap: 77px;
+    width: 319px;
 }
 
 .submitBtn {
-    padding: 10px;
-    font-size: 13px;
-    font-weight: bold;
-    border-radius: 6px;
+    width: 70px;
+    height: 39px;
+    padding: 10px 0;
+    border-radius: 10px;
     border: none;
     cursor: pointer;
     background: #5454FE;
     color: white;
-    margin-bottom: 10px;
+    white-space: nowrap;
+    border-bottom: 1px solid;
+    font-family: 'Roboto', sans-serif;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 100%;
+    letter-spacing: 0;
 }
 
 .forgotPassword {
-    color: #555;
+    color: #000000;
     text-decoration: none;
-    font-size: 12px;
-    text-align: center;
-    margin-bottom: 15px;
     cursor: pointer;
+    white-space: nowrap;
+    text-align: right;
+    font-family: 'Montserrat Alternates', sans-serif;
+    font-weight: 600;
+    font-size: 16px;
+    line-height: 100%;
+    letter-spacing: 0;
+}
+
+/* Контейнер для нижней части с чертой и кнопкой */
+.bottomContainer {
+    width: 319px;
 }
 
 .switchFormBtn {
     background: none;
     border: none;
-    color: #5454FE;
-    font-size: 13px;
-    font-weight: bold;
+    color: #000000;
     cursor: pointer;
     text-align: center;
-    margin-bottom: 15px;
+    margin-top: 0;
+    border-radius: 8px;
+    width: 100%;
+    padding-top: 6px;
+    font-family: 'Montserrat Alternates', sans-serif;
+    font-weight: 600;
+    font-size: 16px;
+    line-height: 100%;
+    letter-spacing: 0;
+}
+
+/* Чёрная чёрточка над кнопкой Create account */
+.separator {
+    width: 100%;
+    height: 2px;
+    border: 2px;
+    background-color: black;
+    margin: 0;
+}
+
+/* Убрал все лишние линии */
+.whiteLine,
+.blackLine {
+    display: none;
 }
