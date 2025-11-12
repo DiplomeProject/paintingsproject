@@ -5,52 +5,45 @@ import axios from 'axios';
 
 const CommissionModalDetails = ({ commission, onClose }) => {
 
-    // 1. Стан для індикатора завантаження
     const [isLoading, setIsLoading] = useState(true);
 
-    // 2. Початковий стан - 'allImages' містить ТІЛЬКИ головне зображення, яке прийшло
     const [allImages, setAllImages] = useState(
         commission ? (commission.imageUrl ? [commission.imageUrl] : []) : []
     );
-    // 3. Головне зображення встановлюємо одразу з пропсів
     const [mainImage, setMainImage] = useState(
         commission ? commission.imageUrl : null
     );
 
-    // 4. Завантажуємо решту зображень, коли модалка відкривається
     useEffect(() => {
         if (commission && commission.id) {
             setIsLoading(true);
 
-            // Встановлюємо початковий стан з пропсів
             const initialMain = commission.imageUrl || null;
             setMainImage(initialMain);
             setAllImages(initialMain ? [initialMain] : []);
 
-            // Робимо запит на всі зображення, використовуючи НОВИЙ РОУТ
-            axios.get(`http://localhost:8080/api/commissions/${commission.id}/images`, { withCredentials: true })
+            axios.get(`http://localhost:8080/api/commissions/${commission.id}`, { withCredentials: true })
                 .then(response => {
-                    if (response.data.success && response.data.images.length > 0) {
-                        // Ми отримали повний масив зображень
-                        setAllImages(response.data.images);
-                        // Переконуємось, що головне зображення - це перше з отриманих
-                        setMainImage(response.data.images[0]);
+
+                    if (response.data.success && response.data.commission && response.data.commission.images && response.data.commission.images.length > 0) {
+
+                        setAllImages(response.data.commission.images);
+
+                        const newMain = response.data.commission.images[0];
+                        setMainImage(newMain);
+
                     }
-                    // Якщо зображень немає (окрім головного), залишаємо як є
                 })
                 .catch(err => {
                     console.error("Failed to fetch all commission images", err);
-                    // У разі помилки, просто покажемо головне зображення, яке вже є
                 })
                 .finally(() => {
-                    setIsLoading(false); // Завершуємо завантаження
+                    setIsLoading(false);
                 });
         }
-    }, [commission]); // Залежність від 'commission'
+    }, [commission]);
 
-    // 5. hasMultipleImages тепер динамічно розраховується
     const hasMultipleImages = allImages.length > 1;
-    // --- (КІНЕЦЬ ОНОВЛЕННЯ) ---
 
     if (!commission) {
         return null;
@@ -81,13 +74,11 @@ const CommissionModalDetails = ({ commission, onClose }) => {
                                 <img
                                     src={mainImage || "/images/placeholder.png"}
 
-                                    // --- ВИПРАВЛЕНО ---
-                                    alt={commission.Title}
+                                    alt={commission.title}
 
                                     className={styles.image}
                                     onError={onImageError}
                                 />
-                                {/* ... (решта галереї без змін) ... */}
                                 <div className={styles.previewRow}>
                                     {allImages.map((img, index) => (
                                         <img
@@ -105,8 +96,7 @@ const CommissionModalDetails = ({ commission, onClose }) => {
                             <img
                                 src={mainImage || "/images/placeholder.png"}
 
-                                // --- ВИПРАВЛЕНО ---
-                                alt={commission.Title}
+                                alt={commission.title}
 
                                 className={styles.singleImage}
                                 onError={onImageError}
@@ -114,37 +104,39 @@ const CommissionModalDetails = ({ commission, onClose }) => {
                         )
                     )}
 
-                    {/* --- (ВИПРАВЛЕНО) Вся ця секція --- */}
                     <div className={styles.info}>
-                        <p className={styles.title}>{commission.Title}</p>
+
+                        {/* ВИПРАВЛЕНО: 'Title' -> 'title' */}
+                        <p className={styles.title}>{commission.title}</p>
+
                         <p className={styles.field}>
-                            <span>Category</span> {commission.Category}
+                            {/* ВИПРАВЛЕНО: 'Category' -> 'category' */}
+                            <span>Category</span> {commission.category}
                         </p>
                         <p className={styles.field}>
-                            <span>Style</span> {commission.Style}
+                            {/* ВИПРАВЛЕНО: 'Style' -> 'style' */}
+                            <span>Style</span> {commission.style}
                         </p>
                         <p className={styles.field}>
-                            <span>File format</span> {commission.Format}
+                            {/* ВИПРАВЛЕНО: 'Format' -> 'fileFormat' */}
+                            <span>File format</span> {commission.fileFormat}
                         </p>
                         <p className={styles.field}>
-                            <span>Size</span> {commission.Size}
+                            {/* ВИПРАВЛЕНО: 'Size' -> 'size' */}
+                            <span>Size</span> {commission.size}
                         </p>
                     </div>
                 </div>
 
                 <div className={styles.about}>
                     <p>About</p>
-
-                    {/* --- ВИПРАВЛЕНО --- */}
-                    <span>{commission.Description}</span>
-
+                    {/* ВИПРАВЛЕНО: 'Description' -> 'description' */}
+                    <span>{commission.description}</span>
                 </div>
 
                 <div className={styles.actions}>
-
-                    {/* --- ВИПРАВЛЕНО --- */}
-                    <button className={styles.priceBtn}>{commission.Price}$</button>
-
+                    {/* ВИПРАВЛЕНО: 'Price' -> 'price' */}
+                    <button className={styles.priceBtn}>{commission.price}$</button>
                     <button className={styles.takeBtn}>Take</button>
                 </div>
             </div>
