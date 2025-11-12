@@ -2,54 +2,56 @@
 .authCard {
     display: flex;
     flex-direction: column;
-    width: 443px;
-    height: 527px;
+    max-width: 443px;
+    /*height: 527px;*/
     background-color: #f9f9f9;
-    padding: 51px 62px 39px 61px;
+    padding: 44px 62px;
     border-radius: 20px;
     font-family: 'Roboto', sans-serif;
+    font-weight: 400;
+    font-size: 14px;
     margin: 0;
     overflow: hidden;
     opacity: 1;
     box-sizing: border-box;
-    align-items: center;
+    /*align-items: center;*/
 }
 
 .mainTitle {
     font-size: 22px;
     color: #333;
     text-align: left;
-    margin-bottom: 5px;
+    margin-bottom: 33px;
+    margin-top: 0;
     font-weight: 500;
-    font-family: 'Roboto', sans-serif;
     line-height: 100%;
     letter-spacing: 0;
-    width: 216px;
-    height: 26px;
+    /*width: 216px;*/
+    /*height: 26px;*/
 }
 
 .emailTitle {
     font-size: 14px;
-    color: #555;
+    color: #000000;
     text-align: left;
     margin-bottom: 25px;
+    margin-top: 0;
 }
 
 .field {
     display: flex;
     flex-direction: column;
-    margin-bottom: 20px;
+    margin-bottom: 17px;
 }
 
 .field label {
-    font-size: 14px;
-    color: #555;
+    color: #000000;
     margin-bottom: 8px;
-    font-weight: 500;
+    font-weight: 400;
 }
 
 .field input {
-    width: 319px;
+    width: 100%;
     height: 39px;
     padding: 0 10px;
     border: none;
@@ -60,21 +62,27 @@
     box-sizing: border-box;
 }
 
-/* Позиции полей */
-.field:nth-child(2) { /* Username */
-    top: 127px; /* 393px - 266px */
+.field input[type="date"]:invalid {
+    color: transparent;
 }
 
-.field:nth-child(3) { /* Email */
-    top: 207px; /* 473px - 266px */
+.field input[type="date"]:valid {
+    color: white;
 }
 
-.field:nth-child(4) { /* Birthday */
-    top: 285px; /* 551px - 266px */
+.field input[type="date"] {
+    position: relative;
+    cursor: pointer;
 }
 
-.field:nth-child(5) { /* Password */
-    top: 363px; /* 629px - 266px */
+.field input[type="date"]::-webkit-calendar-picker-indicator {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
 }
 
 .passwordWrapper {
@@ -99,18 +107,16 @@
 
 .buttonsRow {
     display: flex;
-    justify-content: space-between;
+    /*justify-content: space-between;*/
     align-items: center;
-    width: 319px;
-    gap: 10px;
+    gap: 145px;
+    margin-top: 22px;
 }
 
 .submitBtn {
-    width: 70px;
+    /*width: 70px;*/
     height: 39px;
-    padding: 10px 0;
-    font-size: 14px;
-    font-weight: bold;
+    padding: 15px;
     border-radius: 10px;
     border: none;
     cursor: pointer;
@@ -122,6 +128,12 @@
     align-items: center;
     justify-content: center;
     transition: all 0.5s ease-out;
+
+    font-family: 'Roboto', sans-serif;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 100%;
+    letter-spacing: 0;
 }
 
 .submitBtn:active {
@@ -132,8 +144,6 @@
     width: 104px;
     height: 39px;
     padding: 10px 0;
-    font-size: 14px;
-    font-weight: bold;
     border-radius: 10px;
     border: none;
     cursor: pointer;
@@ -145,6 +155,12 @@
     align-items: center;
     justify-content: center;
     transition: all 0.5s ease-out;
+
+    font-family: 'Roboto', sans-serif;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 100%;
+    letter-spacing: 0;
 }
 
 .backBtn:active {
@@ -154,79 +170,15 @@
 /* Стили для второго шага */
 .codeInput {
     width: 100%;
-    padding: 12px;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    font-size: 16px;
-    background-color: white;
-    color: #333;
-    box-sizing: border-box;
-    text-align: center;
-    letter-spacing: 3px;
-    font-weight: bold;
-}
-
-.verificationTitle {
-    font-size: 18px;
-    color: #333;
-    text-align: center;
-    margin-bottom: 10px;
-    font-weight: bold;
-}
-
-.verificationText {
-    font-size: 14px;
-    color: #555;
-    text-align: center;
-    margin-bottom: 20px;
-    line-height: 1.4;
-}
-
-.verificationField {
-    display: flex;
-    flex-direction: column;
-    margin-bottom: 15px;
-}
-
-.verificationField input {
-    width: 100%;
-    padding: 12px;
+    height: 39px;
+    padding: 0 10px;
     border: none;
     border-radius: 10px;
-    font-size: 16px;
     background-color: #361950;
     color: white;
     box-sizing: border-box;
+    font-size: 18px;
     text-align: center;
     letter-spacing: 3px;
-}
-
-.verificationButtons {
-    display: flex;
-    gap: 10px;
-    margin-top: 20px;
-}
-
-.verifyBtn {
-    padding: 12px;
-    font-size: 14px;
     font-weight: bold;
-    border-radius: 8px;
-    border: none;
-    cursor: pointer;
-    background: #5454FE;
-    color: white;
-    width: 25%;
-}
-
-.backStepBtn {
-    padding: 12px;
-    font-size: 14px;
-    font-weight: bold;
-    border-radius: 8px;
-    border: 1px solid #5454FE;
-    cursor: pointer;
-    background: none;
-    color: #5454FE;
-    width: 30%;
 }

@@ -121,6 +121,7 @@ function Register({toggleForm}) {
                                onChange={handleChange}
                                required
                                disabled={loading}
+                               onClick={(e) => e.target.showPicker()}
                         />
                     </div>
                     <div className={styles.field}>
@@ -151,14 +152,16 @@ function Register({toggleForm}) {
                 </>
             ) : (
                 <>
-                    <h2 className={styles.verificationTitle}>Підтвердження email</h2>
-                    <p className={styles.verificationText}>
-                        Ми надіслали 6-значний код на <strong>{formData.email}</strong>
+                    <h2 className={styles.mainTitle}>Email confirmation</h2>
+
+                    <p className={styles.emailTitle} style={{textAlign: 'left', marginBottom: '20px'}}>
+                        We have sent a 6-digit code to <strong>{formData.email}</strong>
                     </p>
-                    <div className={styles.verificationField}>
+
+                    <div className={styles.field}>
                         <input
                             type="text"
-                            placeholder="Введіть код (6 цифр)"
+                            placeholder="Enter the code (6 digits)"
                             value={userCode}
                             onChange={(e) => setUserCode(e.target.value)}
                             required
@@ -168,17 +171,20 @@ function Register({toggleForm}) {
                             className={styles.codeInput}
                         />
                     </div>
-                    <div className={styles.verificationButtons}>
-                        <button type="submit" className={styles.verifyBtn} disabled={loading}>
-                            {loading ? "Перевірка..." : "Підтвердити"}
+
+                    <div className={styles.buttonsRow}>
+
+                        <button type="submit" className={styles.submitBtn} disabled={loading}>
+                            {loading ? "verification..." : "Confirm"}
                         </button>
+
                         <button
                             type="button"
-                            className={styles.backStepBtn}
+                            className={styles.backBtn}
                             onClick={() => setStep(1)}
                             disabled={loading}
                         >
-                            Назад
+                            Back
                         </button>
                     </div>
                 </>
