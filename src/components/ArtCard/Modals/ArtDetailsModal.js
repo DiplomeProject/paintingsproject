@@ -1,19 +1,22 @@
-import React, {useEffect} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import styles from './ArtDetailsModal.module.css';
-import closeIcon from '../../../assets/closeCross.svg'; // Шлях до іконки "X"
+import closeIcon from '../../../assets/closeCross.svg';
+import ImageViewer from "../ImageViewer/ImageViewer";
 
 const ArtDetailsModal = ({art, onClose}) => {
+
+    const [isViewerOpen, setIsViewerOpen] = useState(false);
+    const [viewerInitialIndex, setViewerInitialIndex] = useState(0);
+
     // Блокуємо прокрутку фону, коли модалка відкрита
     useEffect(() => {
         document.body.style.overflow = 'hidden';
         return () => {
-            document.body.style.overflow = 'auto'; // Повертаємо прокрутку
+            document.body.style.overflow = 'auto';
         };
     }, []);
 
-    // Обробник кліку на оверлей (для закриття)
     const handleOverlayClick = (e) => {
-        // Закриваємо, тільки якщо клік був на самому оверлеї, а не на модалці
         if (e.target === e.currentTarget) {
             onClose();
         }
@@ -22,12 +25,18 @@ const ArtDetailsModal = ({art, onClose}) => {
     // Перевірка наявності декількох зображень
     const imagesToShow = art.images && art.images.length > 0 ? art.images : [art.imageUrl];
 
+    const openImageViewer = useCallback((index) => {
+        setViewerInitialIndex(index);
+        setIsViewerOpen(true);
+    }, []);
+
+    const closeImageViewer = useCallback(() => {
+        setIsViewerOpen(false);
+    }, []);
+
     return (
         <div className={styles.overlay} onClick={handleOverlayClick}>
             <div className={styles.modal}>
-                <button className={styles.closeBtn} onClick={onClose}>
-                    <img src={closeIcon} alt="Close"/>
-                </button>
 
                 <div className={styles.modalContent}>
                     {/* --- Ліва колонка (Зображення) --- */}
@@ -38,13 +47,20 @@ const ArtDetailsModal = ({art, onClose}) => {
                                 src={imgUrl}
                                 alt={`${art.title} preview ${index + 1}`}
                                 className={styles.artImage}
+                                onError={(e) => { e.target.src = "/images/placeholder.png"; }}
+                                onClick={() => openImageViewer(index)}
                             />
                         ))}
                     </div>
 
                     {/* --- Права колонка (Інформація) --- */}
                     <div className={styles.rightColumn}>
-                        <h2 className={styles.title}>{art.title}</h2>
+                        <div className={styles.topSection}>
+                            <h2 className={styles.title}>{art.title} </h2>
+                            <button className={styles.closeBtn} onClick={onClose}>
+                                <img src={closeIcon} alt="Close"/>
+                            </button>
+                        </div>
                         <p className={styles.artistName}>{art.artistName}</p>
 
                         <div className={styles.detailsList}>
@@ -100,6 +116,13 @@ const ArtDetailsModal = ({art, onClose}) => {
                     </div>
                 </div>
             </div>
+            {isViewerOpen && (
+                <ImageViewer
+                    images={imagesToShow}
+                    initialImageIndex={viewerInitialIndex}
+                    onClose={closeImageViewer}
+                />
+            )}
         </div>
     );
 };

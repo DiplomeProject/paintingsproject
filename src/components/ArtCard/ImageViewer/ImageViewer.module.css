@@ -1,0 +1,78 @@
+/* ImageViewer.module.css */
+.viewerOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.9);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000; /* Дуже високий z-index */
+}
+
+.viewerContent {
+    position: relative;
+    max-width: 90vw;
+    max-height: 90vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: transparent; /* Без фону, тільки зображення */
+}
+
+.fullImage {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain; /* Зберігає пропорції та вміщує в контейнер */
+}
+
+.closeButton {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: none;
+    border: none;
+    color: white;
+    font-size: 40px;
+    cursor: pointer;
+    z-index: 2001; /* Поверх стрілок та зображення */
+}
+
+.navButton {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0, 0, 0, 0.5);
+    border: none;
+    color: white;
+    font-size: 30px;
+    padding: 10px 15px;
+    cursor: pointer;
+    z-index: 2001;
+    user-select: none; /* Забороняє виділення тексту */
+    border-radius: 5px;
+}
+
+.navButton:hover {
+    background: rgba(0, 0, 0, 0.8);
+}
+
+.prev {
+    left: -60px; /* Поза межами зображення */
+}
+
+.next {
+    right: -60px; /* Поза межами зображення */
+}
+
+/* Адаптація для маленьких екранів, щоб кнопки були ближче */
+@media (max-width: 768px) {
+    .prev {
+        left: 10px;
+    }
+    .next {
+        right: 10px;
+    }
+}

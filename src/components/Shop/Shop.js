@@ -50,6 +50,7 @@ const Shop = () => {
             images: [ // Масив зображень для модалки
                 `/images/shopAndOtherPageImages/image${(i % 4) + 1}.png`,
                 `/images/shopAndOtherPageImages/image${((i + 1) % 4) + 1}.png`,
+                '/images/shopAndOtherPageImages/shepard.jpg',
             ],
             title: `Artwork #${i + 1}`,
             artistName: "Digital Artist",
