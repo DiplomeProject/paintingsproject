@@ -28,6 +28,9 @@ const AddCommissionModal = ({ onClose }) => {
     // --- Стан для помилок валідації ---
     const [errors, setErrors] = useState({});
 
+    // --- Стан для відправки форми ---
+    const [submitting, setSubmitting] = useState(false);
+
     useEffect(() => {
         return () => {
             if (mainImage) URL.revokeObjectURL(mainImage.preview);
@@ -126,9 +129,10 @@ const AddCommissionModal = ({ onClose }) => {
     };
 
 
-    // В файлі AddCommissionModal.js
     const handleCreate = async () => {
         if (!validate()) return;
+
+        setSubmitting(true); // Початок відправки
 
         try {
             const formData = new FormData();
@@ -140,37 +144,37 @@ const AddCommissionModal = ({ onClose }) => {
             formData.append("format", fileFormat);
             formData.append("price", price);
 
-            // --- (ОНОВЛЕНО) Додаємо всі файли під назвою 'images' ---
-            // 1. Додаємо головне зображення
+            // main image (backend expects 'referenceImage')
             if (mainImage?.file) {
-                formData.append("images", mainImage.file);
+            formData.append("referenceImage", mainImage.file);
             }
 
-            // 2. Додаємо всі прев'ю
-            previews.forEach(p => {
-                if (p?.file) {
-                    formData.append("images", p.file);
+            // ДОДАНО: Додаємо прев'ю-изображення, якщо вони є
+            previews.forEach((img, index) => {
+                if (img?.file) {
+                    formData.append(`image${index + 2}`, img.file);
                 }
             });
-            // --- Кінець оновлення ---
 
             const response = await axios.post("http://localhost:8080/api/commissions/public", formData, {
-                headers: { "Content-Type": "multipart/form-data" },
-                withCredentials: true
+            headers: { "Content-Type": "multipart/form-data" },
+            withCredentials: true
             });
 
             if (response.data.success) {
-                alert("Commission created successfully!");
-                onClose();
-                window.location.reload();
+            alert("Commission created successfully!");
+            onClose();
+            window.location.reload(); // reload to show new item (optional)
             } else {
-                alert("Error: " + (response.data.message || "Failed to create commission"));
+            alert("Error: " + (response.data.message || "Failed to create commission"));
             }
         } catch (error) {
             console.error("Error creating commission:", error);
             alert("Server error while creating commission");
+        } finally {
+            setSubmitting(false); // Кінець відправки
         }
-    };
+        };
 
     return (
         <div className={styles.overlay} onClick={onClose}>
@@ -330,7 +334,9 @@ const AddCommissionModal = ({ onClose }) => {
                         />
                         {errors.price && <span className={styles.errorPrice}>{errors.price}</span>}
                     </div>
-                    <button className={styles.createBtn} onClick={handleCreate}>Create</button>
+                    <button className={styles.createBtn} onClick={handleCreate} disabled={submitting}>
+                        {submitting ? 'Uploading...' : 'Create'}
+                    </button>
                 </div>
             </div>
         </div>

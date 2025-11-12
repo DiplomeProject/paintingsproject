@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, {useEffect, useMemo, useState} from 'react';
 import styles from './Commission.module.css';
 import CategoryFilters from "../CategoryFilters/CategoryFilters";
 import AdvancedFilters from '../AdvancedFilters/AdvancedFilters';
@@ -132,15 +132,47 @@ function Commission() {
                 console.log('Fetched commissions:', response.data);
 
                 if (response.data.success && Array.isArray(response.data.commissions)) {
+                    const mapped = response.data.commissions.map(c => {
+                        // prefer server-normalized imageUrl
+                        let imageSrc = c.imageUrl || c.Image || c.ReferenceImage || null;
 
-                    // --- (ВИПРАВЛЕНО) ---
-                    // Прибираємо непотрібний .map()
-                    // Дані з сервера (response.data.commissions)
-                    // ВЖЕ містять всі потрібні поля: Title, Description, Price, imageUrl і т.д.
-                    setCommissions(response.data.commissions);
-                    // --- (КІНЕЦЬ ВИПРАВЛЕННЯ) ---
+                        if (imageSrc && typeof imageSrc === 'string') {
+                            const s = imageSrc.trim();
+                            if (s.startsWith('data:')) {
+                                imageSrc = s;
+                            } else {
+                                // remove newlines/spaces that may break base64
+                                const cleaned = s.replace(/(\r\n|\n|\r|\s)+/gm, "");
+                                if (cleaned.length > 50 && /^[A-Za-z0-9+/=]+$/.test(cleaned)) {
+                                    // treat as raw base64 -> prefix as PNG
+                                    imageSrc = `data:image/png;base64,${cleaned}`;
+                                } else {
+                                    // keep as-is (might be a public URL or filesystem path); browser will try to load it
+                                    imageSrc = s;
+                                }
+                            }
+                        } else {
+                            imageSrc = null;
+                        }
 
-                    setTotalPages(response.data.totalPages);
+                        return {
+                            id: c.Commission_ID || c.id,
+                            title: c.Title || '',
+                            description: c.Description || '',
+                            price: c.Price || 0,
+                            category: c.Category || '',
+                            style: c.Style || '',
+                            fileFormat: c.Format || '',
+                            size: c.Size || '',
+                            imageUrl: c.imageUrl || null,
+                            imageSrc: imageSrc || "/images/placeholder.png",
+                            about: c.Description || '',
+                            authorIcon: "/images/profileImg.jpg",
+                        };
+                    });
+
+                    console.log('Mapped commissions (with imageSrc):', mapped.map(m => ({ id: m.id, imageSrcType: typeof m.imageSrc, imageSrcPreview: (m.imageSrc || '').slice(0,60) })));
+                    setCommissions(mapped);
                 } else {
                     setCommissions([]);
                     setTotalPages(0);
@@ -156,27 +188,19 @@ function Commission() {
         fetchCommissions();
     }, [currentPage, itemsPerPage]);
 
-    const filteredCommissions = useMemo(() => {
-        let items = commissions; // 'commissions' - це ВЖЕ дані поточної сторінки
+    const displayedCommissions = useMemo(() => {
+        let items = commissions;
         if (activeCategory) {
-            items = items.filter(c => (c.Category || '').toUpperCase() === activeCategory.toUpperCase());
+            items = items.filter(c => (c.category || '').toUpperCase() === activeCategory.toUpperCase());
         }
         if (searchQuery) {
-            items = items.filter(c => (c.Title || '').toLowerCase().includes(searchQuery.toLowerCase()));
+            items = items.filter(c => (c.title || '').toLowerCase().includes(searchQuery.toLowerCase()));
         }
         return items;
     }, [activeCategory, searchQuery, commissions]);
 
 
-    // const {
-    //     currentPage,
-    //     setCurrentPage,
-    //     totalPages,
-    //     displayedData: displayedCommissions
-    // } = usePagination(filteredCommissions, itemsPerPage);
-
-    const displayedCommissions = filteredCommissions;
-
+    // Effect for Modal
     useEffect(() => {
         if (isModalOpen) {
             document.body.style.overflow = 'hidden';
@@ -188,6 +212,7 @@ function Commission() {
         };
     }, [isModalOpen]);
 
+    // Effect for AddModal
     useEffect(() => {
         if (isAddModalOpen) {
             document.body.style.overflow = 'hidden';
@@ -289,33 +314,23 @@ function Commission() {
                                     <div className={styles.imagePriceWrapper}>
                                         <div className={styles.imageWrapper}>
                                             <img
-                                                src={commission.imageUrl || "/images/placeholder.png"}
-
-                                                alt={commission.Title || "Commission"}
-
+                                                src={commission.imageSrc || "/images/placeholder.png"}
+                                                alt={commission.title || "Commission"}
                                                 className={styles.cardImage}
                                                 onError={(e) => {
-                                                    if (!e.target.src.endsWith("/images/placeholder.png")) {
-                                                        console.error('Image load error for:', commission.Title);
-                                                        e.target.src = "/images/placeholder.png";
-                                                    }
+                                                    console.error('Image load error for:', commission.title, 'Source:', commission.imageSrc);
+                                                    e.target.src = "/images/placeholder.png";
                                                 }}
                                             />
                                         </div>
                                         <div className={styles.priceOverlay}>
-
-                                            {/* --- ВИПРАВЛЕНО --- */}
-                                            <span className={styles.cardPrice}>${commission.Price}</span>
-
+                                            <span className={styles.cardPrice}>${commission.price}</span>
                                         </div>
                                     </div>
                                     <div className={styles.cardContent}>
                                         <div>
-
-                                            {/* --- ВИПРАВЛЕНО --- */}
-                                            <h3 className={styles.cardTitle}>{commission.Title}</h3>
-                                            <p className={styles.cardDescription}>{commission.Description}</p>
-
+                                            <h3 className={styles.cardTitle}>{commission.title}</h3>
+                                            <p className={styles.cardDescription}>{commission.description}</p>
                                         </div>
                                         <button
                                             className={styles.takeButton}
@@ -331,7 +346,7 @@ function Commission() {
                         <Pagination
                             currentPage={currentPage}
                             totalPages={totalPages}
-                            onPageChange={setCurrentPage} // setCurrentPage тепер тригерить useEffect
+                            onPageChange={setCurrentPage}
                         />
                     </>
                 ) : (
