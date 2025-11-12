@@ -1,0 +1,167 @@
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal {
+    background-color: #342E4CF2;
+    border-radius: 16px;
+    padding: 111px 115px 0 135px;
+    width: 900px;
+    max-width: 95vw;
+    max-height: 90vh;
+    color: white;
+    font-family: "Roboto", sans-serif;
+    position: relative;
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+}
+
+.closeBtn {
+    position: absolute;
+    top: 25px;
+    right: 25px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+}
+.closeBtn img {
+    width: 24px;
+    height: 24px;
+}
+
+.modalContent {
+    display: flex;
+    gap: 40px;
+}
+
+.leftColumn {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    /* Додаємо скрол, якщо зображень забагато */
+    max-height: calc(90vh - 80px); /* (90vh - падінги модалки) */
+    overflow-y: auto;
+}
+
+.artImage {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+.rightColumn {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.title {
+    font-size: 36px;
+    font-weight: 500;
+    margin: 0;
+}
+
+.artistName {
+    font-size: 20px;
+    color: #d1d1d1;
+    margin-bottom: 25px;
+}
+
+.detailsList {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 25px;
+}
+
+.field {
+    font-size: 16px;
+    color: #FFFFFF;
+    margin: 0;
+}
+.field span {
+    display: block;
+    color: #B0B0B0;
+    font-size: 14px;
+    margin-bottom: 2px;
+}
+
+.description {
+    font-size: 16px;
+    line-height: 1.6;
+    color: #d1d1d1;
+    margin-bottom: 30px;
+}
+
+.actions {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.price {
+    font-size: 28px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    flex-direction: column;
+}
+.price svg {
+    fill: white;
+    transform: scale(1.2);
+}
+
+.buyBtn {
+    background: #5454FE;
+    border: none;
+    color: white;
+    padding: 12px 30px;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+.buyBtn:hover {
+    background: #4f4fe8;
+}
+
+.likes {
+    font-size: 18px;
+    color: #d1d1d1;
+    flex-direction: column;
+}
+
+.likeBtn {
+    background: none;
+    border: 2px solid #888;
+    border-radius: 50%;
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.likeBtn:hover {
+    border-color: white;
+    background-color: rgba(255, 255, 255, 0.1);
+}
+.likeBtn svg {
+    width: 20px;
+    height: 20px;
+}

@@ -89,8 +89,10 @@ jobs:
     
     needs: [my_ci_part]
     runs-on: self-hosted
-
+    environment: test-srv
+    
     steps:
+    
       - name: SSH and Deploy to Server
         uses: appleboy/ssh-action@v1
         with:
@@ -101,12 +103,12 @@ jobs:
           script: |
             echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
             echo "--- Pulling latest Docker image ---"
-            docker pull ghcr.io/tatticoder/terraform-get-time:main
+            docker pull ghcr.io/diplomeproject/paintingsproject:master
             echo "--- Stopping existing container (if running) ---"
-            docker stop my_container || true # Добавлено || true для игнорирования ошибок, если контейнер не запущен
+            docker stop paintingsproject || true # Добавлено || true для игнорирования ошибок, если контейнер не запущен
             echo "--- Removing existing container ---"
-            docker rm my_container || true # Добавлено || true
+            docker rm paintingsproject || true # Добавлено || true
             echo "--- Starting new container ---"
-            docker run -d --name my_container -p 3000:80 ghcr.io/tatticoder/terraform-get-time:main
+            docker run -d --name paintingsproject -p 8080:80 ghcr.io/diplomeproject/paintingsproject:master
 
     

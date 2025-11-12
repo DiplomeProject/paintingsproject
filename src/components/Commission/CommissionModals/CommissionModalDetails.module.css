@@ -1,0 +1,261 @@
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.65);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+/* --- ЗМІНЕНО: Видалено фіксовану висоту --- */
+.modal {
+    background-color: rgba(52, 46, 76, 0.95);
+    border-radius: 16px;
+    padding: 65px 83px;
+    width: 985px;
+    max-width: 95vw;
+    color: white;
+    font-family: "Roboto", sans-serif;
+    font-weight: 400;
+    position: relative;
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+    max-height: 95vh;
+    overflow-y: auto;
+}
+
+.closeBtn {
+    position: absolute;
+    /*top: 18px;*/
+    right: 10%;
+    background: none;
+    border: none;
+    color: white;
+    font-size: 22px;
+    cursor: pointer;
+}
+
+.topSection {
+    display: flex;
+    gap: 99px;
+    align-items: flex-start;
+}
+
+.imageColumn {
+    display: flex;
+    flex-direction: column;
+    gap: 21px;
+}
+
+.image {
+    width: 320px;
+    height: 336px;
+    object-fit: cover;
+    border-radius: 14px;
+}
+
+.info {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.title {
+    font-size: 41px;
+    margin-bottom: 50px;
+    text-transform: capitalize;
+    margin-top: 0;
+}
+
+.field {
+    font-size: 30px;
+    color: rgba(171, 171, 171, 1);
+    margin: 0;
+}
+
+.field span {
+    display: block;
+    color: rgba(255, 255, 255, 1);
+}
+
+.authorIcon {
+    width: 42px;
+    height: 42px;
+    margin-top: 8px;
+    border-radius: 50%;
+}
+
+.previewRow {
+    display: flex;
+    gap: 8px;
+    margin-top: 0;
+    flex-wrap: wrap;
+    width: 320px;
+}
+
+.previewImg {
+    width: 64px;
+    height: 64px;
+    border-radius: 14px;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: border-color 0.2s;
+}
+.previewImg:hover {
+    border-color: rgba(255, 255, 255, 0.5);
+}
+
+/* --- ДОДАНО: Активне прев'ю --- */
+.activePreview {
+    border-color: #5454FE; /* Яскраво-синя рамка */
+}
+
+.singleImage {
+    width: 320px;
+    height: 420px;
+    object-fit: cover;
+    border-radius: 14px;
+}
+
+.about {
+    font-size: 30px;
+    color: rgba(171, 171, 171, 1);
+    line-height: 100%;
+}
+
+.about p {
+    margin-bottom: 25px;
+    color: #fff;
+    font-size: 30px;
+}
+
+.feelings {
+    margin-top: 15px;
+    font-size: 14px;
+    color: #B0B0B0;
+}
+.feelings b {
+    color: #d5d5d5;
+}
+
+
+.actions {
+    margin-top: 25px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.priceBtn {
+    background: #2E2E2E99;
+    color: white;
+    padding: 10px 25px;
+    border-radius: 3px;
+    font-size: 30px;
+    border: 3px solid #5454FE;
+    width: 30%;
+}
+
+/* --- ЗМІНЕНО: Кнопка 'Take' --- */
+.takeBtn {
+    background: #5454FE;
+    border: none;
+    color: white;
+    padding: 10px 30px;
+    border-radius: 3px;
+    font-size: 30px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    width: 30%;
+}
+
+.takeBtn:hover {
+    background: #5a50ff;
+}
+
+/* --- АДАПТАЦІЯ --- */
+
+/* 1. Планшети (наприклад, < 1000px) */
+@media (max-width: 1000px) {
+    .modal {
+        width: 90vw; /* Модалка займає 90% ширини екрану */
+        padding: 40px 30px;
+    }
+
+    .topSection {
+        /* Складаємо колонки вертикально */
+        flex-direction: column;
+        gap: 30px;
+    }
+
+    .image, .singleImage {
+        width: 100%; /* Картинка на повну ширину */
+        height: auto; /* Автоматична висота */
+        max-height: 400px; /* Обмеження, щоб не була занадто високою */
+    }
+
+    .previewRow {
+        width: 100%; /* Прев'ю на повну ширину */
+    }
+
+    .title {
+        font-size: 32px;
+        margin-bottom: 20px;
+    }
+
+    .field, .about {
+        font-size: 22px;
+    }
+    .about p {
+        font-size: 22px;
+    }
+
+    .actions {
+        /* Кнопки одна під одною */
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .priceBtn, .takeBtn {
+        width: 100%; /* Кнопки на повну ширину */
+        font-size: 22px;
+    }
+}
+
+/* 2. Телефони (наприклад, < 600px) */
+@media (max-width: 600px) {
+    .modal {
+        padding: 30px 15px; /* Мінімальні падінги */
+        font-size: 18px;
+    }
+
+    .closeBtn {
+        /* Переміщуємо кнопку з кута, щоб не заважала */
+        top: 15px;
+        right: 15px;
+    }
+
+    .title {
+        font-size: 24px;
+    }
+
+    .field, .about, .about p {
+        font-size: 16px;
+    }
+
+    .about span {
+        font-size: 16px; /* Текст "About" */
+    }
+
+    .priceBtn, .takeBtn {
+        font-size: 18px;
+    }
+
+    .previewImg {
+        width: 50px;
+        height: 50px;
+        border-radius: 10px;
+    }
+}

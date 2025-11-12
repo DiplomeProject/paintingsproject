@@ -1,8 +1,11 @@
-import React, { useMemo, useState, useEffect } from "react"; // 1. Імпортуємо useEffect
+import React, { useMemo, useState, useEffect } from "react";
 import styles from "./Shop.module.css";
 import ArtCard from '../ArtCard/ArtCard';
 import CategoryFilters from "../CategoryFilters/CategoryFilters";
 import AdvancedFilters from '../AdvancedFilters/AdvancedFilters';
+import { usePagination } from '../hooks/Pagination/usePagination';
+import Pagination from '../hooks/Pagination/Pagination';
+import ArtDetailsModal from "../ArtCard/Modals/ArtDetailsModal";
 
 // ОНОВЛЕНО: Визначаємо конфігурацію фільтрів для Shop
 const shopFilterConfig = [
@@ -38,33 +41,34 @@ const categories = [
 ];
 
 const Shop = () => {
-    const [activeCategory, setActiveCategory] = useState(null);
-    const [currentPage, setCurrentPage] = useState(0);
-    const [searchQuery, setSearchQuery] = useState('');
-    const [showAdvanced, setShowAdvanced] = useState(false);
-    const itemsPerPage = 112;
-
-    // 2. ДОДАНО: Хук, який спрацьовує при зміні 'currentPage'
-    useEffect(() => {
-        // Плавно прокручуємо вікно до самого верху
-        window.scrollTo({
-            top: 0,
-            behavior: 'smooth'
-        });
-    }, [currentPage]); // Залежність: ефект спрацює щоразу, коли currentPage зміниться
 
     const cards = useMemo(() => {
         return Array.from({ length: 400 }, (_, i) => ({
             id: i,
             imageUrl: `/images/shopAndOtherPageImages/image${(i % 4) + 1}.png`,
+            images: [ // Масив зображень для модалки
+                `/images/shopAndOtherPageImages/image${(i % 4) + 1}.png`,
+                `/images/shopAndOtherPageImages/image${((i + 1) % 4) + 1}.png`,
+            ],
             title: `Artwork #${i + 1}`,
             artistName: "Digital Artist",
-            artistStyle: categories[i % categories.length],
+            artistStyle: categories[i % categories.length], // 'categories' доступна тут
             likes: `${Math.floor(Math.random() * 500)}k`,
             price: (Math.random() * 200 + 20).toFixed(2),
             category: categories[i % categories.length],
+
+            // --- Поля, яких раніше не було ---
+            style: "Neo-minimalism",
+            fileFormat: "PNG",
+            size: "1080 x 1920",
+            description: "The composition features two large, metallic, ring-like sculptures with reflective chrome surfaces, symmetrically placed on a stark white background."
         }));
     }, []);
+
+    const [activeCategory, setActiveCategory] = useState(null);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [showAdvanced, setShowAdvanced] = useState(false);
+    const [selectedArt, setSelectedArt] = useState(null);
 
     const filteredCards = useMemo(() => {
         let filtered = cards;
@@ -85,9 +89,13 @@ const Shop = () => {
         return filtered;
     }, [activeCategory, cards, searchQuery]);
 
-    const totalPages = Math.ceil(filteredCards.length / itemsPerPage);
-    const startIndex = currentPage * itemsPerPage;
-    const displayedCards = filteredCards.slice(startIndex, startIndex + itemsPerPage);
+    const itemsPerPage = 96; // Визначаємо, скільки елементів на сторінці
+    const {
+        currentPage,
+        setCurrentPage,
+        totalPages,
+        displayedData: displayedCards // Перейменовуємо displayedData на displayedCards
+    } = usePagination(filteredCards, itemsPerPage);
 
     const handleCategoryClick = (category) => {
         if (activeCategory === category) {
@@ -95,64 +103,10 @@ const Shop = () => {
         } else {
             setActiveCategory(category);
         }
-        setCurrentPage(0);
     };
 
     const handleSearchChange = (event) => {
         setSearchQuery(event.target.value);
-        setCurrentPage(0);
-    };
-
-    const renderPageNumbers = () => {
-        if (totalPages <= 7) {
-            const pageNumbers = [];
-            for (let i = 0; i < totalPages; i++) {
-                pageNumbers.push(
-                    <button key={i} className={`${styles.pageNumber} ${i === currentPage ? styles.active : ""}`} onClick={() => setCurrentPage(i)}>
-                        {i + 1}
-                    </button>
-                );
-            }
-            return pageNumbers;
-        }
-
-        const pages = [];
-        const siblingCount = 1;
-
-        pages.push(
-            <button key={0} className={`${styles.pageNumber} ${0 === currentPage ? styles.active : ""}`} onClick={() => setCurrentPage(0)}>
-                1
-            </button>
-        );
-
-        if (currentPage > siblingCount + 1) {
-            pages.push(<span key="dots1" className={styles.paginationDots}>...</span>);
-        }
-
-        const startPage = Math.max(1, currentPage - siblingCount);
-        const endPage = Math.min(totalPages - 2, currentPage + siblingCount);
-
-        for (let i = startPage; i <= endPage; i++) {
-            pages.push(
-                <button key={i} className={`${styles.pageNumber} ${i === currentPage ? styles.active : ""}`} onClick={() => setCurrentPage(i)}>
-                    {i + 1}
-                </button>
-            );
-        }
-
-        if (currentPage < totalPages - siblingCount - 2) {
-            pages.push(<span key="dots2" className={styles.paginationDots}>...</span>);
-        }
-
-        if (totalPages > 1) {
-            pages.push(
-                <button key={totalPages - 1} className={`${styles.pageNumber} ${totalPages - 1 === currentPage ? styles.active : ""}`} onClick={() => setCurrentPage(totalPages - 1)}>
-                    {totalPages}
-                </button>
-            );
-        }
-
-        return pages;
     };
 
     return (
@@ -208,35 +162,17 @@ const Shop = () => {
                             {displayedCards.map((card) => (
                                 <ArtCard
                                     key={card.id}
-                                    imageUrl={card.imageUrl}
-                                    title={card.title}
-                                    artistName={card.artistName}
-                                    artistStyle={card.artistStyle}
-                                    likes={card.likes}
-                                    price={card.price}
+                                    art={card}
+                                    onArtClick={setSelectedArt}
                                 />
                             ))}
                         </div>
 
-                        <div className={styles.paginationContainer}>
-                            <div className={styles.pagination}>
-                                <button
-                                    className={styles.pageBtn}
-                                    onClick={() => setCurrentPage((p) => Math.max(p - 1, 0))}
-                                    disabled={currentPage === 0}
-                                >
-                                    ‹
-                                </button>
-                                {renderPageNumbers()}
-                                <button
-                                    className={styles.pageBtn}
-                                    onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages - 1))}
-                                    disabled={currentPage === totalPages - 1 || totalPages === 0}
-                                >
-                                    ›
-                                </button>
-                            </div>
-                        </div>
+                        <Pagination
+                            currentPage={currentPage}
+                            totalPages={totalPages}
+                            onPageChange={setCurrentPage}
+                        />
                     </>
                 ) : (
                     <div className={styles.noResults}>
@@ -244,6 +180,12 @@ const Shop = () => {
                     </div>
                 )}
             </div>
+            {selectedArt && (
+                <ArtDetailsModal
+                    art={selectedArt}
+                    onClose={() => setSelectedArt(null)}
+                />
+            )}
         </div>
     );
 };

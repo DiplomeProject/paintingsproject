@@ -2,6 +2,7 @@ import React, {useState, useMemo, useEffect} from "react";
 import styles from "./Gallery.module.css";
 import {useNavigate} from "react-router-dom";
 import ArtCard from '../ArtCard/ArtCard';
+import ArtDetailsModal from "../ArtCard/Modals/ArtDetailsModal";
 
 // Дані-заглушки для верхньої секції
 const placeholderFeaturedCards = [
@@ -42,6 +43,7 @@ function Gallery({paintings: paintingsFromProps = []}) {
     const [scatteredImages, setScatteredImages] = useState([]);
     const navigate = useNavigate();
     const [searchQuery, setSearchQuery] = useState('');
+    const [selectedArt, setSelectedArt] = useState(null);
 
     const handleNavigation = (path) => {
         navigate(path);
@@ -60,17 +62,25 @@ function Gallery({paintings: paintingsFromProps = []}) {
     }, [paintingsFromProps]);
 
     const allTrendPaintings = useMemo(() => {
-        // Створюємо більший масив для наочності пошуку
         return Array.from({length: 50}, (_, i) => {
             const randomIndex = Math.floor(Math.random() * 5) + 1;
+            const randomImage = `/images/image${randomIndex}.png`;
             return {
                 id: `${Math.random()}-${i}`,
-                imageUrl: `/images/image${randomIndex}.png`,
+                imageUrl: randomImage,
                 title: `Artwork #${i}`,
-                artistName: `Artist ${String.fromCharCode(65 + (i % 5))}`, // Artist A, Artist B, etc.
+                artistName: `Artist ${String.fromCharCode(65 + (i % 5))}`,
                 artistStyle: `Style ${i % 3 === 0 ? 'Abstract' : 'Realism'}`,
                 likes: `${(Math.random() * 500).toFixed(1)}k`,
                 price: (Math.random() * 200).toFixed(2),
+
+                // --- Додані поля для ArtDetailsModal ---
+                images: [ randomImage, `/images/image${(randomIndex % 4) + 1}.png` ],
+                category: "Abstract",
+                style: "Abstract",
+                fileFormat: "JPG",
+                size: "1920 x 1080",
+                description: "This abstract piece explores the relationship between color and form, creating a dynamic visual experience."
             };
         });
     }, []);
@@ -232,12 +242,8 @@ function Gallery({paintings: paintingsFromProps = []}) {
                                             {slide.map((card) => (
                                                 <ArtCard
                                                     key={card.id}
-                                                    imageUrl={card.imageUrl}
-                                                    title={card.title}
-                                                    artistName={card.artistName}
-                                                    artistStyle={card.artistStyle}
-                                                    likes={card.likes}
-                                                    price={card.price}
+                                                    art={card} // 1. Передаємо весь об'єкт
+                                                    onArtClick={setSelectedArt} // 2. Передаємо функцію
                                                 />
                                             ))}
                                         </div>
@@ -265,6 +271,12 @@ function Gallery({paintings: paintingsFromProps = []}) {
                     )}
                 </div>
             </div>
+            {selectedArt && (
+                <ArtDetailsModal
+                    art={selectedArt}
+                    onClose={() => setSelectedArt(null)}
+                />
+            )}
         </main>
     );
 }

@@ -281,7 +281,7 @@
     max-height: 180px;
     transform: rotate(18.08deg);
     top: -56%;
-    left: 38%;
+    left: 56%;
     z-index: 2;
 }
 
@@ -293,7 +293,7 @@
     max-height: 214px;
     transform: rotate(-24.55deg);
     top: -20%;
-    left: 2%;
+    left: 8%;
     z-index: 3;
 }
 
@@ -329,7 +329,7 @@
     max-height: 240px;
     transform: rotate(-25.88deg);
     top: 40%;
-    left: 2%;
+    left: 8%;
     z-index: 1;
 }
 
