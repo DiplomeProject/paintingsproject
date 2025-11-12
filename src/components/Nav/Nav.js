@@ -1,11 +1,24 @@
 import {useNavigate, useLocation} from "react-router-dom";
 import React, {useEffect, useState} from "react";
 import styles from "./Nav.module.css";
+import axios from 'axios';
 
 export function Navbar() {
     const navigate = useNavigate();
     const location = useLocation();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+    useEffect(() => {
+        axios.get("http://localhost:8080/check-session", { withCredentials: true })
+            .then(res => {
+                console.log('Session check (Nav):', res.data.loggedIn);
+                setIsLoggedIn(res.data.loggedIn);
+            })
+            .catch(() => {
+                setIsLoggedIn(false);
+            });
+    }, [location]);
 
     useEffect(() => {
         if (isMenuOpen) {
@@ -107,9 +120,7 @@ export function Navbar() {
                             className={getButtonClass('/profile', 'PROFILE')}
                             onClick={() => handleNavigation('/profile')}
                         >
-                            SIGN IN/
-                            <br/>
-                            PROFILE
+                            {isLoggedIn ? 'PROFILE' : 'SIGN IN'}
                         </button>
                     </div>
 
