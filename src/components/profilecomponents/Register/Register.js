@@ -135,7 +135,7 @@ function Register({toggleForm}) {
                                    minLength="6"
                             />
                             <button type="button" className={styles.eyeBtn} onClick={() => setShowPassword((s) => !s)}>
-                                {showPassword ? <EyeSlashIcon/> : <EyeIcon/>}
+                                {showPassword ?  <EyeIcon/>: <EyeSlashIcon/>}
                             </button>
                         </div>
                     </div>

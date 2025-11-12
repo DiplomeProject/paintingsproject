@@ -40,7 +40,7 @@ function Login({ toggleForm, handleLogin, handleInputChange, onForgotPassword })
                             className={styles.eyeBtn}
                             onClick={() => setShowPassword((s) => !s)}
                         >
-                            {showPassword ? <EyeSlashIcon /> : <EyeIcon />}
+                            {showPassword ? <EyeIcon /> : <EyeSlashIcon />}
                         </button>
                     </div>
                 </div>

@@ -5,13 +5,14 @@
     width: 443px;
     height: 527px;
     background-color: #f9f9f9;
-    padding: 40px 30px;
+    padding: 51px 62px 39px 61px;
     border-radius: 20px;
     font-family: 'Roboto', sans-serif;
     margin: 0;
     overflow: hidden;
     opacity: 1;
     box-sizing: border-box;
+    align-items: center;
 }
 
 .mainTitle {
@@ -87,7 +88,7 @@
 .eyeBtn {
     position: absolute;
     top: 50%;
-    right: 72px;
+    right: 8px;
     transform: translateY(-50%);
     background: none;
     border: none;
