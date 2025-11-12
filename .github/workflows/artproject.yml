@@ -10,7 +10,6 @@ env:
   IMAGE_NAME: ${{ github.repository }}
   
 jobs:
-
   my_ci_part:
     runs-on: self-hosted
     permissions:
