@@ -1,6 +1,8 @@
 import React, { useState } from "react";
-import styles from "./Login.module.css";
-import { EyeIcon, EyeSlashIcon } from "../Register/AuthIcons"; // Видалено непотрібні іконки
+// import styles from "./Login.module.css";
+import { EyeIcon, EyeSlashIcon } from "../Register/AuthIcons";
+import AuthLayout from "./AuthComponent/AuthForm";
+import styles from "./AuthComponent/AuthForm.module.css";
 
 function Login({ toggleForm, handleLogin, handleInputChange, onForgotPassword }) {
     const [showPassword, setShowPassword] = useState(false);
@@ -10,50 +12,56 @@ function Login({ toggleForm, handleLogin, handleInputChange, onForgotPassword })
     };
 
     return (
-        <form className={styles.authCard} onSubmit={handleSubmit}>
-            <h2 className={styles.logo}>DIGITAL BRUSH</h2>
+        <AuthLayout onCreateAccount={toggleForm}>
 
-            <div className={styles.field}>
-                <label htmlFor="login-email">Login</label>
-                <input
-                    id="login-email"
-                    type="email"
-                    name="email"
-                    onChange={handleInputChange}
-                    required
-                />
-            </div>
-
-            <div className={styles.field}>
-                <label htmlFor="login-password">Password</label>
-                <div className={styles.passwordWrapper}>
+            {/* 4. <form> тепер всередині */}
+            <form className={styles.formContainer} onSubmit={handleSubmit}>
+                <div className={styles.field}>
+                    <label htmlFor="login-email">Login</label>
                     <input
-                        id="login-password"
-                        name="password"
-                        type={showPassword ? "text" : "password"}
+                        id="login-email"
+                        type="email"
+                        name="email"
                         onChange={handleInputChange}
                         required
                     />
+                </div>
+
+                <div className={styles.field}>
+                    <label htmlFor="login-password">Password</label>
+                    <div className={styles.passwordWrapper}>
+                        <input
+                            id="login-password"
+                            name="password"
+                            type={showPassword ? "text" : "password"}
+                            onChange={handleInputChange}
+                            required
+                        />
+                        <button
+                            type="button"
+                            className={styles.eyeBtn}
+                            onClick={() => setShowPassword((s) => !s)}
+                        >
+                            {showPassword ? <EyeIcon /> : <EyeSlashIcon />}
+                        </button>
+                    </div>
+                </div>
+
+                <div className={styles.actionsRow}>
+                    {/* Використовуємо нові уніфіковані класи */}
+                    <button type="submit" className={styles.primaryBtn}>
+                        Log in
+                    </button>
                     <button
                         type="button"
-                        className={styles.eyeBtn}
-                        onClick={() => setShowPassword((s) => !s)}
+                        className={styles.secondaryBtn} // <-- Це тепер теж secondaryBtn
+                        onClick={onForgotPassword}
                     >
-                        {showPassword ? <EyeSlashIcon /> : <EyeIcon />}
+                        Password forgotten?
                     </button>
                 </div>
-            </div>
-
-            <button type="submit" className={styles.submitBtn}>Log in</button>
-
-            <a type="button" className={styles.forgotPassword} onClick={onForgotPassword}>
-                Password forgotten?
-            </a>
-
-            <button type="button" className={styles.switchFormBtn} onClick={toggleForm}>
-                Create account
-            </button>
-        </form>
+            </form>
+        </AuthLayout>
     );
 }
 

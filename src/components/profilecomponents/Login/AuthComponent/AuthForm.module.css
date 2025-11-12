@@ -1,0 +1,137 @@
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Montserrat+Alternates:wght@400;600&display=swap');
+
+/* --- 1. Головна картка --- */
+.authCard {
+    display: flex;
+    flex-direction: column;
+    width: 444px;
+    height: 527px;
+    background-color: #f9f9f9;
+    padding: 51px 62px 39px 61px;
+    border-radius: 20px;
+    font-family: 'Roboto', sans-serif;
+    overflow: hidden;
+    opacity: 1;
+    box-sizing: border-box;
+    align-items: center;
+}
+
+/* --- 2. Логотип --- */
+.logo {
+    width: 80%;
+    margin-bottom: 28px;
+}
+
+/* --- 3. Контейнер для полів та кнопок форми --- */
+.formContainer {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+/* --- 4. Поле вводу --- */
+.field {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 27px;
+    width: 100%;
+}
+
+.field label {
+    font-size: 14px;
+    color: #000000;
+    margin-bottom: 10px;
+}
+
+.field input {
+    width: 100%;
+    height: 39px;
+    padding: 0 10px;
+    border: none;
+    border-radius: 10px;
+    font-size: 14px;
+    background-color: #361950;
+    color: white;
+    box-sizing: border-box;
+}
+
+/* --- 5. Обгортка для іконки ока --- */
+.passwordWrapper {
+    position: relative;
+}
+
+.passwordWrapper input {
+    padding-right: 40px;
+}
+
+.eyeBtn {
+    position: absolute;
+    right: 10px;
+    top: 50%; /* Краще 50% */
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: white;
+    padding: 5px;
+}
+
+/* --- 6. Загальні стилі для кнопок --- */
+/* Головна синя кнопка */
+.primaryBtn {
+    flex: 1;
+    /*width: 70px;*/
+    height: 39px;
+    padding: 10px 0;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    background: #5454FE;
+    color: white;
+    white-space: nowrap;
+    border-bottom: 1px solid;
+    font-family: 'Roboto', sans-serif;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 100%;
+    letter-spacing: 0;
+}
+
+.primaryBtn:active {
+    transform: scale(0.95);
+}
+
+/* Вторинна текстова кнопка (Password forgotten, Create account) */
+.secondaryBtn {
+    background: none;
+    border: none;
+    color: #000000;
+    cursor: pointer;
+    text-align: center;
+    padding: 10px 0;
+    font-family: 'Montserrat Alternates', sans-serif;
+    font-weight: 600;
+    font-size: 16px;
+    line-height: 100%;
+    letter-spacing: 0;
+}
+
+.actionsRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 77px;
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+.separator {
+    width: 100%;
+    height: 2px;
+    background-color: #000000;
+    border: none;
+    margin-top: auto;
+    /*margin-bottom: 15px;*/
+}
