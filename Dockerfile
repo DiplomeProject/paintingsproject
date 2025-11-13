@@ -12,7 +12,7 @@ COPY . ./
 RUN npm run build
 
 # Stage 2: Serve the built application with Nginx
-FROM nginx: alpine
+FROM nginx:alpine
 
 COPY --from=builder /app/build /usr/share/nginx/html
 
