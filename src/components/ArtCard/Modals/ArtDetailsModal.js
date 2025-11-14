@@ -1,25 +1,107 @@
-import React, {useCallback, useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
 import styles from './ArtDetailsModal.module.css';
 import closeIcon from '../../../assets/closeCross.svg';
 import ImageViewer from "../ImageViewer/ImageViewer";
+
+const lerp = (current, target, factor) => {
+    return current * (1 - factor) + target * factor;
+};
 
 const ArtDetailsModal = ({art, onClose}) => {
 
     const [isViewerOpen, setIsViewerOpen] = useState(false);
     const [viewerInitialIndex, setViewerInitialIndex] = useState(0);
+    const [isLiked, setIsLiked] = useState(false);
+
+    const leftColumnRef = useRef(null);
+    const rightInfoRef = useRef(null);
+
+    const leftScroll = useRef({current: 0, target: 0});
+    const rightScroll = useRef({current: 0, target: 0});
+    const animationFrameId = useRef(null);
+    const lerpFactor = 0.1;
 
     // Блокуємо прокрутку фону, коли модалка відкрита
     useEffect(() => {
         document.body.style.overflow = 'hidden';
+
+        startScrollAnimation();
+
         return () => {
             document.body.style.overflow = 'auto';
+            if (animationFrameId.current) {
+                cancelAnimationFrame(animationFrameId.current);
+            }
         };
     }, []);
+
+    const handleLikeClick = () => {
+        setIsLiked(prev => !prev); // Перемикає стан
+        // Тут ви можете додати логіку для відправки лайка на сервер
+    };
+
+    const smoothScrollLoop = () => {
+        let leftNeedsUpdate = false;
+        let rightNeedsUpdate = false;
+
+        if (leftColumnRef.current) {
+            const {current, target} = leftScroll.current;
+            if (Math.abs(target - current) > 0.1) {
+                leftScroll.current.current = lerp(current, target, lerpFactor);
+                leftColumnRef.current.scrollTop = leftScroll.current.current;
+                leftNeedsUpdate = true;
+            } else if (current !== target) {
+                leftScroll.current.current = target;
+                leftColumnRef.current.scrollTop = target;
+            }
+        }
+
+        if (rightInfoRef.current) {
+            const {current, target} = rightScroll.current;
+            if (Math.abs(target - current) > 0.1) {
+                rightScroll.current.current = lerp(current, target, lerpFactor);
+                rightInfoRef.current.scrollTop = rightScroll.current.current;
+                rightNeedsUpdate = true;
+            } else if (current !== target) {
+                rightScroll.current.current = target;
+                rightInfoRef.current.scrollTop = target;
+            }
+        }
+
+        if (leftNeedsUpdate || rightNeedsUpdate) {
+            animationFrameId.current = requestAnimationFrame(smoothScrollLoop);
+        } else {
+            animationFrameId.current = null;
+        }
+    };
+
+    const startScrollAnimation = () => {
+        if (!animationFrameId.current) {
+            animationFrameId.current = requestAnimationFrame(smoothScrollLoop);
+        }
+    };
 
     const handleOverlayClick = (e) => {
         if (e.target === e.currentTarget) {
             onClose();
         }
+    };
+
+    const handleWheelScroll = (e) => {
+        e.preventDefault();
+        const scrollAmount = e.deltaY;
+
+        if (leftColumnRef.current) {
+            const maxScroll = leftColumnRef.current.scrollHeight - leftColumnRef.current.clientHeight;
+            leftScroll.current.target = Math.max(0, Math.min(leftScroll.current.target + scrollAmount, maxScroll));
+        }
+
+        if (rightInfoRef.current) {
+            const maxScroll = rightInfoRef.current.scrollHeight - rightInfoRef.current.clientHeight;
+            rightScroll.current.target = Math.max(0, Math.min(rightScroll.current.target + scrollAmount, maxScroll));
+        }
+
+        startScrollAnimation();
     };
 
     // Перевірка наявності декількох зображень
@@ -38,16 +120,21 @@ const ArtDetailsModal = ({art, onClose}) => {
         <div className={styles.overlay} onClick={handleOverlayClick}>
             <div className={styles.modal}>
 
-                <div className={styles.modalContent}>
+                <div className={styles.modalContent} onWheel={handleWheelScroll}>
+                    <button className={styles.closeBtnFixed} onClick={onClose}>
+                        <img src={closeIcon} alt="Close"/>
+                    </button>
                     {/* --- Ліва колонка (Зображення) --- */}
-                    <div className={styles.leftColumn}>
+                    <div className={styles.leftColumn} ref={leftColumnRef}>
                         {imagesToShow.map((imgUrl, index) => (
                             <img
                                 key={index}
                                 src={imgUrl}
                                 alt={`${art.title} preview ${index + 1}`}
                                 className={styles.artImage}
-                                onError={(e) => { e.target.src = "/images/placeholder.png"; }}
+                                onError={(e) => {
+                                    e.target.src = "/images/placeholder.png";
+                                }}
                                 onClick={() => openImageViewer(index)}
                             />
                         ))}
@@ -55,29 +142,33 @@ const ArtDetailsModal = ({art, onClose}) => {
 
                     {/* --- Права колонка (Інформація) --- */}
                     <div className={styles.rightColumn}>
-                        <div className={styles.topSection}>
-                            <h2 className={styles.title}>{art.title} </h2>
-                            <button className={styles.closeBtn} onClick={onClose}>
-                                <img src={closeIcon} alt="Close"/>
-                            </button>
-                        </div>
-                        <p className={styles.artistName}>{art.artistName}</p>
+                        <div className={styles.scrollableInfo} ref={rightInfoRef}>
+                            <div className={styles.topSection}>
+                                <h2 className={styles.title}>{art.title} </h2>
+                                {/*<button className={styles.closeBtn} onClick={onClose}>*/}
+                                {/*    <img src={closeIcon} alt="Close"/>*/}
+                                {/*</button>*/}
+                            </div>
+                            <p className={styles.artistName}>{art.artistName}</p>
 
-                        <div className={styles.detailsList}>
-                            <p className={styles.field}><span>Category</span> {art.category}</p>
-                            <p className={styles.field}><span>Style</span> {art.style}</p>
-                            <p className={styles.field}><span>File format</span> {art.fileFormat}</p>
-                            <p className={styles.field}><span>Size</span> {art.size}</p>
-                        </div>
+                            <div className={styles.detailsList}>
+                                <p className={styles.field}><span>Category</span> {art.category}</p>
+                                <p className={styles.field}><span>Style</span> {art.style}</p>
+                                <p className={styles.field}><span>File format</span> {art.fileFormat}</p>
+                                <p className={styles.field}><span>Size</span> {art.size}</p>
+                            </div>
 
-                        <p className={styles.description}>
-                            {art.description}
-                        </p>
+                            <p className={styles.description}>
+                                {art.description}
+                            </p>
+                        </div>
 
                         <div className={styles.actions}>
-                            <div className={styles.price}>
-                                <p>
-                                    <svg width="24" height="24" viewBox="0 0 24 24" /* ... (іконка $) ... */>
+                            {/* --- ЗМІНЕНО: '.price' -> '.purchaseBlock' --- */}
+                            <div className={styles.purchaseBlock}>
+
+                                <p className={styles.priceText}>
+                                    <svg width="24" height="24" viewBox="0 0 24 24" /* ... */ >
                                         <g transform="translate(5 0) scale(1.3333 1.3333) translate(-7 -3)">
                                             <path
                                                 d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-.9.6-1.75 2.1-1.75 1.7 0 2.2.8 2.3 2.1h2.1c-.1-1.7-1.1-3.2-3-3.8V3h-3v2.1c-1.9.5-3.1 1.9-3.1 3.8 0 2.2 1.8 3.4 4.5 4 2.8.6 3 1.3 3 2.2 0 1-.6 1.8-2.2 1.8-1.8 0-2.3-.9-2.4-2.1H7c.1 1.7 1.1 3.2 3.1 3.8V21h3v-2.1c1.9-.5 3.1-1.9 3.1-3.8 0-2.3-1.8-3.5-4.6-4.1z"/>
@@ -88,8 +179,11 @@ const ArtDetailsModal = ({art, onClose}) => {
                                 <button className={styles.buyBtn}>Buy</button>
                             </div>
 
-                            <div className={styles.likes}>
-                                <span>
+                            {/* --- ЗМІНЕНО: '.likes' -> '.socialBlock' --- */}
+                            <div className={styles.socialBlock}>
+
+                                {/* --- ЗМІНЕНО: Додано клас '.likesText' --- */}
+                                <span className={styles.likesText}>
                                     <svg
                                         width="17"
                                         height="17"
@@ -103,9 +197,10 @@ const ArtDetailsModal = ({art, onClose}) => {
                                     {art.likes}
                                 </span>
 
-                                <button className={styles.likeBtn}>
-                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white"
-                                         strokeWidth="2" /* ... (іконка серця) ... */>
+                                <button className={styles.likeBtn} onClick={handleLikeClick}>
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                         xmlns="http://www.w3.org/2000/svg"
+                                         className={isLiked ? styles.likedHeart : styles.unlikedHeart}>
                                         <path
                                             d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
                                     </svg>

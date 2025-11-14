@@ -10,41 +10,70 @@
     align-items: center;
 }
 
-.modal {
-    background-color: #342E4CF2;
-    border-radius: 16px;
-    /*padding: 111px 115px 0 135px;*/
-    padding: 2rem 2rem 0 2rem;
-    max-width: 80rem;
-    width: 100%;
-    max-height: 90dvh;
-    color: white;
-    font-family: "Roboto", sans-serif;
-    position: relative;
-    box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
-}
+/*.modal {*/
+/*    background-color: #342E4CF2;*/
+/*    border-radius: 16px;*/
+/*    !*padding: 111px 115px 0 135px;*!*/
+/*    padding: 2rem 2rem 0 2rem;*/
+/*    max-width: 80rem;*/
+/*    width: 100%;*/
+/*    max-height: 90dvh;*/
+/*    color: white;*/
+/*    font-family: "Roboto", sans-serif;*/
+/*    font-weight: 400;*/
+/*    position: relative;*/
+/*    box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);*/
+/*}*/
 
-.closeBtn {
-    /*position: absolute;*/
-    /*top: 20px;*/
-    /*right: 20px;*/
-    cursor: pointer;
-    font-size: 24px;
-    color: #fff;
-    background: none;
-    border: none;
-    z-index: 1000;
-    margin-left: auto;
-}
-.closeBtn img {
-    width: 24px;
-    height: 24px;
-}
+/*.closeBtn {*/
+/*    !*position: absolute;*!*/
+/*    !*top: 20px;*!*/
+/*    !*right: 20px;*!*/
+/*    cursor: pointer;*/
+/*    font-size: 24px;*/
+/*    color: #fff;*/
+/*    background: none;*/
+/*    border: none;*/
+/*    z-index: 1000;*/
+/*    margin-left: auto;*/
+/*}*/
+/*.closeBtn img {*/
+/*    width: 42px;*/
+/*    height: 42px;*/
+/*}*/
 
 .modalContent {
     display: flex;
+    gap: 20px;
+    background-color: #342E4CF2;
+    border-radius: 10px;
+    padding: 2rem 2rem 0; /* Зменшуємо нижній padding, бо .actions має свій */
+    width: 90vw;
+    max-width: 1400px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
     position: relative;
-    /*gap: 153px;*/
+}
+
+.closeBtnFixed {
+    position: absolute;
+    top: 2rem; /* Відступ зверху */
+    right: 2rem; /* Відступ справа */
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    z-index: 10; /* Переконуємось, що кнопка поверх іншого контенту */
+    width: 24px; /* Забезпечуємо достатній розмір для кліку */
+    height: 24px;
+    display: flex; /* Для центрування іконки, якщо вона менша */
+    align-items: center;
+    justify-content: center;
+}
+
+.closeBtnFixed img {
+    width: 42px;
+    height: 42px;
+    display: block;
 }
 
 .leftColumn {
@@ -57,6 +86,13 @@
     overflow-y: auto;
     padding-right: 153px;
     padding-bottom: 3rem;
+
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.leftColumn::-webkit-scrollbar {
+    display: none;
 }
 
 .artImage {
@@ -64,86 +100,116 @@
     height: auto;
     object-fit: cover;
     border-radius: 8px;
+    cursor: pointer;
 }
 
 .rightColumn {
     flex: 1;
     display: flex;
     flex-direction: column;
+    max-height: calc(90vh - 80px);
+}
+
+.scrollableInfo {
+    flex-grow: 1;
+    overflow-y: auto;
+    padding-bottom: 2rem;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+.scrollableInfo::-webkit-scrollbar {
+    display: none;
 }
 
 .topSection{
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    position: relative;
+    align-items: flex-start;
+    /*align-items: center;*/
+    /*position: relative;*/
+    padding-right: 3rem;
 }
 
 .title {
-    font-size: 36px;
-    font-weight: 500;
-    margin: 0 20px 0 0;
+    font-size: 57.31px;
+    /*font-weight: 500;*/
+    margin: 0;
+    line-height: 1.2;
+    word-break: break-word;
 }
 
 .artistName {
-    font-size: 20px;
-    color: #d1d1d1;
-    margin-bottom: 25px;
+    font-size: 30px;
+    color: #D9D9D9;
+    margin: 0 0 90px 0;
+    /*margin-bottom: 25px;*/
 }
 
 .detailsList {
     display: flex;
+    font-size: 30px;
     flex-direction: column;
-    gap: 12px;
-    margin-bottom: 25px;
+    gap: 26px;
+    margin-bottom: 46px;
 }
 
 .field {
-    font-size: 16px;
-    color: #FFFFFF;
+    color: #ABABAB;
     margin: 0;
 }
 .field span {
     display: block;
-    color: #B0B0B0;
-    font-size: 14px;
-    margin-bottom: 2px;
+    color: #FFFFFF;
+    /*margin-bottom: 13px;*/
 }
 
 .description {
-    font-size: 16px;
-    line-height: 1.6;
-    color: #d1d1d1;
-    margin-bottom: 30px;
+    font-size: 30px;
+    line-height: 100%;
+    color: #D9D9D9;
+    /*margin-bottom: 47px;*/
 }
 
 .actions {
     display: flex;
     align-items: center;
     gap: 15px;
+    justify-content: space-between;
+    flex-shrink: 0;
+    padding-top: 1.5rem;
 }
 
-.price {
-    font-size: 28px;
+.purchaseBlock {
+    display: flex;
+    flex-direction: column;
+    gap: 29px;
+}
+
+.priceText {
+    font-size: 56px;
     font-weight: 600;
     display: flex;
     align-items: center;
-    gap: 5px;
-    flex-direction: column;
+    margin: 0;
 }
-.price svg {
+
+/* --- ДОДАНО: Стилі для SVG всередині тексту ціни --- */
+.priceText svg {
     fill: white;
-    transform: scale(1.2);
+    width: 67px;
+    height: 67px;
+    margin: 0;
+    /*transform: scale(1.2);*/
 }
 
 .buyBtn {
     background: #5454FE;
     border: none;
     color: white;
-    padding: 12px 30px;
+    padding: 12px 93px;
     border-radius: 6px;
-    font-size: 16px;
-    font-weight: 500;
+    font-size: 39px;
+    font-weight: 400;
     cursor: pointer;
     transition: background-color 0.2s;
 }
@@ -151,29 +217,56 @@
     background: #4f4fe8;
 }
 
-.likes {
-    font-size: 18px;
-    color: #d1d1d1;
+.socialBlock {
+    display: flex;
     flex-direction: column;
+    gap: 27px;
+    align-items: center;
+}
+
+.likesText {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 30px;
+    color: #D9D9D9;
+}
+
+.likesText svg{
+    width: 47px;
+    height: 47px;
 }
 
 .likeBtn {
     background: none;
-    border: 2px solid #888;
-    border-radius: 50%;
-    width: 44px;
-    height: 44px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    border: none;
     cursor: pointer;
-    transition: all 0.2s;
+    padding: 0;
+
+    /* --- ДОДАНО: Прибираємо обводку при фокусі/кліку --- */
+    outline: none;
+    -webkit-tap-highlight-color: transparent; /* Для мобільних браузерів */
 }
-.likeBtn:hover {
-    border-color: white;
-    background-color: rgba(255, 255, 255, 0.1);
-}
+
 .likeBtn svg {
-    width: 20px;
-    height: 20px;
+    width: 86px;
+    height: 86px;
+}
+
+.unlikedHeart path {
+    fill: none; /* Заливка прозора, буде обводка */
+    stroke: white; /* Обводка біла */
+    transition: fill 0.3s ease, stroke 0.3s ease; /* Плавний перехід */
+}
+
+.likedHeart path {
+    fill: #FF5A5A; /* Заливка червона */
+    stroke: #FF5A5A; /* Обводка теж червона */
+    transition: fill 0.3s ease, stroke 0.3s ease; /* Плавний перехід */
+}
+
+/* Optional: Додаємо ефект наведення для .likeBtn, якщо хочете */
+.likeBtn:hover .unlikedHeart path {
+    fill: rgba(255, 255, 255, 0.2); /* Легка заливка при наведенні */
+    stroke: white;
 }
