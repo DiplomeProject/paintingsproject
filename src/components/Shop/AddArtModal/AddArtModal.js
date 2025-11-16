@@ -308,8 +308,8 @@ const AddArtModal = ({ onClose, categories, filterConfig }) => {
                             <div className={styles.formHeader}>
                                 <p>Name</p>
                             </div>
-                            <input
-                                type="text"
+                            {/* --- ЗМІНЕНО: <input> став <textarea> --- */}
+                            <textarea
                                 id="name"
                                 className={`${styles.formInput} ${styles.formInputName} ${errors.name ? styles.errorBorderInput : ''}`}
                                 value={name}
@@ -317,7 +317,14 @@ const AddArtModal = ({ onClose, categories, filterConfig }) => {
                                     setName(e.target.value);
                                     if (errors.name) setErrors(prev => ({...prev, name: null}));
                                 }}
+                                maxLength={150} // Ліміт символів
+                                rows={2} // Висота у 2 рядки
+                                placeholder="Enter art name..."
                             />
+                            {/* --- ДОДАНО: Лічильник символів --- */}
+                            <span className={styles.charCounter}>{name.length} / 150</span>
+
+                            {/* Повідомлення про помилку тепер йде після лічильника */}
                             {errors.name && <span className={styles.error}>{errors.name}</span>}
                         </div>
                         <div className={styles.formGroup}>

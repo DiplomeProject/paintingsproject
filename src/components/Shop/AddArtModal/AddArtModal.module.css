@@ -231,10 +231,12 @@
     background-color: #7E7E7E;
     border-radius: 7px;
     height: 33px;
-    padding: 15px 15px;
+    padding: 0 8px;
     color: white;
-    font-size: 30px;
+    font-size: 20px;
     border: none;
+    box-sizing: border-box;
+    font-family: "Roboto", sans-serif;
 }
 
 .aboutGroup {
@@ -245,18 +247,30 @@
     background-color: #7E7E7E;
     border-radius: 7px;
     height: 33px;
-    padding: 0 15px;
+    padding: 0 8px;
     color: white;
     font-size: 20px;
     border: none;
 }
 
 .formInputName {
-    height: 60px;
+    height: auto; /* Дозволяє 'rows' контролювати висоту */
+    min-height: 60px;
+    padding: 0 8px;
+    resize: none;
+    line-height: 1.4;
+}
+
+.charCounter {
+    font-size: 14px;
+    color: #ababab;
+    text-align: right;
+    margin-top: 4px;
 }
 
 .formInputAbout {
     height: 235px;
+    resize: none;
 }
 
 /* Це поле тепер буде прокручуватись */
