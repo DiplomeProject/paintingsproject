@@ -11,7 +11,6 @@
     z-index: 1000;
 }
 
-/* --- ЗМІНЕНО: Видалено фіксовану висоту --- */
 .modal {
     background-color: rgba(52, 46, 76, 0.95);
     border-radius: 16px;
@@ -29,7 +28,6 @@
 
 .closeBtn {
     position: absolute;
-    /*top: 18px;*/
     right: 10%;
     background: none;
     border: none;
@@ -55,6 +53,7 @@
     height: 336px;
     object-fit: cover;
     border-radius: 14px;
+    cursor: pointer;
 }
 
 .info {
@@ -90,7 +89,7 @@
 
 .previewRow {
     display: flex;
-    gap: 8px;
+    gap: 15px;
     margin-top: 0;
     flex-wrap: wrap;
     width: 320px;
@@ -108,9 +107,8 @@
     border-color: rgba(255, 255, 255, 0.5);
 }
 
-/* --- ДОДАНО: Активне прев'ю --- */
 .activePreview {
-    border-color: #5454FE; /* Яскраво-синя рамка */
+    border-color: #5454FE;
 }
 
 .singleImage {
@@ -118,6 +116,15 @@
     height: 420px;
     object-fit: cover;
     border-radius: 14px;
+    cursor: pointer;
+}
+
+/* --- ДОДАНО: Обгортка для одного зображення (для layout) --- */
+.singleImageWrapper {
+    /* По суті, це як .imageColumn, але без .previewRow */
+    display: flex;
+    flex-direction: column;
+    gap: 21px;
 }
 
 .about {
@@ -141,7 +148,6 @@
     color: #d5d5d5;
 }
 
-
 .actions {
     margin-top: 25px;
     display: flex;
@@ -158,7 +164,6 @@
     width: 30%;
 }
 
-/* --- ЗМІНЕНО: Кнопка 'Take' --- */
 .takeBtn {
     background: #5454FE;
     border: none;
@@ -175,29 +180,54 @@
     background: #5a50ff;
 }
 
+/* --- ОНОВЛЕНІ СТИЛІ ЛОГО --- */
+/* (Використовуємо .loadingSpinnerContainer з JS) */
+.loadingSpinnerContainer {
+    /* Співпадає з розмірами .imageColumn */
+    width: 320px;
+    height: calc(336px + 21px + 64px); /* image.height + gap + preview.height */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 14px;
+}
+
+.loadingLogo {
+    width: 80px; /* Трохи менше для модалки */
+    height: 80px;
+    animation: rotateLogo 2s linear infinite;
+}
+
+@keyframes rotateLogo {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
 /* --- АДАПТАЦІЯ --- */
 
-/* 1. Планшети (наприклад, < 1000px) */
 @media (max-width: 1000px) {
     .modal {
-        width: 90vw; /* Модалка займає 90% ширини екрану */
+        width: 90vw;
         padding: 40px 30px;
     }
 
     .topSection {
-        /* Складаємо колонки вертикально */
         flex-direction: column;
         gap: 30px;
     }
 
     .image, .singleImage {
-        width: 100%; /* Картинка на повну ширину */
-        height: auto; /* Автоматична висота */
-        max-height: 400px; /* Обмеження, щоб не була занадто високою */
+        width: 100%;
+        height: auto;
+        max-height: 400px;
     }
 
     .previewRow {
-        width: 100%; /* Прев'ю на повну ширину */
+        width: 100%;
     }
 
     .title {
@@ -205,34 +235,34 @@
         margin-bottom: 20px;
     }
 
-    .field, .about {
-        font-size: 22px;
-    }
-    .about p {
+    .field, .about, .about p {
         font-size: 22px;
     }
 
     .actions {
-        /* Кнопки одна під одною */
         flex-direction: column;
         gap: 15px;
     }
 
     .priceBtn, .takeBtn {
-        width: 100%; /* Кнопки на повну ширину */
+        width: 100%;
         font-size: 22px;
+    }
+
+    /* Оновлюємо .loadingContainer для адаптації */
+    .loadingSpinnerContainer {
+        width: 100%;
+        height: 400px; /* Співпадає з max-height для .image */
     }
 }
 
-/* 2. Телефони (наприклад, < 600px) */
 @media (max-width: 600px) {
     .modal {
-        padding: 30px 15px; /* Мінімальні падінги */
+        padding: 30px 15px;
         font-size: 18px;
     }
 
     .closeBtn {
-        /* Переміщуємо кнопку з кута, щоб не заважала */
         top: 15px;
         right: 15px;
     }
@@ -241,12 +271,8 @@
         font-size: 24px;
     }
 
-    .field, .about, .about p {
+    .field, .about, .about p, .about span {
         font-size: 16px;
-    }
-
-    .about span {
-        font-size: 16px; /* Текст "About" */
     }
 
     .priceBtn, .takeBtn {

@@ -2,11 +2,11 @@ import React, {useEffect, useMemo, useState} from 'react';
 import styles from './Commission.module.css';
 import CategoryFilters from "../CategoryFilters/CategoryFilters";
 import AdvancedFilters from '../AdvancedFilters/AdvancedFilters';
-// import { usePagination } from '../hooks/Pagination/usePagination';
 import Pagination from '../hooks/Pagination/Pagination';
 import CommissionModalDetails from './CommissionModals/CommissionModalDetails';
 import AddCommissionModal from './CommissionModals/AddCommissionModal';
 import axios from 'axios';
+import logo from '../../assets/logo.svg'
 
 // ОНОВЛЕНО: Визначаємо конфігурацію фільтрів для Commission
 const commissionFilterConfig = [
@@ -116,7 +116,6 @@ function Commission() {
             });
     }, []);
 
-// В файлі Commission.js
     useEffect(() => {
         const fetchCommissions = async () => {
             setLoading(true);
@@ -251,10 +250,6 @@ function Commission() {
         setIsAddModalOpen(false);
     };
 
-    if (loading) {
-        return <div className={styles.loading}>Loading commissions...</div>;
-    }
-
     return (
         <div className={styles.commissionPage}>
             <div className={styles.contentWrapper}>
@@ -306,51 +301,58 @@ function Commission() {
                     </div>
                 </div>
                 {showAdvanced && <AdvancedFilters filterConfig={commissionFilterConfig} />}
-                {displayedCommissions.length > 0 ? (
-                    <>
-                        <div className={styles.commissionGrid}>
-                            {displayedCommissions.map(commission => (
-                                <div key={commission.id} className={styles.commissionCard}>
-                                    <div className={styles.imagePriceWrapper}>
-                                        <div className={styles.imageWrapper}>
-                                            <img
-                                                src={commission.imageSrc || "/images/placeholder.png"}
-                                                alt={commission.title || "Commission"}
-                                                className={styles.cardImage}
-                                                onError={(e) => {
-                                                    console.error('Image load error for:', commission.title, 'Source:', commission.imageSrc);
-                                                    e.target.src = "/images/placeholder.png";
-                                                }}
-                                            />
-                                        </div>
-                                        <div className={styles.priceOverlay}>
-                                            <span className={styles.cardPrice}>${commission.price}</span>
-                                        </div>
-                                    </div>
-                                    <div className={styles.cardContent}>
-                                        <div>
-                                            <h3 className={styles.cardTitle}>{commission.title}</h3>
-                                            <p className={styles.cardDescription}>{commission.description}</p>
-                                        </div>
-                                        <button
-                                            className={styles.takeButton}
-                                            onClick={() => handleOpenModal(commission)}
-                                        >
-                                            Take
-                                        </button>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-
-                        <Pagination
-                            currentPage={currentPage}
-                            totalPages={totalPages}
-                            onPageChange={setCurrentPage}
-                        />
-                    </>
+                {loading ? (
+                <div className={styles.loadingSpinnerContainer}>
+                    <img src={logo} alt="Loading" className={styles.loadingLogo} />
+                </div>
                 ) : (
-                    <div className={styles.noResults}>There are no commissions available at the moment</div>
+                    // Стара логіка (відображення сітки або "No results")
+                    displayedCommissions.length > 0 ? (
+                        <>
+                            <div className={styles.commissionGrid}>
+                                {displayedCommissions.map(commission => (
+                                    <div key={commission.id} className={styles.commissionCard}>
+                                        <div className={styles.imagePriceWrapper}>
+                                            <div className={styles.imageWrapper}>
+                                                <img
+                                                    src={commission.imageSrc || "/images/placeholder.png"}
+                                                    alt={commission.title || "Commission"}
+                                                    className={styles.cardImage}
+                                                    onError={(e) => {
+                                                        console.error('Image load error for:', commission.title, 'Source:', commission.imageSrc);
+                                                        e.target.src = "/images/placeholder.png";
+                                                    }}
+                                                />
+                                            </div>
+                                            <div className={styles.priceOverlay}>
+                                                <span className={styles.cardPrice}>${commission.price}</span>
+                                            </div>
+                                        </div>
+                                        <div className={styles.cardContent}>
+                                            <div>
+                                                <h3 className={styles.cardTitle}>{commission.title}</h3>
+                                                <p className={styles.cardDescription}>{commission.description}</p>
+                                            </div>
+                                            <button
+                                                className={styles.takeButton}
+                                                onClick={() => handleOpenModal(commission)}
+                                            >
+                                                Take
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+
+                            <Pagination
+                                currentPage={currentPage}
+                                totalPages={totalPages}
+                                onPageChange={setCurrentPage}
+                            />
+                        </>
+                    ) : (
+                        <div className={styles.noResults}>There are no commissions available at the moment</div>
+                    )
                 )}
             </div>
             {isAddModalOpen && (

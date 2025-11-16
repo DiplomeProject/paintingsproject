@@ -4,6 +4,10 @@
     font-family: 'Roboto', sans-serif;
 }
 
+.logo {
+    width: 100%;
+}
+
 .navbarMain {
     background-color: transparent;
     padding: 1rem 1.5rem;
@@ -25,22 +29,14 @@
 .navbarLogo {
     display: flex;
     align-items: center;
-    margin-left: 6%;
-}
-
-.logoText {
-    color: white;
-    font-weight: 800;
-    font-size: 42px;
-    letter-spacing: 0.05em;
-    font-family: 'Orbitron', sans-serif;
+    margin-left: 6.5%;
 }
 
 .navbarLinks {
     display: flex;
     align-items: center;
     gap: 15px;
-    margin-left: 3%;
+    margin-left: -3%;
 }
 
 .navLink {
