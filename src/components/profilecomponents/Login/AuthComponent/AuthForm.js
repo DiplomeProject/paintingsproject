@@ -1,4 +1,3 @@
-// AuthLayout.js (Новий файл)
 import React from "react";
 import styles from "./AuthForm.module.css"; // <-- Використовуємо новий CSS
 import logo from "../../../../assets/logoWithText.svg";

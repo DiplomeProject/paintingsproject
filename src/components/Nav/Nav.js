@@ -2,6 +2,7 @@ import {useNavigate, useLocation} from "react-router-dom";
 import React, {useEffect, useState} from "react";
 import styles from "./Nav.module.css";
 import axios from 'axios';
+import logo from "../../assets/mainIconNavbar.svg";
 
 export function Navbar() {
     const navigate = useNavigate();
@@ -56,7 +57,8 @@ export function Navbar() {
                 <div className={styles.navbarContainer}>
                     {/* ОНОВЛЕНО: Додано нову обгортку .navbarLeft */}
                     <div className={styles.navbarLogo}>
-                        <div className={styles.logoText}>Digital<br/>Brush</div>
+                        {/*<div className={styles.logoText}>Digital<br/>Brush</div>*/}
+                        <img src={logo} className={styles.logo} alt="logo" />
                     </div>
                     <div className={styles.navbarLeft}>
                         <div className={styles.navbarLinks}>
