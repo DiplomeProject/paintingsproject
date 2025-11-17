@@ -35,6 +35,7 @@ const AddArtModal = ({ onClose, categories, filterConfig }) => {
 
     // --- Стан зображень ---
     const [images, setImages] = useState([]);
+    const MAX_IMAGES = 10;
     const [errors, setErrors] = useState({});
     const [submitting, setSubmitting] = useState(false);
 
@@ -164,16 +165,26 @@ const AddArtModal = ({ onClose, categories, filterConfig }) => {
 
     // --- Обробники файлів (без змін) ---
     const handleFileAdd = (e) => {
-        // 1. Перевіряємо, чи є файли
         if (!e.target.files || e.target.files.length === 0) {
             return;
         }
 
-        // 2. Конвертуємо FileList в масив
         const files = Array.from(e.target.files);
+        const currentImageCount = images.length;
 
-        // 3. Створюємо нові об'єкти файлів з URL для прев'ю
-        const newFileObjects = files.map(file => ({
+        if (currentImageCount >= MAX_IMAGES) {
+            alert(`You can only upload a maximum of ${MAX_IMAGES} images.`);
+            e.target.value = null;
+            return;
+        }
+
+        const filesToAdd = files.slice(0, MAX_IMAGES - currentImageCount);
+
+        if (filesToAdd.length < files.length) {
+            alert(`You can only add ${filesToAdd.length} more images (limit is ${MAX_IMAGES}).`);
+        }
+
+        const newFileObjects = filesToAdd.map(file => ({
             file,
             preview: URL.createObjectURL(file)
         }));
@@ -182,7 +193,6 @@ const AddArtModal = ({ onClose, categories, filterConfig }) => {
 
         if (errors.images) setErrors(prev => ({...prev, images: null}));
 
-        // 5. Очищуємо input
         e.target.value = null;
     };
 
@@ -284,6 +294,7 @@ const AddArtModal = ({ onClose, categories, filterConfig }) => {
                             className={styles.fileInput}
                             onChange={handleFileAdd}
                             multiple
+                            disabled={images.length >= MAX_IMAGES}
                         />
                     </div>
                     {errors.images && !images.length && <span className={styles.error}>{errors.images}</span>}
