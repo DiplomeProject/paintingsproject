@@ -12,33 +12,52 @@
     margin: 0 auto;
     background: #46464799;
     padding: 47px 115px;
-    max-height: 915px;
+    height: 915px;
     border-radius: 12px;
+    overflow: hidden;
 }
 
 .itemsColumn {
     flex: 2;
     max-width: 670px;
+    display: flex;
+    flex-direction: column;
 }
 
 .paymentColumn {
     flex: 1;
     border-radius: 12px;
     height: fit-content;
-    padding: 114px 0 0;
+    margin: 90px 0 0;
 }
 
 .title {
     font-size: 30px;
     text-transform: uppercase;
     font-weight: 400;
-    margin: 0 0 74px;
+    margin: 0 0 74px 16px;
+    flex-shrink: 0;
 }
 
 .itemList {
     display: flex;
     flex-direction: column;
     gap: 2.5rem;
+    flex-grow: 1;
+    overflow-y: auto;
+    padding-right: 1rem;
+    scrollbar-width: thin;
+    scrollbar-color: #5454FE #46464799;
+}
+.itemList::-webkit-scrollbar {
+    width: 8px;
+}
+.itemList::-webkit-scrollbar-track {
+    background: rgba(70, 70, 71, 0.6);
+}
+.itemList::-webkit-scrollbar-thumb {
+    background-color: #5454FE;
+    border-radius: 4px;
 }
 
 .emptyMessage {
@@ -57,6 +76,14 @@
     gap: 29px;
     color: white;
     height: 287px;
+    cursor: pointer;
+    border-radius: 8px;
+    padding: 1rem;
+    transition: background-color 0.2s ease;
+}
+
+.item:hover {
+    background-color: rgba(255, 255, 255, 0.05);
 }
 
 .itemImage {
@@ -94,7 +121,6 @@
 
 .itemDesc {
     font-size: 16px;
-    color: #aaa;
     margin: 0;
     line-height: 1.5;
     font-weight: 400;
@@ -105,18 +131,24 @@
     align-items: center;
     flex-shrink: 0;
     margin-top: 1rem;
-    gap: 56px;
+    /*gap: 56px;*/
+    justify-content: space-between;
 }
 
 .itemPrice {
     font-size: 18px;
     font-weight: 400;
-    border: 1.79px solid #5454FE;
-    padding: 0.5rem 1rem;
-    border-radius: 4px;
-    width: 140px;
     text-align: center;
-    background-color: #2E2E2E99;
+    width: 253.51px;
+    box-sizing: border-box;
+    background-color: rgba(46, 46, 46, 0.6);
+    border: 1.79px solid #5454FE;
+    border-radius: 1.95px;
+    height: 30px;
+    padding: 0 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .removeBtn {
@@ -140,9 +172,9 @@
 }
 
 .paymentForm label {
-    margin-bottom: 0.5rem;
+    margin-bottom: 13px;
     color: white;
-    font-size: 19px;
+    font-size: 22px;
     font-weight: 400;
 }
 
@@ -150,19 +182,24 @@
     background-color: #7E7E7E;
     border: none;
     border-radius: 6px;
-    padding: 10px 15px;
+    padding: 0 15px;
     color: #fff;
-    font-size: 18px;
-    height: 48px;
+    font-size: 22px;
+    height: 33px;
 }
 
 .subtotal {
     display: flex;
-    justify-content: space-between;
-    font-size: 30px;
+    /*justify-content: space-between;*/
+    font-size: 24px;
     font-weight: 400;
     color: white;
-    margin: 2rem 0;
+    margin: 25px 0;
+    gap: 20%;
+}
+
+.subtotalText {
+    font-size: 22px;
 }
 
 .payBtn {
@@ -196,9 +233,21 @@
     .content {
         padding: 2rem;
         flex-direction: column-reverse;
+        max-height: none;
+        overflow: visible;
     }
+
     .itemsColumn {
         max-width: 100%;
+        overflow-y: visible;
+        padding-right: 0;
+        height: auto;
+    }
+
+    .itemList {
+        flex-grow: 0;
+        overflow-y: visible;
+        padding-right: 0;
     }
 }
 

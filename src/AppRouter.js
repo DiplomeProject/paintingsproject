@@ -8,7 +8,7 @@ import Commission from "./components/Commission/Commission";
 import Artists from "./components/Artists/Artists";
 import CheckoutPage from './components/CheckoutPage/CheckoutPage';
 
-export default function AppRouter() {
+export default function AppRouter({ onViewArtDetails }) {
     return (
         <Routes>
             <Route path='/' element={<HomePage />} />
@@ -18,7 +18,10 @@ export default function AppRouter() {
             <Route path='shop' element={<Shop />} />
             <Route path='artists' element={<Artists />} />
             <Route path='commission' element={<Commission />} />
-            <Route path='checkout' element={<CheckoutPage />} />
+            <Route
+                path='checkout'
+                element={<CheckoutPage onViewArtDetails={onViewArtDetails} />}
+            />
         </Routes>
     )
 }
