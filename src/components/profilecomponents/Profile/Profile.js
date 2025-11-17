@@ -6,11 +6,20 @@ import ForgotPassword from "../Login/ForgotPassword/ForgotPassword";
 import styles from './Profile.module.css';
 import DigitalBrushProfile from "./UserProfile/DigitalBrushProfile";
 
+// Мок-користувач для тестування
+const MOCK_USER = {
+    name: "Maksym",
+    surname: "Protsenko",
+    email: "test-user@gmail.com",
+    bio: "I create visual solutions that not only look good, but also work...",
+    profileImage: "https://i.pravatar.cc/300"
+};
 
+// Флаг для переключения между мок-данными и реальным бэкендом
+const USE_MOCK_DATA = true; // установите false для использования реального бэкенда
 
 function Profile() {
-    //const [user, setUser] = useState(null);
-    const [user, setUser] = useState('');
+    const [user, setUser] = useState(null);
     const [view, setView] = useState('login');
     const [isLogin, setIsLogin] = useState(true);
 
@@ -26,28 +35,43 @@ function Profile() {
     const [selectedFile, setSelectedFile] = useState(null);
 
     useEffect(() => {
-        fetch('http://localhost:8080/check-session', { credentials: 'include' })
-            .then(response => response.json())
-            .then(data => {
-                if (data.loggedIn) {
-                    setUser(data.user);
-                    setFormData({
-                        name: data.user.name || '',
-                        surname: data.user.surname || '',
-                        bio: data.user.bio || '',
-                        email: data.user.email || '',
-                        password: ''
-                    });
-                    if (data.user.profileImage) {
-                        setImagePreview(data.user.profileImage);
+        if (USE_MOCK_DATA) {
+            // Используем мок-данные
+            setUser(MOCK_USER);
+            setFormData({
+                name: MOCK_USER.name || '',
+                surname: MOCK_USER.surname || '',
+                bio: MOCK_USER.bio || '',
+                email: MOCK_USER.email || '',
+                password: ''
+            });
+            if (MOCK_USER.profileImage) {
+                setImagePreview(MOCK_USER.profileImage);
+            }
+        } else {
+            // Реальный бэкенд
+            fetch('http://localhost:8080/check-session', { credentials: 'include' })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.loggedIn) {
+                        setUser(data.user);
+                        setFormData({
+                            name: data.user.name || '',
+                            surname: data.user.surname || '',
+                            bio: data.user.bio || '',
+                            email: data.user.email || '',
+                            password: ''
+                        });
+                        if (data.user.profileImage) {
+                            setImagePreview(data.user.profileImage);
+                        }
+                    } else {
+                        setUser(null);
                     }
-                } else {
-                    setUser(null);
-                }
-            })
-            .catch(error => console.error('Error checking session:', error));
+                })
+                .catch(error => console.error('Error checking session:', error));
+        }
     }, []);
-
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -64,82 +88,128 @@ function Profile() {
 
     const handleProfileUpdate = async (e) => {
         e.preventDefault();
-        try {
-            const formDataToSend = new FormData();
-            formDataToSend.append('name', formData.name || user.name);
-            formDataToSend.append('surname', formData.surname || user.surname);
-            formDataToSend.append('bio', formData.bio || user.bio);
-            formDataToSend.append('email', formData.email || user.email);
 
-            if (selectedFile) {
-                formDataToSend.append('profileImage', selectedFile);
-            }
-
-            const response = await axios.post('http://localhost:8080/update-profile', formDataToSend, {
-                withCredentials: true,
-            });
-            setUser(response.data.user);
+        if (USE_MOCK_DATA) {
+            // Мок-обновление профиля
+            console.log("Mock Profile Update:", formData);
+            alert("Профіль оновлено (симуляція)");
             setShowModal(false);
-        } catch (error) {
-            console.error('Error updating profile:', error);
-            alert('Ошибка при обновлении профиля');
+            setUser(prev => ({...prev, ...formData}));
+        } else {
+            // Реальное обновление профиля
+            try {
+                const formDataToSend = new FormData();
+                formDataToSend.append('name', formData.name || user.name);
+                formDataToSend.append('surname', formData.surname || user.surname);
+                formDataToSend.append('bio', formData.bio || user.bio);
+                formDataToSend.append('email', formData.email || user.email);
+
+                if (selectedFile) {
+                    formDataToSend.append('profileImage', selectedFile);
+                }
+
+                const response = await axios.post('http://localhost:8080/update-profile', formDataToSend, {
+                    withCredentials: true,
+                });
+                setUser(response.data.user);
+                setShowModal(false);
+            } catch (error) {
+                console.error('Error updating profile:', error);
+                alert('Ошибка при обновлении профиля');
+            }
         }
     };
 
     const handleLogin = async (e) => {
         e.preventDefault();
-        try {
-            const response = await axios.post('http://localhost:8080/login', {
-                email: formData.email,
-                password: formData.password,
-            }, { withCredentials: true });
-            setUser(response.data.user);
-            localStorage.setItem("user", JSON.stringify(response.data.user));
+
+        if (USE_MOCK_DATA) {
+            // Мок-логин
+            console.log("Mock Login");
+            setUser(MOCK_USER);
             setFormData({
-                name: response.data.user.name || '',
-                surname: response.data.user.surname || '',
-                bio: response.data.user.bio || '',
-                email: response.data.user.email
+                name: MOCK_USER.name || '',
+                surname: MOCK_USER.surname || '',
+                bio: MOCK_USER.bio || '',
+                email: MOCK_USER.email || '',
+                password: ''
             });
-            if (response.data.user.profileImage) {
-                setImagePreview(response.data.user.profileImage);
-            }
+            setImagePreview(MOCK_USER.profileImage);
             setView('profile');
-        } catch (error) {
-            console.error('Login failed:', error);
-            alert('Ошибка при авторизации');
+        } else {
+            // Реальный логин
+            try {
+                const response = await axios.post('http://localhost:8080/login', {
+                    email: formData.email,
+                    password: formData.password,
+                }, { withCredentials: true });
+                setUser(response.data.user);
+                localStorage.setItem("user", JSON.stringify(response.data.user));
+                setFormData({
+                    name: response.data.user.name || '',
+                    surname: response.data.user.surname || '',
+                    bio: response.data.user.bio || '',
+                    email: response.data.user.email
+                });
+                if (response.data.user.profileImage) {
+                    setImagePreview(response.data.user.profileImage);
+                }
+                setView('profile');
+            } catch (error) {
+                console.error('Login failed:', error);
+                alert('Ошибка при авторизации');
+            }
         }
     };
 
     const handleRegister = async (e, formData) => {
-    e.preventDefault();
-    try {
-        const response = await axios.post(
-        "http://localhost:8080/register",
-        {
-            name: formData.name,
-            surname: formData.surname,
-            email: formData.email,
-            password: formData.password,
-        },
-        { withCredentials: true }
-        );
+        e.preventDefault();
 
-        alert("Реєстрація успішна, увійдіть у свій акаунт");
-        setIsLogin(true);
-    } catch (error) {
-        console.error("Registration failed:", error);
-        alert("Помилка при реєстрації");
-    }
+        if (USE_MOCK_DATA) {
+            // Мок-регистрация
+            console.log("Mock Register");
+            alert("Реєстрація успішна (симуляція), увійдіть у свій акаунт");
+            setIsLogin(true);
+            setView('login');
+        } else {
+            // Реальная регистрация
+            try {
+                const response = await axios.post(
+                    "http://localhost:8080/register",
+                    {
+                        name: formData.name,
+                        surname: formData.surname,
+                        email: formData.email,
+                        password: formData.password,
+                    },
+                    { withCredentials: true }
+                );
+
+                alert("Реєстрація успішна, увійдіть у свій акаунт");
+                setIsLogin(true);
+                setView('login');
+            } catch (error) {
+                console.error("Registration failed:", error);
+                alert("Помилка при реєстрації");
+            }
+        }
     };
 
     const handleLogout = async () => {
-        try {
-            await axios.post('http://localhost:8080/logout', {}, { withCredentials: true });
+        if (USE_MOCK_DATA) {
+            // Мок-выход
+            console.log("Mock Logout");
             setUser(null);
             setView('login');
-        } catch (error) {
-            console.error('Logout failed:', error);
+        } else {
+            // Реальный выход
+            try {
+                await axios.post('http://localhost:8080/logout', {}, { withCredentials: true });
+                setUser(null);
+                setView('login');
+            } catch (error) {
+                console.error('Logout failed:', error);
+            }
         }
     };
 
@@ -162,21 +232,20 @@ function Profile() {
                     {view === 'login' && (
                         <Login
                             handleLogin={handleLogin}
-                            handleInputChange={handleInputChange} // Передаємо єдиний обробник
+                            handleInputChange={handleInputChange}
                             toggleForm={showRegister}
                             onForgotPassword={showForgotPassword}
                         />
                     )}
                     {view === 'register' && (
                         <Register
-                            // Передаємо handleRegister з Profile, щоб він міг викликати API
                             handleRegister={handleRegister}
                             toggleForm={showLogin}
                         />
                     )}
                     {view === 'forgotPassword' && (
                         <ForgotPassword
-                            onBack={showLogin} // Функція для повернення до логіну
+                            onBack={showLogin}
                         />
                     )}
                 </div>
@@ -188,7 +257,7 @@ function Profile() {
                     <div className={styles.modalContent}>
                         <div className={styles.modalHeader}>
                             <h5>Редагувати профіль</h5>
-                            <button type="button" className={styles.closeButton} onClick={() => { setShowModal(false); setImagePreview(user.profileImage || null); }} >&times;</button> {/* Скидаємо прев'ю при закритті */}
+                            <button type="button" className={styles.closeButton} onClick={() => { setShowModal(false); setImagePreview(user.profileImage || null); }} >&times;</button>
                         </div>
                         <div className={styles.modalBody}>
                             <form onSubmit={handleProfileUpdate}>
