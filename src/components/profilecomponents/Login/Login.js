@@ -1,7 +1,8 @@
 import React, { useState } from "react";
-import styles from "./Login.module.css";
+// import styles from "./Login.module.css";
 import { EyeIcon, EyeSlashIcon } from "../Register/AuthIcons";
-import logo from '../../../assets/logoWithText.svg';
+import AuthLayout from "./AuthComponent/AuthForm";
+import styles from "./AuthComponent/AuthForm.module.css";
 
 function Login({ toggleForm, handleLogin, handleInputChange, onForgotPassword }) {
     const [showPassword, setShowPassword] = useState(false);
@@ -11,11 +12,10 @@ function Login({ toggleForm, handleLogin, handleInputChange, onForgotPassword })
     };
 
     return (
-        <form className={styles.authCard} onSubmit={handleSubmit}>
-            <img src={logo} className={styles.logo} alt="logo" />
-            {/*<h2 className={styles.logo}>Digital<br />Brush</h2>*/}
+        <AuthLayout onCreateAccount={toggleForm}>
 
-            <div className={styles.fieldsContainer}>
+            {/* 4. <form> тепер всередині */}
+            <form className={styles.formContainer} onSubmit={handleSubmit}>
                 <div className={styles.field}>
                     <label htmlFor="login-email">Login</label>
                     <input
@@ -46,28 +46,22 @@ function Login({ toggleForm, handleLogin, handleInputChange, onForgotPassword })
                         </button>
                     </div>
                 </div>
-            </div>
 
-            <div className={styles.buttonsRow}>
-                <button type="submit" className={styles.submitBtn}>
-                    Log in
-                </button>
-                <a
-                    type="button"
-                    className={styles.forgotPassword}
-                    onClick={onForgotPassword}
-                >
-                    Password forgotten?
-                </a>
-            </div>
-
-            <div className={styles.bottomContainer}>
-                <div className={styles.separator}></div>
-                <button type="button" className={styles.switchFormBtn} onClick={toggleForm}>
-                    Create account
-                </button>
-            </div>
-        </form>
+                <div className={styles.actionsRow}>
+                    {/* Використовуємо нові уніфіковані класи */}
+                    <button type="submit" className={styles.primaryBtn}>
+                        Log in
+                    </button>
+                    <button
+                        type="button"
+                        className={styles.secondaryBtn} // <-- Це тепер теж secondaryBtn
+                        onClick={onForgotPassword}
+                    >
+                        Password forgotten?
+                    </button>
+                </div>
+            </form>
+        </AuthLayout>
     );
 }
 
