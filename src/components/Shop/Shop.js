@@ -203,6 +203,7 @@ const Shop = () => {
                 <ArtDetailsModal
                     art={selectedArt}
                     onClose={() => setSelectedArt(null)}
+                    isLoggedIn={isLoggedIn}
                 />
             )}
 

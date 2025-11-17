@@ -2,12 +2,14 @@ import React, {useCallback, useEffect, useRef, useState} from 'react';
 import styles from './ArtDetailsModal.module.css';
 import closeIcon from '../../../assets/closeCross.svg';
 import ImageViewer from "../ImageViewer/ImageViewer";
+import { useCart } from '../../Cart/CartContext';
+import {useNavigate} from "react-router-dom";
 
 const lerp = (current, target, factor) => {
     return current * (1 - factor) + target * factor;
 };
 
-const ArtDetailsModal = ({art, onClose}) => {
+const ArtDetailsModal = ({art, onClose, isLoggedIn}) => {
 
     const [isViewerOpen, setIsViewerOpen] = useState(false);
     const [viewerInitialIndex, setViewerInitialIndex] = useState(0);
@@ -20,6 +22,10 @@ const ArtDetailsModal = ({art, onClose}) => {
     const rightScroll = useRef({current: 0, target: 0});
     const animationFrameId = useRef(null);
     const lerpFactor = 0.1;
+
+    const navigate = useNavigate();
+
+    const { addToCart } = useCart();
 
     // Блокуємо прокрутку фону, коли модалка відкрита
     useEffect(() => {
@@ -115,6 +121,16 @@ const ArtDetailsModal = ({art, onClose}) => {
         setIsViewerOpen(false);
     }, []);
 
+    const handleBuyClick = () => {
+        if (!isLoggedIn) {
+            alert("Please sign in to add items to your basket.");
+            onClose();
+            return;
+        }
+
+        addToCart(art);
+    };
+
     return (
         <div className={styles.overlay} onClick={handleOverlayClick}>
             <div className={styles.modal}>
@@ -192,7 +208,7 @@ const ArtDetailsModal = ({art, onClose}) => {
 
                             {/* --- НОВЫЙ РЯДОК ДЛЯ КНОПОК (КУПИТЬ + ЛАЙК) --- */}
                             <div className={styles.buttonRow}>
-                                <button className={styles.buyBtn}>Buy</button>
+                                <button className={styles.buyBtn} onClick={handleBuyClick}>Buy</button>
 
                                 <button className={styles.likeBtn} onClick={handleLikeClick}>
                                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none"

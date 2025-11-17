@@ -6,6 +6,7 @@ import Shop from "./components/Shop/Shop";
 import Register from "./components/profilecomponents/Register/Register";
 import Commission from "./components/Commission/Commission";
 import Artists from "./components/Artists/Artists";
+import CheckoutPage from './components/CheckoutPage/CheckoutPage';
 
 export default function AppRouter() {
     return (
@@ -17,6 +18,7 @@ export default function AppRouter() {
             <Route path='shop' element={<Shop />} />
             <Route path='artists' element={<Artists />} />
             <Route path='commission' element={<Commission />} />
+            <Route path='checkout' element={<CheckoutPage />} />
         </Routes>
     )
 }

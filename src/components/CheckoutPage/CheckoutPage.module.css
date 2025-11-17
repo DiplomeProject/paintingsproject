@@ -1,0 +1,216 @@
+.checkoutPage {
+    width: 100%;
+    min-height: 80vh;
+    padding: 102px 154px;
+    box-sizing: border-box;
+    color: white;
+}
+
+.content {
+    display: flex;
+    gap: 250px;
+    margin: 0 auto;
+    background: #46464799;
+    padding: 47px 115px;
+    max-height: 915px;
+    border-radius: 12px;
+}
+
+.itemsColumn {
+    flex: 2;
+    max-width: 670px;
+}
+
+.paymentColumn {
+    flex: 1;
+    border-radius: 12px;
+    height: fit-content;
+    padding: 114px 0 0;
+}
+
+.title {
+    font-size: 30px;
+    text-transform: uppercase;
+    font-weight: 400;
+    margin: 0 0 74px;
+}
+
+.itemList {
+    display: flex;
+    flex-direction: column;
+    gap: 2.5rem;
+}
+
+.emptyMessage {
+    color: #ccc;
+    text-align: center;
+    padding: 2rem 0;
+}
+.emptyMessage span {
+    color: #a5b4fc;
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+.item {
+    display: flex;
+    gap: 29px;
+    color: white;
+    height: 287px;
+}
+
+.itemImage {
+    width: 248px;
+    height: 287px;
+    object-fit: cover;
+    border-radius: 8px;
+    flex-shrink: 0;
+}
+
+.itemInfo {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.infoText {
+    display: flex;
+    flex-direction: column;
+}
+
+.itemTitle {
+    font-size: 19px;
+    font-weight: 400;
+    text-transform: uppercase;
+}
+
+.itemArtist {
+    font-size: 16px;
+    color: #9E9E9E;
+    margin-bottom: 32px;
+    font-weight: 400;
+}
+
+.itemDesc {
+    font-size: 16px;
+    color: #aaa;
+    margin: 0;
+    line-height: 1.5;
+    font-weight: 400;
+}
+
+.itemActions {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    margin-top: 1rem;
+    gap: 56px;
+}
+
+.itemPrice {
+    font-size: 18px;
+    font-weight: 400;
+    border: 1.79px solid #5454FE;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    width: 140px;
+    text-align: center;
+    background-color: #2E2E2E99;
+}
+
+.removeBtn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #aaa;
+}
+.removeBtn svg {
+    width: 32px;
+    height: 32px;
+}
+.removeBtn:hover svg {
+    stroke: #ff6b6b;
+}
+
+.paymentForm .formGroup {
+    margin-bottom: 1.5rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.paymentForm label {
+    margin-bottom: 0.5rem;
+    color: white;
+    font-size: 19px;
+    font-weight: 400;
+}
+
+.paymentForm input {
+    background-color: #7E7E7E;
+    border: none;
+    border-radius: 6px;
+    padding: 10px 15px;
+    color: #fff;
+    font-size: 18px;
+    height: 48px;
+}
+
+.subtotal {
+    display: flex;
+    justify-content: space-between;
+    font-size: 30px;
+    font-weight: 400;
+    color: white;
+    margin: 2rem 0;
+}
+
+.payBtn {
+    background: #5454FE;
+    border: none;
+    color: white;
+    border-radius: 6px;
+    font-size: 30px;
+    font-weight: 400;
+    cursor: pointer;
+    width: 100%;
+    transition: background-color 0.2s;
+    height: 55px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.payBtn:hover {
+    background: #4f4fe8;
+}
+.payBtn:disabled {
+    background: #7E7E7E;
+    cursor: not-allowed;
+}
+
+@media (max-width: 1200px) {
+    .checkoutPage {
+        padding: 4rem 2rem;
+    }
+    .content {
+        padding: 2rem;
+        flex-direction: column-reverse;
+    }
+    .itemsColumn {
+        max-width: 100%;
+    }
+}
+
+@media (max-width: 768px) {
+    .item {
+        flex-direction: column;
+    }
+    .itemImage {
+        width: 100%;
+        height: 250px;
+    }
+    .title {
+        margin-bottom: 2rem;
+    }
+}
