@@ -5,6 +5,7 @@ import CategoryFilters from "../CategoryFilters/CategoryFilters";
 import AdvancedFilters from '../AdvancedFilters/AdvancedFilters';
 import { usePagination } from '../hooks/Pagination/usePagination';
 import Pagination from '../hooks/Pagination/Pagination';
+import ArtDetailsModal from "../ArtCard/Modals/ArtDetailsModal";
 
 // ОНОВЛЕНО: Визначаємо конфігурацію фільтрів для Shop
 const shopFilterConfig = [
@@ -40,23 +41,34 @@ const categories = [
 ];
 
 const Shop = () => {
-    const [activeCategory, setActiveCategory] = useState(null);
-    const [searchQuery, setSearchQuery] = useState('');
-    const [showAdvanced, setShowAdvanced] = useState(false);
-
 
     const cards = useMemo(() => {
-        return Array.from({ length: 1000 }, (_, i) => ({
+        return Array.from({ length: 400 }, (_, i) => ({
             id: i,
             imageUrl: `/images/shopAndOtherPageImages/image${(i % 4) + 1}.png`,
+            images: [ // Масив зображень для модалки
+                `/images/shopAndOtherPageImages/image${(i % 4) + 1}.png`,
+                `/images/shopAndOtherPageImages/image${((i + 1) % 4) + 1}.png`,
+            ],
             title: `Artwork #${i + 1}`,
             artistName: "Digital Artist",
-            artistStyle: categories[i % categories.length],
+            artistStyle: categories[i % categories.length], // 'categories' доступна тут
             likes: `${Math.floor(Math.random() * 500)}k`,
             price: (Math.random() * 200 + 20).toFixed(2),
             category: categories[i % categories.length],
+
+            // --- Поля, яких раніше не було ---
+            style: "Neo-minimalism",
+            fileFormat: "PNG",
+            size: "1080 x 1920",
+            description: "The composition features two large, metallic, ring-like sculptures with reflective chrome surfaces, symmetrically placed on a stark white background."
         }));
     }, []);
+
+    const [activeCategory, setActiveCategory] = useState(null);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [showAdvanced, setShowAdvanced] = useState(false);
+    const [selectedArt, setSelectedArt] = useState(null);
 
     const filteredCards = useMemo(() => {
         let filtered = cards;
@@ -150,12 +162,8 @@ const Shop = () => {
                             {displayedCards.map((card) => (
                                 <ArtCard
                                     key={card.id}
-                                    imageUrl={card.imageUrl}
-                                    title={card.title}
-                                    artistName={card.artistName}
-                                    artistStyle={card.artistStyle}
-                                    likes={card.likes}
-                                    price={card.price}
+                                    art={card}
+                                    onArtClick={setSelectedArt}
                                 />
                             ))}
                         </div>
@@ -172,6 +180,12 @@ const Shop = () => {
                     </div>
                 )}
             </div>
+            {selectedArt && (
+                <ArtDetailsModal
+                    art={selectedArt}
+                    onClose={() => setSelectedArt(null)}
+                />
+            )}
         </div>
     );
 };

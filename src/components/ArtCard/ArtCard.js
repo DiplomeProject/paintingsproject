@@ -1,9 +1,15 @@
 import React from 'react';
 import styles from './ArtCard.module.css';
 
-function ArtCard({imageUrl, title, artistName, artistStyle, likes, price}) {
+// --- ЗМІНЕНО: Приймаємо 'art' (об'єкт) та 'onArtClick' (функцію) ---
+function ArtCard({ art, onArtClick }) {
+
+    // Деструктуруємо дані для зручності
+    const { imageUrl, title, artistName, artistStyle, likes, price } = art;
+
     return (
-        <div className={styles.artCard}>
+        // --- ЗМІНЕНО: Додано onClick ---
+        <div className={styles.artCard} onClick={() => onArtClick(art)}>
             <div
                 className={styles.artCardImage}
                 style={{backgroundImage: `url(${imageUrl})`}}
@@ -16,7 +22,7 @@ function ArtCard({imageUrl, title, artistName, artistStyle, likes, price}) {
                             width="17"
                             height="17"
                             viewBox="0 0 24 24"
-                            fill="currentColor" /* Буде використовувати колір тексту */
+                            fill="currentColor"
                             xmlns="http://www.w3.org/2000/svg"
                         >
                         <path

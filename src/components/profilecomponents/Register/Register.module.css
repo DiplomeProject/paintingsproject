@@ -1,77 +1,88 @@
 /* Register.module.css */
-/* Багато стилів схожі на Login.module.css */
 .authCard {
     display: flex;
     flex-direction: column;
-    width: 100%;
-    max-width: 400px;
+    max-width: 443px;
+    /*height: 527px;*/
     background-color: #f9f9f9;
-    padding: 40px 30px;
+    padding: 44px 62px;
     border-radius: 20px;
     font-family: 'Roboto', sans-serif;
+    font-weight: 400;
+    font-size: 14px;
+    margin: 0;
+    overflow: hidden;
+    opacity: 1;
+    box-sizing: border-box;
+    /*align-items: center;*/
 }
 
-.title {
-    font-size: 14px;
-    color: #555;
-    text-align: center;
-    margin-bottom: 15px;
+.mainTitle {
+    font-size: 22px;
+    color: #333;
+    text-align: left;
+    margin-bottom: 33px;
+    margin-top: 0;
+    font-weight: 500;
+    line-height: 100%;
+    letter-spacing: 0;
+    /*width: 216px;*/
+    /*height: 26px;*/
 }
 
 .emailTitle {
-    margin-top: 25px;
-}
-
-.socialLogin {
-    display: flex;
-    justify-content: center;
-    gap: 20px;
-}
-
-.socialButton {
-    width: 50px;
-    height: 50px;
-    border: none;
-    border-radius: 12px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    cursor: pointer;
-}
-
-.twitter {
-    background-color: #1DA1F2;
-}
-
-.facebook {
-    background-color: #1877F2;
-}
-
-.mail {
-    background-color: #EA4335;
+    font-size: 14px;
+    color: #000000;
+    text-align: left;
+    margin-bottom: 25px;
+    margin-top: 0;
 }
 
 .field {
     display: flex;
     flex-direction: column;
-    margin-bottom: 15px;
+    margin-bottom: 17px;
 }
 
 .field label {
-    font-size: 14px;
-    color: #555;
+    color: #000000;
     margin-bottom: 8px;
+    font-weight: 400;
 }
 
 .field input {
     width: 100%;
-    padding: 12px;
+    height: 39px;
+    padding: 0 10px;
     border: none;
     border-radius: 10px;
-    font-size: 16px;
+    font-size: 14px;
     background-color: #361950;
     color: white;
     box-sizing: border-box;
+}
+
+.field input[type="date"]:invalid {
+    color: transparent;
+}
+
+.field input[type="date"]:valid {
+    color: white;
+}
+
+.field input[type="date"] {
+    position: relative;
+    cursor: pointer;
+}
+
+.field input[type="date"]::-webkit-calendar-picker-indicator {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
 }
 
 .passwordWrapper {
@@ -84,33 +95,90 @@
 
 .eyeBtn {
     position: absolute;
-    right: 10px;
     top: 50%;
+    right: 8px;
     transform: translateY(-50%);
     background: none;
     border: none;
     cursor: pointer;
     color: white;
+    padding: 5px;
+}
+
+.buttonsRow {
+    display: flex;
+    /*justify-content: space-between;*/
+    align-items: center;
+    gap: 145px;
+    margin-top: 22px;
 }
 
 .submitBtn {
+    /*width: 70px;*/
+    height: 39px;
     padding: 15px;
-    font-size: 16px;
-    font-weight: bold;
     border-radius: 10px;
     border: none;
     cursor: pointer;
     background: #5454FE;
     color: white;
-    margin-top: 10px;
-    margin-bottom: 20px;
+    white-space: nowrap;
+    border-bottom: 1px solid;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.5s ease-out;
+
+    font-family: 'Roboto', sans-serif;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 100%;
+    letter-spacing: 0;
 }
 
-.switchFormBtn {
-    background: none;
+.submitBtn:active {
+    transform: scale(0.95);
+}
+
+.backBtn {
+    width: 104px;
+    height: 39px;
+    padding: 10px 0;
+    border-radius: 10px;
     border: none;
-    color: #5454FE;
-    font-size: 14px;
     cursor: pointer;
+    background: #5454FE;
+    color: white;
+    white-space: nowrap;
+    border-bottom: 1px solid;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.5s ease-out;
+
+    font-family: 'Roboto', sans-serif;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 100%;
+    letter-spacing: 0;
+}
+
+.backBtn:active {
+    transform: scale(0.95);
+}
+
+/* Стили для второго шага */
+.codeInput {
+    width: 100%;
+    height: 39px;
+    padding: 0 10px;
+    border: none;
+    border-radius: 10px;
+    background-color: #361950;
+    color: white;
+    box-sizing: border-box;
+    font-size: 18px;
     text-align: center;
+    letter-spacing: 3px;
+    font-weight: bold;
 }
