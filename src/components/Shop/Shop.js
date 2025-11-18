@@ -6,6 +6,8 @@ import AdvancedFilters from '../AdvancedFilters/AdvancedFilters';
 import { usePagination } from '../hooks/Pagination/usePagination';
 import Pagination from '../hooks/Pagination/Pagination';
 import ArtDetailsModal from "../ArtCard/Modals/ArtDetailsModal";
+import axios from 'axios';
+import AddArtModal from "./AddArtModal/AddArtModal";
 
 // ОНОВЛЕНО: Визначаємо конфігурацію фільтрів для Shop
 const shopFilterConfig = [
@@ -49,6 +51,7 @@ const Shop = () => {
             images: [ // Масив зображень для модалки
                 `/images/shopAndOtherPageImages/image${(i % 4) + 1}.png`,
                 `/images/shopAndOtherPageImages/image${((i + 1) % 4) + 1}.png`,
+                '/images/shopAndOtherPageImages/shepard.jpg',
             ],
             title: `Artwork #${i + 1}`,
             artistName: "Digital Artist",
@@ -69,6 +72,20 @@ const Shop = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [showAdvanced, setShowAdvanced] = useState(false);
     const [selectedArt, setSelectedArt] = useState(null);
+
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+
+    useEffect(() => {
+        axios.get("http://localhost:8080/check-session", { withCredentials: true })
+            .then(res => {
+                console.log('Session check (Shop):', res.data.loggedIn);
+                setIsLoggedIn(res.data.loggedIn);
+            })
+            .catch(() => {
+                setIsLoggedIn(false);
+            });
+    }, []);
 
     const filteredCards = useMemo(() => {
         let filtered = cards;
@@ -130,12 +147,14 @@ const Shop = () => {
                             </button>
                         </div>
                     </div>
-                    <button className={styles.addImageButton}>
-                        <svg width="25" height="25" viewBox="0 0 25 25" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M12.4158 0C5.56994 0 0 5.56994 0 12.4158C0 19.2617 5.56994 24.8317 12.4158 24.8317C19.2617 24.8317 24.8317 19.2617 24.8317 12.4158C24.8317 5.56994 19.2617 0 12.4158 0ZM12.4158 1.91013C18.2293 1.91013 22.9216 6.60236 22.9216 12.4158C22.9216 18.2293 18.2293 22.9216 12.4158 22.9216C6.60236 22.9216 1.91013 18.2293 1.91013 12.4158C1.91013 6.60236 6.60236 1.91013 12.4158 1.91013ZM11.4608 6.68545V11.4608H6.68545V13.3709H11.4608V18.1462H13.3709V13.3709H18.1462V11.4608H13.3709V6.68545H11.4608Z" fill="white"/>
-                        </svg>
-                        ADD IMAGE
-                    </button>
+                    {isLoggedIn && (
+                        <button className={styles.addImageButton} onClick={() => setIsAddModalOpen(true)}>
+                            <svg width="25" height="25" viewBox="0 0 25 25" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12.4158 0C5.56994 0 0 5.56994 0 12.4158C0 19.2617 5.56994 24.8317 12.4158 24.8317C19.2617 24.8317 24.8317 19.2617 24.8317 12.4158C24.8317 5.56994 19.2617 0 12.4158 0ZM12.4158 1.91013C18.2293 1.91013 22.9216 6.60236 22.9216 12.4158C22.9216 18.2293 18.2293 22.9216 12.4158 22.9216C6.60236 22.9216 1.91013 18.2293 1.91013 12.4158C1.91013 6.60236 6.60236 1.91013 12.4158 1.91013ZM11.4608 6.68545V11.4608H6.68545V13.3709H11.4608V18.1462H13.3709V13.3709H18.1462V11.4608H13.3709V6.68545H11.4608Z" fill="white"/>
+                            </svg>
+                            ADD IMAGE
+                        </button>
+                    )}
                 </header>
 
                 <CategoryFilters
@@ -184,6 +203,15 @@ const Shop = () => {
                 <ArtDetailsModal
                     art={selectedArt}
                     onClose={() => setSelectedArt(null)}
+                    isLoggedIn={isLoggedIn}
+                />
+            )}
+
+            {isAddModalOpen && (
+                <AddArtModal
+                    onClose={() => setIsAddModalOpen(false)}
+                    categories={categories}
+                    filterConfig={shopFilterConfig}
                 />
             )}
         </div>

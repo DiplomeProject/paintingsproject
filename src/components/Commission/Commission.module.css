@@ -8,7 +8,7 @@
 .contentWrapper {
     width: 100%;
     margin: 0 auto;
-    padding-top: 70px;
+    padding-top: 10px;
 }
 
 .header {
@@ -39,7 +39,7 @@
 .searchBarContainer {
     display: flex;
     align-items: center;
-    max-width: 55%;
+    max-width: 861.88px;
     height: 55px;
     background: white;
     border-radius: 18px;
@@ -129,7 +129,6 @@
     border: 3px solid transparent;
     border-radius: 12px;
     max-width: 444px;
-    /* ЗМІНЕНО: max-height на height, щоб зафіксувати розмір */
     height: 304px;
     gap: 17px;
 }
@@ -140,7 +139,6 @@
     position: relative;
     display: flex;
     flex-direction: column;
-    /*margin-right: 17px;*/
     box-sizing: border-box;
     border: 3px solid transparent;
     border-radius: 5px;
@@ -193,7 +191,6 @@
     flex-direction: column;
     flex-grow: 1;
     position: relative;
-    /* ДОДАНО: Це розштовхне текстовий блок і кнопку */
     justify-content: space-between;
 }
 
@@ -214,20 +211,16 @@
     font-size: 16px;
     line-height: 100%;
     letter-spacing: 0;
-    /* ДОДАНО: Відступ для охайності */
     margin-top: 12px;
 }
 
 .cardTags {
     color: rgba(255, 255, 255, 0.7);
-    /* ВИДАЛЕНО: Цей відступ заважав кнопці "прилипнути" до низу */
-    /* margin-bottom: 35px; */
     font-family: Roboto, sans-serif;
     font-weight: 400;
     font-size: 16px;
     line-height: 100%;
     letter-spacing: 0;
-    /* ДОДАНО: Відступ для охайності */
     margin-top: 12px;
 }
 
@@ -253,7 +246,6 @@
     background: #4f4fe8;
 }
 
-/* --- Стилі пагінації (без змін) --- */
 .paginationContainer {
     display: flex;
     justify-content: center;
@@ -315,53 +307,63 @@
     color: rgba(255, 255, 255, 0.7);
 }
 
-/* --- АДАПТАЦІЯ --- */
+/* --- ОНОВЛЕНІ СТИЛІ ЛОГО --- */
+.loadingSpinnerContainer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 400px;
+    width: 100%;
+}
 
-/* 1. Планшети (наприклад, < 1024px) */
+.loadingLogo {
+    width: 100px;
+    height: 100px;
+    animation: rotateLogo 2s linear infinite;
+}
+
+@keyframes rotateLogo {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* --- АДАПТАЦІЯ --- */
 @media (max-width: 1024px) {
     .header {
-        /* Складаємо хедер вертикально */
         flex-direction: column;
         align-items: flex-start;
         gap: 20px;
     }
-
     .searchBarContainer {
-        max-width: 100%; /* Пошук на повну ширину */
+        max-width: 100%;
         width: 100%;
     }
 }
 
-/* 2. Маленькі планшети та великі телефони (наприклад, < 768px) */
 @media (max-width: 768px) {
     .commissionPage {
-        padding: 0 20px; /* Зменшуємо бічні відступи */
+        padding: 0 20px;
     }
-
     .commissionTitle {
-        font-size: 40px; /* Зменшуємо заголовок */
+        font-size: 40px;
     }
-
     .commissionGrid {
-        /* Дозволяємо карткам бути вужчими */
         grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
         gap: 20px;
     }
-
     .commissionCard {
-        /* Дозволяємо картці бути вищою, якщо потрібно */
         height: auto;
     }
 }
 
-/* 3. Телефони (наприклад, < 480px) */
 @media (max-width: 480px) {
     .commissionGrid {
-        /* Картки на повну ширину, одна під одною */
         grid-template-columns: 1fr;
     }
-
-    /* Зменшуємо шрифти на самій картці */
     .cardTitle {
         font-size: 16px;
     }
@@ -372,11 +374,9 @@
         font-size: 20px;
         padding: 10px 20px;
     }
-
     .filtersWrapper {
         margin-bottom: 20px;
     }
-
     .additionalFilters {
         font-size: 16px;
     }
