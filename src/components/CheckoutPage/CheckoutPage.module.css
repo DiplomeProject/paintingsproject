@@ -1,0 +1,265 @@
+.checkoutPage {
+    width: 100%;
+    min-height: 80vh;
+    padding: 102px 154px;
+    box-sizing: border-box;
+    color: white;
+}
+
+.content {
+    display: flex;
+    gap: 250px;
+    margin: 0 auto;
+    background: #46464799;
+    padding: 47px 115px;
+    height: 915px;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.itemsColumn {
+    flex: 2;
+    max-width: 670px;
+    display: flex;
+    flex-direction: column;
+}
+
+.paymentColumn {
+    flex: 1;
+    border-radius: 12px;
+    height: fit-content;
+    margin: 90px 0 0;
+}
+
+.title {
+    font-size: 30px;
+    text-transform: uppercase;
+    font-weight: 400;
+    margin: 0 0 74px 16px;
+    flex-shrink: 0;
+}
+
+.itemList {
+    display: flex;
+    flex-direction: column;
+    gap: 2.5rem;
+    flex-grow: 1;
+    overflow-y: auto;
+    padding-right: 1rem;
+    scrollbar-width: thin;
+    scrollbar-color: #5454FE #46464799;
+}
+.itemList::-webkit-scrollbar {
+    width: 8px;
+}
+.itemList::-webkit-scrollbar-track {
+    background: rgba(70, 70, 71, 0.6);
+}
+.itemList::-webkit-scrollbar-thumb {
+    background-color: #5454FE;
+    border-radius: 4px;
+}
+
+.emptyMessage {
+    color: #ccc;
+    text-align: center;
+    padding: 2rem 0;
+}
+.emptyMessage span {
+    color: #a5b4fc;
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+.item {
+    display: flex;
+    gap: 29px;
+    color: white;
+    height: 287px;
+    cursor: pointer;
+    border-radius: 8px;
+    padding: 1rem;
+    transition: background-color 0.2s ease;
+}
+
+.item:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.itemImage {
+    width: 248px;
+    height: 287px;
+    object-fit: cover;
+    border-radius: 8px;
+    flex-shrink: 0;
+}
+
+.itemInfo {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.infoText {
+    display: flex;
+    flex-direction: column;
+}
+
+.itemTitle {
+    font-size: 19px;
+    font-weight: 400;
+    text-transform: uppercase;
+}
+
+.itemArtist {
+    font-size: 16px;
+    color: #9E9E9E;
+    margin-bottom: 32px;
+    font-weight: 400;
+}
+
+.itemDesc {
+    font-size: 16px;
+    margin: 0;
+    line-height: 1.5;
+    font-weight: 400;
+}
+
+.itemActions {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    margin-top: 1rem;
+    /*gap: 56px;*/
+    justify-content: space-between;
+}
+
+.itemPrice {
+    font-size: 18px;
+    font-weight: 400;
+    text-align: center;
+    width: 253.51px;
+    box-sizing: border-box;
+    background-color: rgba(46, 46, 46, 0.6);
+    border: 1.79px solid #5454FE;
+    border-radius: 1.95px;
+    height: 30px;
+    padding: 0 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.removeBtn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #aaa;
+}
+.removeBtn svg {
+    width: 32px;
+    height: 32px;
+}
+.removeBtn:hover svg {
+    stroke: #ff6b6b;
+}
+
+.paymentForm .formGroup {
+    margin-bottom: 1.5rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.paymentForm label {
+    margin-bottom: 13px;
+    color: white;
+    font-size: 22px;
+    font-weight: 400;
+}
+
+.paymentForm input {
+    background-color: #7E7E7E;
+    border: none;
+    border-radius: 6px;
+    padding: 0 15px;
+    color: #fff;
+    font-size: 22px;
+    height: 33px;
+}
+
+.subtotal {
+    display: flex;
+    /*justify-content: space-between;*/
+    font-size: 24px;
+    font-weight: 400;
+    color: white;
+    margin: 25px 0;
+    gap: 20%;
+}
+
+.subtotalText {
+    font-size: 22px;
+}
+
+.payBtn {
+    background: #5454FE;
+    border: none;
+    color: white;
+    border-radius: 6px;
+    font-size: 30px;
+    font-weight: 400;
+    cursor: pointer;
+    width: 100%;
+    transition: background-color 0.2s;
+    height: 55px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.payBtn:hover {
+    background: #4f4fe8;
+}
+.payBtn:disabled {
+    background: #7E7E7E;
+    cursor: not-allowed;
+}
+
+@media (max-width: 1200px) {
+    .checkoutPage {
+        padding: 4rem 2rem;
+    }
+    .content {
+        padding: 2rem;
+        flex-direction: column-reverse;
+        max-height: none;
+        overflow: visible;
+    }
+
+    .itemsColumn {
+        max-width: 100%;
+        overflow-y: visible;
+        padding-right: 0;
+        height: auto;
+    }
+
+    .itemList {
+        flex-grow: 0;
+        overflow-y: visible;
+        padding-right: 0;
+    }
+}
+
+@media (max-width: 768px) {
+    .item {
+        flex-direction: column;
+    }
+    .itemImage {
+        width: 100%;
+        height: 250px;
+    }
+    .title {
+        margin-bottom: 2rem;
+    }
+}

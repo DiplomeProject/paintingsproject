@@ -102,6 +102,18 @@ const Shop = () => {
 }, []);
 
 
+
+    useEffect(() => {
+        axios.get("http://localhost:8080/check-session", { withCredentials: true })
+            .then(res => {
+                console.log('Session check (Shop):', res.data.loggedIn);
+                setIsLoggedIn(res.data.loggedIn);
+            })
+            .catch(() => {
+                setIsLoggedIn(false);
+            });
+    }, []);
+
     const filteredCards = useMemo(() => {
         let filtered = cards;
         if (activeCategory) filtered = filtered.filter(c => (c.category || '').toUpperCase() === activeCategory.toUpperCase());

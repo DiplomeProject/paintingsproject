@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import React, {useEffect, useState, useRef} from 'react';
 import styles from './AddArtModal.module.css';
 import axios from "axios";
 import closeIcon from '../../../assets/closeCross.svg';
