@@ -65,7 +65,11 @@ router.post("/upload", auth, uploadMemory.any(), async (req, res) => {
       let images = req.files.filter(f => allowedFieldNames.includes(f.fieldname));
 
       if (images.length === 0) {
+        console.log('No files matched allowed fieldnames:', allowedFieldNames);
+        console.log('Falling back to all uploaded files. req.files summary:', req.files.map(f => ({ fieldname: f.fieldname, originalname: f.originalname, size: f.size })));
         images = req.files; // fallback to any uploaded files
+      } else {
+        console.log('Filtered images to use:', images.map(f => ({ fieldname: f.fieldname, originalname: f.originalname, size: f.size })));
       }
 
       if (images.length === 0) {
