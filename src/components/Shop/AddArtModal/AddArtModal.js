@@ -1,5 +1,3 @@
-// --- START FIXED VERSION ---
-
 import React, { useState, useEffect, useRef } from 'react';
 import styles from './AddArtModal.module.css';
 import axios from "axios";

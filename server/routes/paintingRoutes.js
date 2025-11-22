@@ -14,29 +14,31 @@ const router = express.Router();
 ===================================================== */
 router.get('/api/paintings', async (req, res) => {
   try {
-    const [rows] = await db.query(`
-      SELECT p.Painting_ID, p.Title, p.Image, p.Description, p.Price, p.Style, c.Name AS author_name
-      FROM paintings p
-      JOIN creators c ON p.Creator_ID = c.Creator_ID
-    `);
+      const [rows] = await db.query(`
+          SELECT p.Painting_ID, p.Title, p.Image, p.Description, p.Price, p.Style,
+                 p.Creator_ID, c.Name AS author_name
+          FROM paintings p
+                   JOIN creators c ON p.Creator_ID = c.Creator_ID
+      `);
 
     const paintings = rows.map(row => {
       const blob = row.Image;
       const image = blob ? `data:image/jpeg;base64,${Buffer.from(blob).toString('base64')}` : null;
-      return {
-        Painting_ID: row.Painting_ID,
-        id: row.Painting_ID,
-        Title: row.Title,
-        title: row.Title,
-        Description: row.Description,
-        description: row.Description,
-        Price: row.Price,
-        price: row.Price,
-        Style: row.Style,
-        style: row.Style,
-        author_name: row.author_name,
-        image, // data URI or null
-      };
+        return {
+            Painting_ID: row.Painting_ID,
+            id: row.Painting_ID,
+            Title: row.Title,
+            title: row.Title,
+            Description: row.Description,
+            description: row.Description,
+            Price: row.Price,
+            price: row.Price,
+            Style: row.Style,
+            style: row.Style,
+            author_name: row.author_name,
+            Creator_ID: row.Creator_ID,
+            image, // data URI or null
+        };
     });
 
     res.json({ success: true, paintings });

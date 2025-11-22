@@ -44,7 +44,7 @@ function filePathToDataUri(filePath) {
 // 1. СТВОРЕННЯ ПУБЛІЧНОГО КОМІШЕНУ (із збереженням зображення в base64)
 // Create a public commission (with up to 5 images)
 router.post(
-    '/api/commissions/public',
+    '/api/commissions/create',
     upload.fields([
         {name: 'referenceImage', maxCount: 1},
         {name: 'image2', maxCount: 1},
@@ -53,73 +53,100 @@ router.post(
         {name: 'image5', maxCount: 1}
     ]),
     async (req, res) => {
-        const {title, description, category, style, size, format, price} = req.body;
-        const user = req.session.user || {id: 1, email: 'test@example.com'}; // fallback for testing
-
-        if (!title || !description) {
-            return res.status(400).json({
-                success: false,
-                message: 'Title and description are required'
-            });
-        }
-
-        // helper to safely convert file -> base64 data URI
-        const fileToBase64 = (file) => {
-            if (!file) return null;
-            try {
-                const fileBuffer = fs.readFileSync(file.path);
-                const mimeType = file.mimetype || 'image/png';
-                return `data:${mimeType};base64,${fileBuffer.toString('base64')}`;
-            } catch (err) {
-                console.error(`Error reading ${file.originalname}:`, err);
-                return null;
-            }
-        };
-
-        // convert each possible image
-        const referenceImageBase64 = fileToBase64(req.files?.referenceImage?.[0]);
-        const image2xBase64 = fileToBase64(req.files?.image2?.[0]);
-        const image3xBase64 = fileToBase64(req.files?.image3?.[0]);
-        const image4xBase64 = fileToBase64(req.files?.image4?.[0]);
-        const image5xBase64 = fileToBase64(req.files?.image5?.[0]);
-
-        const sql = `
-            INSERT INTO commissions
-            (Title, Description, Category, Style, Size, Format, Price,
-             ReferenceImage, Image2, Image3, Image4, Image5,
-             Type, Customer_ID, Creator_ID, Status, Created_At)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'public', ?, ?, 'open', NOW())
-        `;
-
-        const values = [
-            title,
-            description,
-            category || null,
-            style || null,
-            size || null,
-            format || null,
-            price || null,
-            referenceImageBase64,
-            image2xBase64,
-            image3xBase64,
-            image4xBase64,
-            image5xBase64,
-            user.id, // Customer_ID
-            null // Creator_ID
-        ];
-
         try {
+            // Отримуємо всі поля
+            const {title, description, category, style, size, format, price, creatorId} = req.body;
+
+            // 1. Перевірка авторизації
+            if (!req.session.user) {
+                return res.status(401).json({ success: false, message: 'Unauthorized. Please log in.' });
+            }
+            const user = req.session.user;
+
+            // 2. Валідація обов'язкових полів
+            if (!title || !description) {
+                return res.status(400).json({ success: false, message: 'Title and description are required' });
+            }
+
+            // 3. Логіка визначення ТИПУ замовлення
+            let commissionType = 'public'; // За замовчуванням
+            let targetCreator = null;      // За замовчуванням
+
+            // Перевіряємо, чи передали ID автора (і чи він не "null"/"undefined" рядком)
+            if (creatorId && creatorId !== 'null' && creatorId !== 'undefined' && creatorId !== '') {
+                targetCreator = parseInt(creatorId);
+
+                // Перевірка на самозамовлення
+                if (parseInt(user.id) === targetCreator) {
+                    return res.status(400).json({ success: false, message: 'You cannot request a commission from yourself.' });
+                }
+
+                // Якщо все ок — тип стає direct
+                commissionType = 'direct';
+            }
+
+            const fileToBase64 = (file) => {
+                if (!file) return null;
+                try {
+                    const fileBuffer = fs.readFileSync(file.path);
+                    const mimeType = file.mimetype || 'image/png';
+                    return `data:${mimeType};base64,${fileBuffer.toString('base64')}`;
+                } catch (err) {
+                    console.error(`Error reading ${file.originalname}:`, err);
+                    return null;
+                }
+            }
+
+            // 4. Обробка зображень
+            const referenceImageBase64 = fileToBase64(req.files?.referenceImage?.[0]);
+            const image2xBase64 = fileToBase64(req.files?.image2?.[0]);
+            const image3xBase64 = fileToBase64(req.files?.image3?.[0]);
+            const image4xBase64 = fileToBase64(req.files?.image4?.[0]);
+            const image5xBase64 = fileToBase64(req.files?.image5?.[0]);
+
+            // 5. SQL Запит
+            const sql = `
+                INSERT INTO commissions
+                (Title, Description, Category, Style, Size, Format, Price,
+                 ReferenceImage, Image2, Image3, Image4, Image5,
+                 Type, Customer_ID, Creator_ID, Status, Created_At)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'open', NOW())
+            `;
+
+            const values = [
+                title,
+                description,
+                category || null,
+                style || null,
+                size || null,
+                format || null,
+                price || null,
+                referenceImageBase64,
+                image2xBase64,
+                image3xBase64,
+                image4xBase64,
+                image5xBase64,
+                commissionType, // 'public' або 'direct'
+                user.id,        // Customer_ID (Замовник)
+                targetCreator   // Creator_ID (Виконавець або NULL)
+            ];
+
             const [result] = await db.query(sql, values);
+
+            console.log(`Commission created. ID: ${result.insertId}, Type: ${commissionType}, Creator: ${targetCreator}`);
+
             res.status(201).json({
                 success: true,
-                message: 'Public commission created successfully',
+                message: `${commissionType} commission created successfully`,
                 commissionId: result.insertId
             });
+
         } catch (err) {
-            console.error('Error creating public commission:', err);
+            console.error('Error creating commission:', err);
             res.status(500).json({
                 success: false,
-                message: 'Database error while creating commission'
+                message: 'Database error',
+                error: err.message
             });
         }
     }

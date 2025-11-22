@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useEffect, useRef } from "react";
-import styles from "./Artists.module.css";
+import { Link } from 'react-router-dom';
+import styles from "./ArtistsPage.module.css";
 import ArtCard from '../ArtCard/ArtCard';
 import CategoryFilters from "../CategoryFilters/CategoryFilters";
 import AdvancedFilters from '../AdvancedFilters/AdvancedFilters';
@@ -8,9 +9,7 @@ import Pagination from '../hooks/Pagination/Pagination';
 import leftArrow from '../../assets/leftArrow.svg';
 import rightArrow from '../../assets/rightArrow.svg';
 import axios from 'axios';
-import ArtDetailsModal from "../ArtCard/Modals/ArtDetailsModal";
 
-// --- Конфігурація фільтрів ---
 const categories = [
     "2D AVATARS", "3D MODELS", "BOOKS", "ANIME", "ICONS", "GAMES",
     "MOCKUPS", "UI/UX", "ADVERTISING", "BRENDING", "POSTER",
@@ -26,77 +25,18 @@ const artistFilterConfig = [
         ]}
 ];
 
-/*// --- Функції для генерації рандомних даних ---
-const getRandomInt = (min, max) => {
-    min = Math.ceil(min);
-    max = Math.floor(max);
-    return Math.floor(Math.random() * (max - min + 1)) + min;
-};
-
-const mockTitles = [
-    'Cyberpunk Alley', 'Forest Spirit', 'Oceanic Dread', 'Retro Future Car', 'Zen Garden 3D',
-    'Project "Phoenix"', 'Synthwave Sunset', 'Minimalist Icon Set', 'Space Opera Concept',
-    'Gothic Architecture', 'Vibrant Street Art', 'Abstract Emotions', 'Lunar Colony UI/UX',
-    'Vintage Poster Ad', 'Nomad Sketch', 'EXHIBITION ADVERTISING'
-];
-const getRandomElement = (arr) => arr[Math.floor(Math.random() * arr.length)];
-
-const mockNames = ["Andriy", "Oleksandra", "Max", "Yaroslav", "Danylo", "Sophia", "Ivan", "Olga", "Dmytro", "Viktoria"];
-const mockSurnames = ["Kovalchuk", "Muratov", "Shevchenko", "Petrenko", "Franko", "Lysenko", "Kravchenko", "Bondarenko"];
-const mockCountries = ["Ukraine", "Poland", "USA", "Italy", "Spain", "Germany", "France", "Japan"];
-const mockStyles = ["Digital Art", "Fantasy", "Synthwave", "Minimalism", "Cyberpunk", "3D Render", "Photography", "Illustration"];
-
-// Генерує 3-6 рандомних карток для одного артиста
-const generateRandomArtworks = (artistName) => {
-    return Array.from({ length: getRandomInt(3, 12) }, (_, i) => ({
-        id: `p-${artistName.replace(/\s/g, '-')}-${i}`,
-        title: getRandomElement(mockTitles),
-        imageUrl: `/images/shopAndOtherPageImages/image${getRandomInt(1, 4)}.png`,
-        artistName: artistName,
-        artistStyle: getRandomElement(mockStyles),
-        likes: `${getRandomInt(50, 500)}k`, // Змінено на 'k' для відповідності дизайну
-        price: getRandomInt(20, 250).toFixed(2),
-
-        // --- Додані поля для ArtDetailsModal ---
-        images: [ // Масив зображень
-            `/images/shopAndOtherPageImages/image${getRandomInt(1, 4)}.png`,
-            `/images/shopAndOtherPageImages/image${getRandomInt(1, 4)}.png`
-        ],
-        category: "Neo-minimalism",
-        style: "Neo-minimalism",
-        fileFormat: "PNG",
-        size: "1080 x 1920",
-        description: "The composition features two large, metallic, ring-like sculptures with reflective chrome surfaces, symmetrically placed on a stark white background."
-    }));
-};
-
-// Генерує одного рандомного артиста
-const generateRandomArtist = (i) => {
-    const name = `${getRandomElement(mockNames)} ${getRandomElement(mockSurnames)}`;
-    const style = getRandomElement(mockStyles); // Стиль артиста
-
-    return {
-        id: i,
-        name: name,
-        country: getRandomElement(mockCountries),
-        style: style,
-        avatar: "/images/profileImg.jpg", // Використовуємо заглушку для аватара
-        likesCount: getRandomInt(100, 5000), // Додано для "Likes"
-        artworks: generateRandomArtworks(name), // Генерація робіт
-    };
-};
-
-// Створюємо масив з 10 рандомних артистів
-const artistsData = Array.from({ length: 30 }, (_, i) => generateRandomArtist(i));*/
-
-export default function Artists() {
+export default function ArtistsPage() {
     const [searchQuery, setSearchQuery] = useState("");
     const [activeCategory, setActiveCategory] = useState(null);
-    const [showAdvanced, setShowAdvanced] = useState(false);
+    // const [showAdvanced, setShowAdvanced] = useState(false); // ВИДАЛЕНО: компонент тепер керує цим сам
     const [galleryStates, setGalleryStates] = useState({});
-    const [selectedArt, setSelectedArt] = useState(null);
+    const [artistsData, setArtistsData] = useState([]);
 
-    // Референси для скролу галерей кожного артиста
+    useEffect(() => {
+        axios.get("http://localhost:8080/check-session", { withCredentials: true })
+            .catch(err => console.log(err));
+    }, []);
+
     const galleryRefs = useRef({});
 
     const checkGalleryOverflow = (artistId) => {
@@ -114,29 +54,30 @@ export default function Artists() {
         }
     };
 
-    const [artistsData, setArtistsData] = useState([]);
-
     useEffect(() => {
         const fetchArtists = async () => {
             try {
                 const res = await axios.get('http://localhost:8080/getartists', { withCredentials: true });
                 const serverArtists = Array.isArray(res.data) ? res.data : (res.data.artists || []);
+
                 const mapped = serverArtists.map((a, idx) => {
                     const name = a.Name || a.name || `Artist ${idx}`;
+                    const currentArtistId = a.Creator_ID || a.Creator_Id || a.id || idx;
+
                     const artworks = Array.isArray(a.paintings)
                         ? a.paintings.map(p => ({
                             id: p.id || p.Painting_ID || p.PaintingId || `${idx}-${Math.random()}`,
                             title: p.title || p.Title || '',
-                            // prefer normalized image_url produced by server, fallback to other fields
                             imageUrl: p.image_url || p.imageBase64 || p.Image || p.image || null,
                             artistName: name,
                             artistStyle: p.style || a.Style || a.style || '',
                             likes: p.likes || 0,
-                            price: p.price || ''
+                            price: p.price || '',
+                            artistId: currentArtistId
                         }))
                         : [];
                     return {
-                        id: a.Creator_ID || a.Creator_Id || a.id || idx,
+                        id: currentArtistId,
                         name,
                         country: a.Country || a.country || 'Unknown',
                         style: a.Style || a.style || 'Unknown',
@@ -148,7 +89,7 @@ export default function Artists() {
                 setArtistsData(mapped);
             } catch (err) {
                 console.error('Error fetching artists from backend:', err);
-                setArtistsData([]); // remove stubs/fallbacks — show real data only
+                setArtistsData([]);
             }
         };
 
@@ -250,19 +191,14 @@ export default function Artists() {
                         activeCategory={activeCategory}
                         onCategoryClick={handleCategoryClick}
                     />
+
+                    {/* ОНОВЛЕНО: Просто вставляємо AdvancedFilters */}
                     <div className={styles.filtersContainer}>
-                        <button
-                            className={`${styles.additionalFilters} ${showAdvanced ? styles.active : ''}`}
-                            onClick={() => setShowAdvanced(!showAdvanced)}
-                        >
-                            ADDITIONAL FILTERS
-                            <svg width="12" height="8" viewBox="0 0 12 8" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M1 1.5L6 6.5L11 1.5" stroke="white" strokeWidth="2"/>
-                            </svg>
-                        </button>
+                        <AdvancedFilters filterConfig={artistFilterConfig} />
                     </div>
                 </div>
-                {showAdvanced && <AdvancedFilters filterConfig={artistFilterConfig} />}
+
+                {/* AdvancedFilters тепер знаходиться всередині filtersWrapper, тому окремий рендер тут не потрібен */}
 
                 <div className={styles.artistsList}>
                     {displayedArtists.length > 0 ? (
@@ -271,14 +207,21 @@ export default function Artists() {
 
                             return (
                                 <div key={artist.id} className={styles.artistSection}>
-                                    <div className={styles.artistLeftInfo}>
-                                        <img src={artist.avatar} alt={artist.name} className={styles.artistAvatar} />
-                                        <span className={styles.artistName}>{artist.name}</span>
-                                        <div className={styles.artistDetails}>
-                                            <span>Style: {artist.style}</span><br/>
-                                            <span>Likes: {artist.likesCount}</span>
+                                    <Link
+                                        to={`/author/${artist.id}`}
+                                        className={styles.artistLeftInfoLink}
+                                        style={{ textDecoration: 'none', color: 'inherit' }}
+                                    >
+                                        <div className={styles.artistLeftInfo}>
+                                            <img src={artist.avatar} alt={artist.name} className={styles.artistAvatar} />
+                                            <h3 className={styles.artistName}>{artist.name}</h3>
+
+                                            <div className={styles.artistDetails}>
+                                                <span>Style: {artist.style}</span><br/>
+                                                <span>Likes: {artist.likesCount}</span>
+                                            </div>
                                         </div>
-                                    </div>
+                                    </Link>
 
                                     <div className={styles.artistRightGallery}>
                                         {state.hasOverflow && state.showLeft && (
@@ -297,22 +240,13 @@ export default function Artists() {
                                         >
                                             {artist.artworks && artist.artworks.length > 0 ? (
                                                 artist.artworks.map(card => (
-                                                    <ArtCard
-                                                        key={card.id}
-                                                        imageUrl={card.imageUrl}
-                                                        title={card.title}
-                                                        artistName={card.artistName}
-                                                        artistStyle={card.artistStyle}
-                                                        likes={card.likes}
-                                                        price={card.price}
-                                                    />
+                                                    <ArtCard key={card.id} art={card} />
                                                 ))
                                             ) : (
                                                 <div className={styles.noArtworks}>No artworks available</div>
                                             )}
                                         </div>
 
-                                        {/* Кнопка "Вправо" */}
                                         {state.hasOverflow && state.showRight && (
                                             <button
                                                 className={`${styles.navButton} ${styles.right}`}
@@ -335,12 +269,6 @@ export default function Artists() {
                     onPageChange={setCurrentPage}
                 />
             </div>
-            {selectedArt && (
-                <ArtDetailsModal
-                    art={selectedArt}
-                    onClose={() => setSelectedArt(null)}
-                />
-            )}
         </div>
     );
 }
