@@ -68,7 +68,7 @@ const AuthorPage = () => {
         return result;
     }, [artist, activeCategory]);
 
-    const itemsPerPage = 9;
+    const itemsPerPage = 24;
     const {
         currentPage,
         setCurrentPage,
