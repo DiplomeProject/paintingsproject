@@ -42,9 +42,11 @@ const ArtDetailsModal = ({art, onClose, isLoggedIn}) => {
     };
 
     const handleArtistNameClick = () => {
-        if (art.artistId) {
+        if (art.artistId !== undefined && art.artistId !== null) {
             onClose();
             navigate(`/author/${art.artistId}`);
+        } else {
+            console.warn("Artist ID is missing for navigation");
         }
     };
 
@@ -162,7 +164,6 @@ const ArtDetailsModal = ({art, onClose, isLoggedIn}) => {
                                 <h2 className={styles.title}>{art.title} </h2>
                             </div>
 
-                            {/* ВИПРАВЛЕНО: Прибрано style={{textDecoration...}} */}
                             <p
                                 className={styles.artistName}
                                 onClick={handleArtistNameClick}

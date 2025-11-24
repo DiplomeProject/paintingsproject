@@ -139,20 +139,22 @@ router.get('/api/paintings/:id', async (req, res) => {
       img.Image ? `data:image/jpeg;base64,${Buffer.from(img.Image).toString('base64')}` : null
     );
 
-    res.json({
-      success: true,
-      painting: {
-        id: painting.Painting_ID,
-        title: painting.Title,
-        description: painting.Description,
-        author_name: painting.author_name,
-        price: painting.Price,
-        style: painting.Style,
-        mainImage,
-        gallery,
-        batchId: painting.Batch_ID
-      }
-    });
+      res.json({
+          success: true,
+          painting: {
+              id: painting.Painting_ID,
+              title: painting.Title,
+              description: painting.Description,
+              author_name: painting.author_name,
+              artistId: painting.Creator_ID,
+              creator_id: painting.Creator_ID,
+              price: painting.Price,
+              style: painting.Style,
+              mainImage,
+              gallery,
+              batchId: painting.Batch_ID
+          }
+      });
 
   } catch (err) {
     console.error('Error fetching painting:', err);

@@ -159,7 +159,7 @@ const AuthorPage = () => {
                                         price: p.Price || p.price,
                                         artistName: artistName,
                                         likes: p.likes || 0,
-                                        artistId: artist.Creator_ID || artist.id,
+                                        artistId: artist.Creator_ID || artist.Creator_Id || artist.CreatorId || artist.id || id,
                                         category: p.Category,
                                         style: p.Style
                                     }}
