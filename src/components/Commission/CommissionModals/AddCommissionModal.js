@@ -4,13 +4,12 @@ import closeIcon from '../../../assets/closeCross.svg';
 import addImageIcon from '../../../assets/image-placeholder-icon.svg';
 import axios from "axios";
 
-// ... (const categories, mockStyles, mockFormats) ...
 const categories = ["2D AVATARS", "3D MODELS", "BOOKS", "ANIME", "ICONS", "GAMES", "MOCKUPS", "UI/UX"];
 const mockStyles = ["Retro", "Cyberpunk", "Fantasy", "Minimalism", "3D Render"];
 const mockFormats = ["PNG", "JPG", "Figma", "PSD", "AI"];
 
 const AddCommissionModal = ({ onClose }) => {
-    // --- Стан для полів форми ---
+    // --- Стан полів (без змін) ---
     const [name, setName] = useState('');
     const [category, setCategory] = useState(categories[0]);
     const [style, setStyle] = useState(mockStyles[0]);
@@ -20,26 +19,22 @@ const AddCommissionModal = ({ onClose }) => {
     const [about, setAbout] = useState('');
     const [price, setPrice] = useState('');
 
-    // --- Стан для зображень (1 головне + 4 прев'ю = 5) ---
-    // Кожен елемент буде об'єктом { file: File, preview: 'blob:...' }
-    const [mainImage, setMainImage] = useState(null);
-    const [previews, setPreviews] = useState(new Array(4).fill(null));
-
-    // --- Стан для помилок валідації ---
+    // --- Стан зображень (з вашого файлу, все вірно) ---
+    const [images, setImages] = useState([]);
+    const MAX_IMAGES = 5;
     const [errors, setErrors] = useState({});
+    const [submitting, setSubmitting] = useState(false);
 
+    // --- Усі хендлери та логіка (handlePriceChange, handleFileAdd, handleImageDelete, validate, handleCreate) залишаються БЕЗ ЗМІН ---
+    // Вони коректно працюють з масивом 'images'
     useEffect(() => {
         return () => {
-            if (mainImage) URL.revokeObjectURL(mainImage.preview);
-            previews.forEach(img => {
-                if (img) URL.revokeObjectURL(img.preview);
-            });
+            images.forEach(img => URL.revokeObjectURL(img.preview));
         };
-    }, [mainImage, previews]);
+    }, [images]);
 
-    /* --- ДОДАНО: Валідація ціни (тільки цілі числа) --- */
     const handlePriceChange = (e) => {
-        const value = e.target.value.replace(/\D/g, ''); // Залишаємо тільки цифри
+        const value = e.target.value.replace(/\D/g, '');
         setPrice(value);
         if (errors.price) setErrors(prev => ({...prev, price: null}));
     };
@@ -54,62 +49,39 @@ const AddCommissionModal = ({ onClose }) => {
         if (errors.size) setErrors(prev => ({...prev, size: null}));
     };
 
-    /* --- ДОДАНО: Обробник завантаження файлів --- */
-    const handleFileChange = (e, type, index = -1) => {
-        const file = e.target.files[0];
-        if (!file) return;
-
-        const previewURL = URL.createObjectURL(file);
-        const newFile = { file, preview: previewURL };
-
-        if (type === 'main') {
-            setMainImage(newFile);
-            if (errors.mainImage) setErrors(prev => ({...prev, mainImage: null}));
-        } else if (type === 'preview') {
-            const newPreviews = [...previews];
-            newPreviews[index] = newFile;
-            setPreviews(newPreviews);
+    const handleFileAdd = (e) => {
+        if (!e.target.files || e.target.files.length === 0) return;
+        const files = Array.from(e.target.files);
+        const currentImageCount = images.length;
+        const allowedFiles = files.slice(0, MAX_IMAGES - currentImageCount);
+        if (allowedFiles.length < files.length) {
+            alert(`You can only upload a maximum of ${MAX_IMAGES} images in total.`);
         }
+        if (allowedFiles.length === 0) {
+            e.target.value = null;
+            return;
+        }
+        const newFileObjects = allowedFiles.map(file => ({
+            file,
+            preview: URL.createObjectURL(file)
+        }));
+
+        setImages(prevImages => [...prevImages, ...newFileObjects]);
+
+        if (errors.images) setErrors(prev => ({...prev, images: null}));
+        e.target.value = null;
     };
 
-    const handleImageDelete = (e, type, index = -1) => {
-        e.stopPropagation(); // Зупиняємо клік, щоб не спрацював input file
-
-        if (type === 'main') {
-            // --- Видалення головного зображення ---
-            URL.revokeObjectURL(mainImage.preview); // 1. Очистка пам'яті
-
-            // 2. Знаходимо перше доступне прев'ю, щоб "підвищити" його
-            const firstValidPreviewIndex = previews.findIndex(p => p !== null);
-
-            if (firstValidPreviewIndex === -1) {
-                // Якщо прев'ю немає, просто очищуємо mainImage
-                setMainImage(null);
-            } else {
-                // 3. "Підвищуємо" перше прев'ю до mainImage
-                const newMainImage = previews[firstValidPreviewIndex];
-                setMainImage(newMainImage);
-
-                // 4. Очищуємо слот прев'ю, звідки взяли зображення (БЕЗ ЗСУВУ)
-                const newPreviews = [...previews];
-                newPreviews[firstValidPreviewIndex] = null;
-                setPreviews(newPreviews);
-            }
-
-        } else if (type === 'preview') {
-            // --- Видалення прев'ю-зображення ---
-            const newPreviews = [...previews];
-            if (newPreviews[index]) {
-                URL.revokeObjectURL(newPreviews[index].preview); // 1. Очистка пам'яті
-            }
-
-            // 2. Просто очищуємо слот (БЕЗ ЗСУВУ)
-            newPreviews[index] = null;
-            setPreviews(newPreviews);
+    const handleImageDelete = (e, index) => {
+        e.stopPropagation();
+        const newImages = [...images];
+        const removedImage = newImages.splice(index, 1)[0];
+        if (removedImage) {
+            URL.revokeObjectURL(removedImage.preview);
         }
+        setImages(newImages);
     };
 
-    /* --- ДОДАНО: Функція валідації --- */
     const validate = () => {
         const newErrors = {};
         if (!name.trim()) newErrors.name = "Name is required";
@@ -119,17 +91,16 @@ const AddCommissionModal = ({ onClose }) => {
         if (!sizeW.trim() || !sizeH.trim()) newErrors.size = "Size is required";
         if (!about.trim()) newErrors.about = "About is required";
         if (!price.trim()) newErrors.price = "Price is required";
-        if (!mainImage) newErrors.mainImage = "Main image is required";
-
+        if (images.length === 0) {
+            newErrors.images = "At least one image is required";
+        }
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
 
-
-    // В файлі AddCommissionModal.js
     const handleCreate = async () => {
         if (!validate()) return;
-
+        setSubmitting(true);
         try {
             const formData = new FormData();
             formData.append("title", name);
@@ -139,26 +110,18 @@ const AddCommissionModal = ({ onClose }) => {
             formData.append("size", `${sizeW}x${sizeH}`);
             formData.append("format", fileFormat);
             formData.append("price", price);
-
-            // --- (ОНОВЛЕНО) Додаємо всі файли під назвою 'images' ---
-            // 1. Додаємо головне зображення
-            if (mainImage?.file) {
-                formData.append("images", mainImage.file);
+            if (images.length > 0) {
+                formData.append("referenceImage", images[0].file);
             }
-
-            // 2. Додаємо всі прев'ю
-            previews.forEach(p => {
-                if (p?.file) {
-                    formData.append("images", p.file);
-                }
-            });
-            // --- Кінець оновлення ---
-
+            if (images.length > 1) {
+                images.slice(1).forEach((img, index) => {
+                    formData.append(`image${index + 2}`, img.file);
+                });
+            }
             const response = await axios.post("http://localhost:8080/api/commissions/public", formData, {
                 headers: { "Content-Type": "multipart/form-data" },
                 withCredentials: true
             });
-
             if (response.data.success) {
                 alert("Commission created successfully!");
                 onClose();
@@ -169,59 +132,74 @@ const AddCommissionModal = ({ onClose }) => {
         } catch (error) {
             console.error("Error creating commission:", error);
             alert("Server error while creating commission");
+        } finally {
+            setSubmitting(false);
         }
     };
+
+    const mainDisplay = images[4] || null;
+    const preview0 = images[0] || null;
+    const preview1 = images[1] || null;
+    const preview2 = images[2] || null;
+    const preview3 = images[3] || null;
+    const previews = [preview0, preview1, preview2, preview3];
 
     return (
         <div className={styles.overlay} onClick={onClose}>
             <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
+
+                {/* --- ОНОВЛЕНО: JSX лівої колонки --- */}
                 <div className={styles.contentWrapper}>
                     <div className={styles.leftColumn}>
 
-                        {/* --- ЗМІНЕНО: Додано оверлей для видалення --- */}
-                        <div className={`${styles.imageUploadArea} ${errors.mainImage ? styles.errorBorder : ''}`}>
-                            {mainImage ? (
+                        {/* 1. Головний слот завантаження (для 5-го зображення) */}
+                        <div className={`${styles.imageUploadArea} ${errors.images && images.length === 0 ? styles.errorBorder : ''}`}>
+                            {mainDisplay ? (
                                 <>
-                                    <img src={mainImage.preview} alt="Main preview" className={styles.imagePreview} />
-                                    <div className={styles.deleteOverlay} onClick={(e) => handleImageDelete(e, 'main')}>
+                                    <img src={mainDisplay.preview} alt="Main preview" className={styles.imagePreview} />
+                                    <div className={styles.deleteOverlay} onClick={(e) => handleImageDelete(e, 4)}>
                                         <img src={closeIcon} alt="Delete" className={styles.deleteIcon} />
                                     </div>
                                 </>
                             ) : (
                                 <>
                                     <img src={addImageIcon} alt="Upload" className={styles.uploadIcon} />
-                                    <input type="file" accept="image/*" className={styles.fileInput} onChange={(e) => handleFileChange(e, 'main')} />
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        className={styles.fileInput}
+                                        onChange={handleFileAdd}
+                                        multiple
+                                        disabled={images.length >= MAX_IMAGES}
+                                    />
                                 </>
                             )}
                         </div>
-                        {errors.mainImage && <span className={styles.error}>{errors.mainImage}</span>}
 
-                        {/* З'являється, тільки якщо mainImage завантажено */}
-                        {mainImage && (
-                            <div className={styles.previewRow}>
-                                {previews.map((img, index) => (
-                                    <div key={index} className={styles.previewImg}>
-                                        {img ? (
-                                            <>
-                                                <img src={img.preview} alt={`preview ${index}`} className={styles.imagePreview} />
-                                                <div className={styles.deleteOverlay} onClick={(e) => handleImageDelete(e, 'preview', index)}>
-                                                    <img src={closeIcon} alt="Delete" className={styles.deleteIcon} />
-                                                </div>
-                                            </>
-                                        ) : (
-                                            <>
-                                                <img src={addImageIcon} alt="preview slot" className={styles.uploadIconPreview} />
-                                                <input type="file" accept="image/*" className={styles.fileInput} onChange={(e) => handleFileChange(e, 'preview', index)} />
-                                            </>
-                                        )}
-                                    </div>
-                                ))}
-                            </div>
-                        )}
+                        {errors.images && images.length === 0 && <span className={styles.error}>{errors.images}</span>}
+
+                        <div className={styles.previewRow}>
+                            {previews.map((img, index) => (
+                                <div key={index} className={styles.previewImg}>
+                                    {img ? (
+                                        <>
+                                            <img src={img.preview} alt={`preview ${index}`} className={styles.imagePreview} />
+                                            <div className={styles.deleteOverlay} onClick={(e) => handleImageDelete(e, index)}>
+                                                <img src={closeIcon} alt="Delete" className={styles.deleteIcon} />
+                                            </div>
+                                        </>
+                                    ) : (
+                                        // Це просто заглушка, в ній НЕМАЄ інпуту
+                                        <img src={addImageIcon} alt="preview slot" className={styles.uploadIconPreview} />
+                                    )}
+                                </div>
+                            ))}
+                        </div>
                     </div>
 
-                    {/* --- ПРАВА КОЛОНКА (Поля вводу) --- */}
+                    {/* --- ПРАВА КОЛОНКА (Без змін) --- */}
                     <div className={styles.rightColumn}>
+                        {/* (Name) */}
                         <div className={styles.formGroup}>
                             <div className={styles.formHeader}>
                                 <p>Name</p>
@@ -229,7 +207,6 @@ const AddCommissionModal = ({ onClose }) => {
                                     <img src={closeIcon} alt="Close" />
                                 </button>
                             </div>
-
                             <input
                                 type="text"
                                 id="name"
@@ -242,44 +219,31 @@ const AddCommissionModal = ({ onClose }) => {
                             />
                             {errors.name && <span className={styles.error}>{errors.name}</span>}
                         </div>
+                        {/* (Category) */}
                         <div className={styles.formGroup}>
                             <p>Category</p>
-                            <select
-                                id="category"
-                                className={styles.formSelect}
-                                value={category}
-                                onChange={(e) => setCategory(e.target.value)}
-                            >
+                            <select id="category" className={styles.formSelect} value={category} onChange={(e) => setCategory(e.target.value)}>
                                 {categories.map(c => <option key={c} value={c}>{c}</option>)}
                             </select>
                         </div>
+                        {/* (Style) */}
                         <div className={styles.formGroup}>
                             <p>Style</p>
-                            <select
-                                id="style"
-                                className={styles.formSelect}
-                                value={style}
-                                onChange={(e) => setStyle(e.target.value)}
-                            >
+                            <select id="style" className={styles.formSelect} value={style} onChange={(e) => setStyle(e.target.value)}>
                                 {mockStyles.map(s => <option key={s} value={s}>{s}</option>)}
                             </select>
                         </div>
+                        {/* (File format) */}
                         <div className={styles.formGroup}>
                             <p>File format</p>
-                            <select
-                                id="fileFormat"
-                                className={styles.formSelect}
-                                value={fileFormat}
-                                onChange={(e) => setFileFormat(e.target.value)}
-                            >
+                            <select id="fileFormat" className={styles.formSelect} value={fileFormat} onChange={(e) => setFileFormat(e.target.value)}>
                                 {mockFormats.map(f => <option key={f} value={f}>{f}</option>)}
                             </select>
                         </div>
+                        {/* (Size) */}
                         <div className={styles.formGroup}>
                             <p>Size</p>
                             <div className={`${styles.sizeInputGroup} ${errors.size ? styles.errorBorderInput : ''}`}>
-
-                                {/* --- ЗМІНЕНО: type="text" та onChange --- */}
                                 <input
                                     type="text"
                                     value={sizeW}
@@ -288,8 +252,6 @@ const AddCommissionModal = ({ onClose }) => {
                                     placeholder="W"
                                 />
                                 <span>X</span>
-
-                                {/* --- ЗМІНЕНО: type="text" та onChange --- */}
                                 <input
                                     type="text"
                                     value={sizeH}
@@ -303,7 +265,7 @@ const AddCommissionModal = ({ onClose }) => {
                     </div>
                 </div>
 
-                {/* Поле 'About' */}
+                {/* About (Без змін) */}
                 <div className={styles.formGroup}>
                     <p>About</p>
                     <textarea
@@ -318,11 +280,11 @@ const AddCommissionModal = ({ onClose }) => {
                     {errors.about && <span className={styles.error}>{errors.about}</span>}
                 </div>
 
-                {/* --- КНОПКИ --- */}
+                {/* Actions (Без змін) */}
                 <div className={styles.actions}>
                     <div className={styles.priceInputWrapper}>
                         <input
-                            type="text" // 'text' для кращого контролю через regex
+                            type="text"
                             className={`${styles.priceInput} ${errors.price ? styles.errorBorderInput : ''}`}
                             value={price}
                             onChange={handlePriceChange}
@@ -330,7 +292,9 @@ const AddCommissionModal = ({ onClose }) => {
                         />
                         {errors.price && <span className={styles.errorPrice}>{errors.price}</span>}
                     </div>
-                    <button className={styles.createBtn} onClick={handleCreate}>Create</button>
+                    <button className={styles.createBtn} onClick={handleCreate} disabled={submitting}>
+                        {submitting ? 'Uploading...' : 'Create'}
+                    </button>
                 </div>
             </div>
         </div>

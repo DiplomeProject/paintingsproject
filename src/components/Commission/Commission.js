@@ -1,12 +1,12 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, {useEffect, useMemo, useState} from 'react';
 import styles from './Commission.module.css';
 import CategoryFilters from "../CategoryFilters/CategoryFilters";
 import AdvancedFilters from '../AdvancedFilters/AdvancedFilters';
-// import { usePagination } from '../hooks/Pagination/usePagination';
 import Pagination from '../hooks/Pagination/Pagination';
 import CommissionModalDetails from './CommissionModals/CommissionModalDetails';
 import AddCommissionModal from './CommissionModals/AddCommissionModal';
 import axios from 'axios';
+import logo from '../../assets/logo.svg'
 
 // ОНОВЛЕНО: Визначаємо конфігурацію фільтрів для Commission
 const commissionFilterConfig = [
@@ -103,9 +103,19 @@ function Commission() {
     const [currentPage, setCurrentPage] = useState(0);
     const [totalPages, setTotalPages] = useState(0);
 
-    // In Commission.js, update your commission card mapping section:
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-// В файлі Commission.js
+    useEffect(() => {
+        axios.get("http://localhost:8080/check-session", { withCredentials: true })
+            .then(res => {
+                console.log('Session check (Commission):', res.data.loggedIn);
+                setIsLoggedIn(res.data.loggedIn);
+            })
+            .catch(() => {
+                setIsLoggedIn(false);
+            });
+    }, []);
+
     useEffect(() => {
         const fetchCommissions = async () => {
             setLoading(true);
@@ -121,15 +131,47 @@ function Commission() {
                 console.log('Fetched commissions:', response.data);
 
                 if (response.data.success && Array.isArray(response.data.commissions)) {
+                    const mapped = response.data.commissions.map(c => {
+                        // prefer server-normalized imageUrl
+                        let imageSrc = c.imageUrl || c.Image || c.ReferenceImage || null;
 
-                    // --- (ВИПРАВЛЕНО) ---
-                    // Прибираємо непотрібний .map()
-                    // Дані з сервера (response.data.commissions)
-                    // ВЖЕ містять всі потрібні поля: Title, Description, Price, imageUrl і т.д.
-                    setCommissions(response.data.commissions);
-                    // --- (КІНЕЦЬ ВИПРАВЛЕННЯ) ---
+                        if (imageSrc && typeof imageSrc === 'string') {
+                            const s = imageSrc.trim();
+                            if (s.startsWith('data:')) {
+                                imageSrc = s;
+                            } else {
+                                // remove newlines/spaces that may break base64
+                                const cleaned = s.replace(/(\r\n|\n|\r|\s)+/gm, "");
+                                if (cleaned.length > 50 && /^[A-Za-z0-9+/=]+$/.test(cleaned)) {
+                                    // treat as raw base64 -> prefix as PNG
+                                    imageSrc = `data:image/png;base64,${cleaned}`;
+                                } else {
+                                    // keep as-is (might be a public URL or filesystem path); browser will try to load it
+                                    imageSrc = s;
+                                }
+                            }
+                        } else {
+                            imageSrc = null;
+                        }
 
-                    setTotalPages(response.data.totalPages);
+                        return {
+                            id: c.Commission_ID || c.id,
+                            title: c.Title || '',
+                            description: c.Description || '',
+                            price: c.Price || 0,
+                            category: c.Category || '',
+                            style: c.Style || '',
+                            fileFormat: c.Format || '',
+                            size: c.Size || '',
+                            imageUrl: c.imageUrl || null,
+                            imageSrc: imageSrc || "/images/placeholder.png",
+                            about: c.Description || '',
+                            authorIcon: "/images/profileImg.jpg",
+                        };
+                    });
+
+                    console.log('Mapped commissions (with imageSrc):', mapped.map(m => ({ id: m.id, imageSrcType: typeof m.imageSrc, imageSrcPreview: (m.imageSrc || '').slice(0,60) })));
+                    setCommissions(mapped);
                 } else {
                     setCommissions([]);
                     setTotalPages(0);
@@ -145,27 +187,19 @@ function Commission() {
         fetchCommissions();
     }, [currentPage, itemsPerPage]);
 
-    const filteredCommissions = useMemo(() => {
-        let items = commissions; // 'commissions' - це ВЖЕ дані поточної сторінки
+    const displayedCommissions = useMemo(() => {
+        let items = commissions;
         if (activeCategory) {
-            items = items.filter(c => (c.Category || '').toUpperCase() === activeCategory.toUpperCase());
+            items = items.filter(c => (c.category || '').toUpperCase() === activeCategory.toUpperCase());
         }
         if (searchQuery) {
-            items = items.filter(c => (c.Title || '').toLowerCase().includes(searchQuery.toLowerCase()));
+            items = items.filter(c => (c.title || '').toLowerCase().includes(searchQuery.toLowerCase()));
         }
         return items;
     }, [activeCategory, searchQuery, commissions]);
 
 
-    // const {
-    //     currentPage,
-    //     setCurrentPage,
-    //     totalPages,
-    //     displayedData: displayedCommissions
-    // } = usePagination(filteredCommissions, itemsPerPage);
-
-    const displayedCommissions = filteredCommissions;
-
+    // Effect for Modal
     useEffect(() => {
         if (isModalOpen) {
             document.body.style.overflow = 'hidden';
@@ -177,6 +211,7 @@ function Commission() {
         };
     }, [isModalOpen]);
 
+    // Effect for AddModal
     useEffect(() => {
         if (isAddModalOpen) {
             document.body.style.overflow = 'hidden';
@@ -215,10 +250,6 @@ function Commission() {
         setIsAddModalOpen(false);
     };
 
-    if (loading) {
-        return <div className={styles.loading}>Loading commissions...</div>;
-    }
-
     return (
         <div className={styles.commissionPage}>
             <div className={styles.contentWrapper}>
@@ -240,12 +271,14 @@ function Commission() {
                             </button>
                         </div>
                     </div>
-                    <button className={styles.addCommissionButton} onClick={handleOpenAddModal}>
-                        <svg width="25" height="25" viewBox="0 0 25 25" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M12.4158 0C5.56994 0 0 5.56994 0 12.4158C0 19.2617 5.56994 24.8317 12.4158 24.8317C19.2617 24.8317 24.8317 19.2617 24.8317 12.4158C24.8317 5.56994 19.2617 0 12.4158 0ZM12.4158 1.91013C18.2293 1.91013 22.9216 6.60236 22.9216 12.4158C22.9216 18.2293 18.2293 22.9216 12.4158 22.9216C6.60236 22.9216 1.91013 18.2293 1.91013 12.4158C1.91013 6.60236 6.60236 1.91013 12.4158 1.91013ZM11.4608 6.68545V11.4608H6.68545V13.3709H11.4608V18.1462H13.3709V13.3709H18.1462V11.4608H13.3709V6.68545H11.4608Z" fill="white"/>
-                        </svg>
-                        ADD COMMISSION
-                    </button>
+                    {isLoggedIn && (
+                        <button className={styles.addCommissionButton} onClick={handleOpenAddModal}>
+                            <svg width="25" height="25" viewBox="0 0 25 25" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12.4158 0C5.56994 0 0 5.56994 0 12.4158C0 19.2617 5.56994 24.8317 12.4158 24.8317C19.2617 24.8317 24.8317 19.2617 24.8317 12.4158C24.8317 5.56994 19.2617 0 12.4158 0ZM12.4158 1.91013C18.2293 1.91013 22.9216 6.60236 22.9216 12.4158C22.9216 18.2293 18.2293 22.9216 12.4158 22.9216C6.60236 22.9216 1.91013 18.2293 1.91013 12.4158C1.91013 6.60236 6.60236 1.91013 12.4158 1.91013ZM11.4608 6.68545V11.4608H6.68545V13.3709H11.4608V18.1462H13.3709V13.3709H18.1462V11.4608H13.3709V6.68545H11.4608Z" fill="white"/>
+                            </svg>
+                            ADD COMMISSION
+                        </button>
+                    )}
                 </header>
 
                 <div className={styles.filtersWrapper}>
@@ -268,61 +301,58 @@ function Commission() {
                     </div>
                 </div>
                 {showAdvanced && <AdvancedFilters filterConfig={commissionFilterConfig} />}
-                {displayedCommissions.length > 0 ? (
-                    <>
-                        <div className={styles.commissionGrid}>
-                            {displayedCommissions.map(commission => (
-                                <div key={commission.id} className={styles.commissionCard}>
-                                    <div className={styles.imagePriceWrapper}>
-                                        <div className={styles.imageWrapper}>
-                                            <img
-                                                src={commission.imageUrl || "/images/placeholder.png"}
-
-                                                alt={commission.Title || "Commission"}
-
-                                                className={styles.cardImage}
-                                                onError={(e) => {
-                                                    if (!e.target.src.endsWith("/images/placeholder.png")) {
-                                                        console.error('Image load error for:', commission.Title);
-                                                        e.target.src = "/images/placeholder.png";
-                                                    }
-                                                }}
-                                            />
-                                        </div>
-                                        <div className={styles.priceOverlay}>
-
-                                            {/* --- ВИПРАВЛЕНО --- */}
-                                            <span className={styles.cardPrice}>${commission.Price}</span>
-
-                                        </div>
-                                    </div>
-                                    <div className={styles.cardContent}>
-                                        <div>
-
-                                            {/* --- ВИПРАВЛЕНО --- */}
-                                            <h3 className={styles.cardTitle}>{commission.Title}</h3>
-                                            <p className={styles.cardDescription}>{commission.Description}</p>
-
-                                        </div>
-                                        <button
-                                            className={styles.takeButton}
-                                            onClick={() => handleOpenModal(commission)}
-                                        >
-                                            Take
-                                        </button>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-
-                        <Pagination
-                            currentPage={currentPage}
-                            totalPages={totalPages}
-                            onPageChange={setCurrentPage} // setCurrentPage тепер тригерить useEffect
-                        />
-                    </>
+                {loading ? (
+                <div className={styles.loadingSpinnerContainer}>
+                    <img src={logo} alt="Loading" className={styles.loadingLogo} />
+                </div>
                 ) : (
-                    <div className={styles.noResults}>There are no commissions available at the moment</div>
+                    // Стара логіка (відображення сітки або "No results")
+                    displayedCommissions.length > 0 ? (
+                        <>
+                            <div className={styles.commissionGrid}>
+                                {displayedCommissions.map(commission => (
+                                    <div key={commission.id} className={styles.commissionCard}>
+                                        <div className={styles.imagePriceWrapper}>
+                                            <div className={styles.imageWrapper}>
+                                                <img
+                                                    src={commission.imageSrc || "/images/placeholder.png"}
+                                                    alt={commission.title || "Commission"}
+                                                    className={styles.cardImage}
+                                                    onError={(e) => {
+                                                        console.error('Image load error for:', commission.title, 'Source:', commission.imageSrc);
+                                                        e.target.src = "/images/placeholder.png";
+                                                    }}
+                                                />
+                                            </div>
+                                            <div className={styles.priceOverlay}>
+                                                <span className={styles.cardPrice}>${commission.price}</span>
+                                            </div>
+                                        </div>
+                                        <div className={styles.cardContent}>
+                                            <div>
+                                                <h3 className={styles.cardTitle}>{commission.title}</h3>
+                                                <p className={styles.cardDescription}>{commission.description}</p>
+                                            </div>
+                                            <button
+                                                className={styles.takeButton}
+                                                onClick={() => handleOpenModal(commission)}
+                                            >
+                                                Take
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+
+                            <Pagination
+                                currentPage={currentPage}
+                                totalPages={totalPages}
+                                onPageChange={setCurrentPage}
+                            />
+                        </>
+                    ) : (
+                        <div className={styles.noResults}>There are no commissions available at the moment</div>
+                    )
                 )}
             </div>
             {isAddModalOpen && (
