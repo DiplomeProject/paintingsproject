@@ -1,40 +1,49 @@
 import React from 'react';
 import styles from './ArtCard.module.css';
+import { useModal } from '../../context/ModalContext'; // Імпортуємо хук
 
-// Accept either an `art` object OR individual props (imageUrl, title, etc.)
 function ArtCard(props) {
-  const {
-    art,
-    imageUrl: imgProp,
-    title: titleProp,
-    artistName: artistNameProp,
-    artistStyle: artistStyleProp,
-    likes: likesProp,
-    price: priceProp,
-    onArtClick = () => {}
-  } = props || {};
+    const { openModal } = useModal(); // Дістаємо функцію відкриття
 
-  // Normalize source: prefer art object, fallback to individual props
-  const source = art || {
-    imageUrl: imgProp,
-    title: titleProp,
-    artistName: artistNameProp,
-    artistStyle: artistStyleProp,
-    likes: likesProp,
-    price: priceProp
-  };
+    const {
+        art,
+        imageUrl: imgProp,
+        title: titleProp,
+        artistName: artistNameProp,
+        artistStyle: artistStyleProp,
+        likes: likesProp,
+        price: priceProp,
+        // onArtClick видаляємо або залишаємо як опціональний callback, якщо треба
+    } = props || {};
 
-  const {
-    imageUrl = '/images/placeholder.png',
-    title = '',
-    artistName = '',
-    artistStyle = '',
-    likes = 0,
-    price = ''
-  } = source;
+    const source = art || {
+        imageUrl: imgProp,
+        title: titleProp,
+        artistName: artistNameProp,
+        artistStyle: artistStyleProp,
+        likes: likesProp,
+        price: priceProp,
+        // Важливо: переконайтеся, що тут є ID, якщо ви передаєте пропси окремо
+        id: props.id
+    };
+
+    const {
+        imageUrl = '/images/placeholder.png',
+        title = '',
+        artistName = '',
+        artistStyle = '',
+        likes = 0,
+        price = ''
+    } = source;
+
+    // Обробник кліку
+    const handleClick = () => {
+        // Викликаємо глобальну модалку
+        openModal(source);
+    };
 
   return (
-    <div className={styles.artCard} onClick={() => onArtClick(source)}>
+      <div className={styles.artCard} onClick={handleClick}>
       <div
         className={styles.artCardImage}
         style={{ backgroundImage: imageUrl ? `url(${imageUrl})` : 'none' }}

@@ -3,6 +3,7 @@
     min-height: 100vh;
     padding: 0 51px;
     box-sizing: border-box;
+    color: white;
 }
 
 .contentWrapper {
@@ -53,6 +54,7 @@
     border: none;
     outline: none;
     font-size: 14px;
+    color: #000;
 }
 
 .searchButton {
@@ -81,35 +83,28 @@
     border-color: rgba(255, 255, 255, 0.5);
 }
 
+/* --- Оновлена секція фільтрів --- */
 .filtersWrapper {
     display: flex;
-    flex-direction: column;
+    justify-content: space-between;
     align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 20px;
     margin-bottom: 40px;
 }
 
-.additionalFilters {
-    background: none;
-    border: none;
-    color: #fff;
-    font-family: 'Roboto', sans-serif;
-    font-size: 20px;
+.filtersContainer {
+    position: relative;
+    z-index: 10;
+    min-width: 200px;
     display: flex;
-    align-items: center;
-    gap: 8px;
-    cursor: pointer;
-    opacity: 0.8;
-    transition: opacity 0.3s ease;
+    justify-content: flex-end;
 }
 
-.additionalFilters:hover {
-    opacity: 1;
-}
+/* ВИДАЛЕНО: старі стилі .additionalFilters */
 
-.additionalFilters.active svg {
-    transform: rotate(180deg);
-}
 
+/* --- Сітка та картки --- */
 .commissionGrid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(444px, 1fr));
@@ -214,16 +209,6 @@
     margin-top: 12px;
 }
 
-.cardTags {
-    color: rgba(255, 255, 255, 0.7);
-    font-family: Roboto, sans-serif;
-    font-weight: 400;
-    font-size: 16px;
-    line-height: 100%;
-    letter-spacing: 0;
-    margin-top: 12px;
-}
-
 .takeButton {
     background: #5454FE;
     font-family: Roboto, sans-serif;
@@ -246,58 +231,11 @@
     background: #4f4fe8;
 }
 
+/* --- Pagination (можна використати загальний стиль) --- */
 .paginationContainer {
     display: flex;
     justify-content: center;
     margin: 60px 0;
-}
-
-.pagination {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    background: rgba(30, 30, 50, 0.8);
-    padding: 8px;
-    border-radius: 12px;
-}
-
-.pageBtn, .pageNumber {
-    background: none;
-    border: none;
-    color: white;
-    font-size: 16px;
-    width: 40px;
-    height: 40px;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.pageBtn:hover, .pageNumber:hover {
-    background: rgba(255, 255, 255, 0.1);
-}
-
-.pageNumber.active {
-    background: linear-gradient(90deg, #9600ff 0%, #ff00cc 100%);
-    font-weight: 700;
-}
-
-.pageBtn:disabled {
-    opacity: 0.4;
-    cursor: default;
-}
-
-.paginationDots {
-    color: white;
-    font-size: 16px;
-    width: 40px;
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
 }
 
 .noResults {
@@ -307,7 +245,7 @@
     color: rgba(255, 255, 255, 0.7);
 }
 
-/* --- ОНОВЛЕНІ СТИЛІ ЛОГО --- */
+/* --- Loading Spinner --- */
 .loadingSpinnerContainer {
     display: flex;
     justify-content: center;
@@ -323,12 +261,8 @@
 }
 
 @keyframes rotateLogo {
-    from {
-        transform: rotate(0deg);
-    }
-    to {
-        transform: rotate(360deg);
-    }
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
 }
 
 /* --- АДАПТАЦІЯ --- */
@@ -358,6 +292,15 @@
     .commissionCard {
         height: auto;
     }
+
+    .filtersWrapper {
+        flex-direction: column;
+        align-items: center;
+    }
+    .filtersContainer {
+        justify-content: center;
+        width: 100%;
+    }
 }
 
 @media (max-width: 480px) {
@@ -373,11 +316,5 @@
     .takeButton {
         font-size: 20px;
         padding: 10px 20px;
-    }
-    .filtersWrapper {
-        margin-bottom: 20px;
-    }
-    .additionalFilters {
-        font-size: 16px;
     }
 }
