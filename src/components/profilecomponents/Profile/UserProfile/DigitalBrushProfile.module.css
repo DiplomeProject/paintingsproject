@@ -1,7 +1,13 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;600;700&display=swap');
+
+* {
+    font-family: 'Roboto', sans-serif;
+}
+
 .profilePage {
     width: 100%;
     min-height: 100vh;
-    padding: 50px 20px;
+    padding: 50px 10px;
     box-sizing: border-box;
     position: relative;
     overflow: hidden;
@@ -14,7 +20,7 @@
     height: 2145.2333984375px;
     opacity: 1;
     top: -895.64px;
-    left: 244px;
+    left: 80px;
     z-index: -1;
     background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
 }
@@ -22,28 +28,28 @@
 .profileView {
     width: 100%;
     color: white;
-    font-family: 'Roboto', sans-serif;
 }
 
 .main {
     max-width: 1440px;
     margin: 0 auto;
-    padding: 0 1.5rem 3rem;
+    padding: 0 1rem 3rem;
     display: grid;
-    grid-template-columns: 330.35px 1fr;
+    grid-template-columns: 300px 1fr;
     gap: 2rem;
     align-items: start;
 }
 
 .profileSidebar {
     grid-column: 1 / 2;
-    width: 330.3525390625px;
+    width: 100%;
     height: auto;
     opacity: 1;
     display: flex;
     flex-direction: column;
     gap: 30px;
     margin-top: 0;
+    margin-left: -50px;
 }
 
 .profileCard {
@@ -53,8 +59,9 @@
     border: 1px solid rgba(255, 255, 255, 0.1);
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: flex-start;
     width: 100%;
+    margin-left: -30px;
 }
 
 .avatarContainer {
@@ -63,6 +70,8 @@
     border-radius: 50%;
     overflow: hidden;
     border: 4px solid rgba(255, 255, 255, 0.1);
+    align-self: center;
+    margin-left: -20px;
 }
 
 .avatar {
@@ -71,27 +80,27 @@
     object-fit: cover;
 }
 
-.name-status-container {
+.nameStatusContainer {
     margin-top: 1rem;
     width: 100%;
-    padding-left: 0;
     display: flex;
     flex-direction: column;
     gap: 0;
+    margin-left: -25px;
 }
 
 .name {
     font-size: 1.5rem;
-    font-family: 'Orbitron', sans-serif;
     font-weight: 600;
     text-align: left;
     margin: 0;
     line-height: 1.2;
+    color: #FFFFFF;
 }
 
 .status {
     font-size: 0.875rem;
-    color: #4ade80;
+    color: #FFFFFF;
     font-weight: 400;
     text-align: left;
     margin: 0;
@@ -105,13 +114,22 @@
     align-items: flex-start;
     gap: 6px;
     width: 100%;
-    padding-left: 50px;
+    margin-left: -25px;
 }
 
 .infoItem {
     font-size: 0.9rem;
     color: #d1d5db;
     text-align: left;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.infoIcon {
+    width: 23px;
+    height: 23px;
+    opacity: 1;
 }
 
 .description {
@@ -122,7 +140,7 @@
     line-height: 1.5;
     max-width: 280px;
     width: 100%;
-    padding-left: 0;
+    margin-left: -25px;
 }
 
 .buttons {
@@ -131,10 +149,11 @@
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
+    margin-left: -25px;
 }
 
 .buttons button {
-    width: 100%;
+    width: 90%;
     height: 43.37689971923828px;
     text-align: left;
     padding: 0.75rem 1rem;
@@ -157,9 +176,36 @@
     transform: translateY(-1px);
 }
 
+.logoutButton {
+    width: 90%;
+    height: 43.37689971923828px;
+    text-align: left;
+    padding: 0.75rem 1rem;
+    border-radius: 3.26px;
+    border: 1.3px solid;
+    background: rgba(255, 59, 59, 0.6);
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(32.57px);
+    font-size: 14px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    border-image: linear-gradient(168.05deg, #ff3b3b 1.51%, rgba(255, 71, 71, 0.44) 90.56%) 1;
+    margin-top: 1rem;
+    margin-left: -25px;
+}
+
+.logoutButton:hover {
+    background: rgba(255, 59, 59, 0.8);
+    transform: translateY(-1px);
+}
+
 .gallerySection {
     grid-column: 2 / 3;
     margin-top: 0;
+    margin-left: -40px;
 }
 
 .filters {
@@ -168,6 +214,7 @@
     align-items: flex-start;
     margin-bottom: 2rem;
     gap: 15px;
+    margin-left: -30px;
 }
 
 .filterButtons {
@@ -208,14 +255,13 @@
 }
 
 .additional {
-    margin-left: 0;
+    margin-left: -30px;
     margin-top: 10px;
     font-size: 0.875rem;
     color: #d1d5db;
     cursor: pointer;
     transition: color 0.3s ease;
     align-self: flex-start;
-    padding-left: 10px;
 }
 
 .additional:hover {
@@ -226,6 +272,7 @@
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
     gap: 17px;
+    margin-left: -30px;
 }
 
 .pagination {
@@ -233,6 +280,7 @@
     display: flex;
     justify-content: center;
     gap: 0.75rem;
+    margin-left: -30px;
 }
 
 .pagination button {
@@ -256,6 +304,95 @@
     color: rgba(255, 255, 255, 0.5);
 }
 
+/* Modal Styles */
+.modalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modalContent {
+    background: rgba(30, 30, 50, 0.9);
+    padding: 2rem;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    width: 90%;
+    max-width: 500px;
+    color: white;
+}
+
+.modalHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.modalHeader h5 {
+    margin: 0;
+    font-size: 1.25rem;
+}
+
+.closeButton {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 0;
+}
+
+.formGroup {
+    margin-bottom: 1rem;
+}
+
+.formGroup label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #d1d5db;
+}
+
+.formGroup input,
+.formGroup textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    font-size: 14px;
+    box-sizing: border-box;
+}
+
+.formGroup textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+.saveButton {
+    width: 100%;
+    padding: 0.75rem;
+    border-radius: 6px;
+    border: none;
+    background: #5454FE;
+    color: white;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.saveButton:hover {
+    background: #4545e0;
+}
+
 @media (max-width: 900px) {
     .main {
         grid-template-columns: 1fr;
@@ -265,15 +402,34 @@
     .profileSidebar {
         grid-row: 1;
         width: 100%;
+        margin-left: 0;
     }
 
     .gallerySection {
         grid-row: 2;
+        margin-left: 0;
+    }
+
+    .profileCard {
+        align-items: center;
+        margin-left: 0;
+    }
+
+    .nameStatusContainer,
+    .infoColumn,
+    .description,
+    .buttons {
+        margin-left: 0;
+    }
+
+    .avatarContainer {
+        margin-left: 0;
     }
 
     .filters {
         flex-direction: column;
         gap: 15px;
+        margin-left: 0;
     }
 
     .filterButtons {
@@ -290,9 +446,10 @@
     .additional {
         margin-top: 30px;
         align-self: center;
+        margin-left: 0;
     }
 
-    .name-status-container {
+    .nameStatusContainer {
         align-items: center;
     }
 
@@ -306,7 +463,6 @@
 
     .infoColumn {
         align-items: center;
-        padding-left: 0;
     }
 
     .infoItem {
@@ -315,5 +471,22 @@
 
     .description {
         text-align: center;
+    }
+
+    .buttons {
+        align-items: center;
+    }
+
+    .buttons button {
+        width: 100%;
+        text-align: center;
+        justify-content: center;
+    }
+
+    .logoutButton {
+        width: 100%;
+        text-align: center;
+        justify-content: center;
+        margin-left: 0;
     }
 }

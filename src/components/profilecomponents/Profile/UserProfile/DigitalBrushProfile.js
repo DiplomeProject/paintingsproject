@@ -2,16 +2,27 @@ import React, { useState, useEffect, useMemo } from "react";
 import axios from "axios";
 import styles from "./DigitalBrushProfile.module.css";
 import ArtCard from "../../../ArtCard/ArtCard";
+import CategoryFilters from "../../../CategoryFilters/CategoryFilters"; // Добавьте этот импорт
+import infoICon from "../../../../assets/infoIcon.svg";
+import infoICon1 from "../../../../assets/infoIcon1.svg";
+import infoICon2 from "../../../../assets/infoIcon2.svg";
 
 function DigitalBrushProfile({ user, onEditProfile, onLogout }) {
     const [paintings, setPaintings] = useState([]);
     const [currentPage, setCurrentPage] = useState(0);
+    const [activeCategory, setActiveCategory] = useState(null); // Добавьте состояние для активной категории
     const itemsPerPage = 24;
 
     const [showUploadModal, setShowUploadModal] = useState(false);
     const [selectedImage, setSelectedImage] = useState(null);
     const [imageTitle, setImageTitle] = useState("");
     const [imageDescription, setImageDescription] = useState("");
+
+    // Добавьте категории для профиля
+    const profileCategories = [
+        "ICONS", "UI/UX", "ADVERTISING", "BRANDING", "POSTER",
+        "ARCHITECTURE", "FASHION", "SKETCH", "PHOTOGRAPHY"
+    ];
 
     useEffect(() => {
         const fetchPaintings = async () => {
@@ -49,6 +60,17 @@ function DigitalBrushProfile({ user, onEditProfile, onLogout }) {
             );
             if (response.data.success) {
                 setShowUploadModal(false);
+                setSelectedImage(null);
+                setImageTitle("");
+                setImageDescription("");
+                // Refresh paintings after upload
+                const paintingsResponse = await axios.get(
+                    "http://localhost:8080/getuserpaintings",
+                    { withCredentials: true }
+                );
+                if (paintingsResponse.data.success) {
+                    setPaintings(paintingsResponse.data.paintings);
+                }
             } else {
                 console.error("Upload failed:", response.data.message);
             }
@@ -57,11 +79,30 @@ function DigitalBrushProfile({ user, onEditProfile, onLogout }) {
         }
     };
 
-    const totalPages = Math.ceil(paintings.length / itemsPerPage);
+    // Добавьте обработчик для категорий
+    const handleCategoryClick = (category) => {
+        if (activeCategory === category) {
+            setActiveCategory(null);
+        } else {
+            setActiveCategory(category);
+        }
+    };
+
+    // Фильтрация картин по категории
+    const filteredPaintings = useMemo(() => {
+        if (!activeCategory) {
+            return paintings;
+        }
+        return paintings.filter(painting =>
+            painting.category?.toUpperCase() === activeCategory.toUpperCase()
+        );
+    }, [paintings, activeCategory]);
+
+    const totalPages = Math.ceil(filteredPaintings.length / itemsPerPage);
     const startIndex = currentPage * itemsPerPage;
     const displayedPaintings = useMemo(
-        () => paintings.slice(startIndex, startIndex + itemsPerPage),
-        [paintings, startIndex]
+        () => filteredPaintings.slice(startIndex, startIndex + itemsPerPage),
+        [filteredPaintings, startIndex]
     );
 
     const renderPageNumbers = () => {
@@ -142,14 +183,23 @@ function DigitalBrushProfile({ user, onEditProfile, onLogout }) {
                             />
                         </div>
 
-                        <h2 className={styles.name}>
-                            Kira Kudo <span className={styles.status}>(available)</span>
-                        </h2>
+                        <div className={styles.nameStatusContainer}>
+                            <h2 className={styles.name}>Kira Kudo <span className={styles.status}>(available)</span></h2>
+                        </div>
 
                         <div className={styles.infoColumn}>
-                            <span className={styles.infoItem}>Retro/Psychedelia</span>
-                            <span className={styles.infoItem}>En/Укр</span>
-                            <span className={styles.infoItem}>52.5k</span>
+                            <span className={styles.infoItem}>
+                                <img src={infoICon} className={styles.infoIcon} alt="Style icon" />
+                                Retro/Psychedelia
+                            </span>
+                            <span className={styles.infoItem}>
+                                <img src={infoICon1} className={styles.infoIcon} alt="Language icon" />
+                                En/Укр
+                            </span>
+                            <span className={styles.infoItem}>
+                                <img src={infoICon2} className={styles.infoIcon} alt="Followers icon" />
+                                52.5k
+                            </span>
                         </div>
 
                         <p className={styles.description}>
@@ -162,6 +212,9 @@ function DigitalBrushProfile({ user, onEditProfile, onLogout }) {
                             <button>My Commission</button>
                             <button>Payment</button>
                             <button>Calendar</button>
+                            <button className={styles.logoutButton} onClick={onLogout}>
+                                Log out
+                            </button>
                         </div>
                     </div>
                 </aside>
@@ -171,23 +224,48 @@ function DigitalBrushProfile({ user, onEditProfile, onLogout }) {
                         <div className={styles.modalContent}>
                             <div className={styles.modalHeader}>
                                 <h5>Upload New Image</h5>
-                                <button type="button" className={styles.closeButton} onClick={() => setShowUploadModal(false)}>&times;</button>
+                                <button
+                                    type="button"
+                                    className={styles.closeButton}
+                                    onClick={() => setShowUploadModal(false)}
+                                >
+                                    &times;
+                                </button>
                             </div>
                             <div className={styles.modalBody}>
                                 <form onSubmit={handleImageUpload}>
                                     <div className={styles.formGroup}>
                                         <label htmlFor="imageTitle">Title</label>
-                                        <input type="text" id="imageTitle" value={imageTitle} onChange={(e) => setImageTitle(e.target.value)} required />
+                                        <input
+                                            type="text"
+                                            id="imageTitle"
+                                            value={imageTitle}
+                                            onChange={(e) => setImageTitle(e.target.value)}
+                                            required
+                                        />
                                     </div>
                                     <div className={styles.formGroup}>
                                         <label htmlFor="imageDescription">Description</label>
-                                        <textarea id="imageDescription" value={imageDescription} onChange={(e) => setImageDescription(e.target.value)} required></textarea>
+                                        <textarea
+                                            id="imageDescription"
+                                            value={imageDescription}
+                                            onChange={(e) => setImageDescription(e.target.value)}
+                                            required
+                                        ></textarea>
                                     </div>
                                     <div className={styles.formGroup}>
                                         <label htmlFor="imageUpload">Select Image</label>
-                                        <input type="file" id="imageUpload" onChange={(e) => setSelectedImage(e.target.files[0])} required />
+                                        <input
+                                            type="file"
+                                            id="imageUpload"
+                                            onChange={(e) => setSelectedImage(e.target.files[0])}
+                                            accept="image/*"
+                                            required
+                                        />
                                     </div>
-                                    <button type="submit" className={styles.saveButton}>Upload Image</button>
+                                    <button type="submit" className={styles.saveButton}>
+                                        Upload Image
+                                    </button>
                                 </form>
                             </div>
                         </div>
@@ -196,12 +274,12 @@ function DigitalBrushProfile({ user, onEditProfile, onLogout }) {
 
                 <section className={styles.gallerySection}>
                     <div className={styles.filters}>
-                        <div className={styles.filterButtons}>
-                            <button className={styles.active}>ICONS</button>
-                            <button>UI/UX</button>
-                            <button>ADVERTISING</button>
-                            <button>BRANDING</button>
-                        </div>
+                        {/* Замените хардкод фильтров на компонент CategoryFilters */}
+                        <CategoryFilters
+                            categories={profileCategories}
+                            activeCategory={activeCategory}
+                            onCategoryClick={handleCategoryClick}
+                        />
                         <div className={styles.additional}>ADDITIONAL FILTERS ▾</div>
                     </div>
 
@@ -233,9 +311,7 @@ function DigitalBrushProfile({ user, onEditProfile, onLogout }) {
                             </button>
                             {renderPageNumbers()}
                             <button
-                                onClick={() =>
-                                    setCurrentPage((p) => Math.min(p + 1, totalPages - 1))
-                                }
+                                onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages - 1))}
                                 disabled={currentPage === totalPages - 1}
                             >
                                 ›
