@@ -8,8 +8,7 @@ const categories = ["2D AVATARS", "3D MODELS", "BOOKS", "ANIME", "ICONS", "GAMES
 const mockStyles = ["Retro", "Cyberpunk", "Fantasy", "Minimalism", "3D Render"];
 const mockFormats = ["PNG", "JPG", "Figma", "PSD", "AI"];
 
-const AddCommissionModal = ({ onClose }) => {
-    // --- Стан полів (без змін) ---
+const AddCommissionModal = ({ onClose, targetCreatorId = null }) => {
     const [name, setName] = useState('');
     const [category, setCategory] = useState(categories[0]);
     const [style, setStyle] = useState(mockStyles[0]);
@@ -18,15 +17,20 @@ const AddCommissionModal = ({ onClose }) => {
     const [sizeH, setSizeH] = useState('');
     const [about, setAbout] = useState('');
     const [price, setPrice] = useState('');
-
-    // --- Стан зображень (з вашого файлу, все вірно) ---
     const [images, setImages] = useState([]);
     const MAX_IMAGES = 5;
     const [errors, setErrors] = useState({});
     const [submitting, setSubmitting] = useState(false);
 
-    // --- Усі хендлери та логіка (handlePriceChange, handleFileAdd, handleImageDelete, validate, handleCreate) залишаються БЕЗ ЗМІН ---
-    // Вони коректно працюють з масивом 'images'
+    useEffect(() => {
+        document.body.style.overflow = 'hidden';
+
+        return () => {
+            document.body.style.overflow = 'auto';
+            images.forEach(img => URL.revokeObjectURL(img.preview));
+        };
+    }, []);
+
     useEffect(() => {
         return () => {
             images.forEach(img => URL.revokeObjectURL(img.preview));
@@ -110,28 +114,42 @@ const AddCommissionModal = ({ onClose }) => {
             formData.append("size", `${sizeW}x${sizeH}`);
             formData.append("format", fileFormat);
             formData.append("price", price);
-            if (images.length > 0) {
-                formData.append("referenceImage", images[0].file);
+
+            // Використовуємо ЄДИНИЙ ендпоінт
+            const apiUrl = "http://localhost:8080/api/commissions/create";
+
+            // Додаємо creatorId тільки якщо він існує
+            if (targetCreatorId) {
+                formData.append("creatorId", targetCreatorId);
             }
+
+            // Додаємо зображення
+            if (images.length > 0) formData.append("referenceImage", images[0].file);
             if (images.length > 1) {
                 images.slice(1).forEach((img, index) => {
                     formData.append(`image${index + 2}`, img.file);
                 });
             }
-            const response = await axios.post("http://localhost:8080/api/commissions/public", formData, {
+
+            const response = await axios.post(apiUrl, formData, {
                 headers: { "Content-Type": "multipart/form-data" },
                 withCredentials: true
             });
+
             if (response.data.success) {
-                alert("Commission created successfully!");
+                // Показуємо повідомлення залежно від типу
+                alert(targetCreatorId ? "Direct commission request sent!" : "Public commission created!");
                 onClose();
                 window.location.reload();
-            } else {
-                alert("Error: " + (response.data.message || "Failed to create commission"));
             }
         } catch (error) {
             console.error("Error creating commission:", error);
-            alert("Server error while creating commission");
+            // Виводимо конкретну помилку з бекенду (наприклад, про самозамовлення)
+            if (error.response && error.response.data && error.response.data.message) {
+                alert("Error: " + error.response.data.message);
+            } else {
+                alert("Server error. Check console for details.");
+            }
         } finally {
             setSubmitting(false);
         }
@@ -147,12 +165,8 @@ const AddCommissionModal = ({ onClose }) => {
     return (
         <div className={styles.overlay} onClick={onClose}>
             <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
-
-                {/* --- ОНОВЛЕНО: JSX лівої колонки --- */}
                 <div className={styles.contentWrapper}>
                     <div className={styles.leftColumn}>
-
-                        {/* 1. Головний слот завантаження (для 5-го зображення) */}
                         <div className={`${styles.imageUploadArea} ${errors.images && images.length === 0 ? styles.errorBorder : ''}`}>
                             {mainDisplay ? (
                                 <>
@@ -175,9 +189,6 @@ const AddCommissionModal = ({ onClose }) => {
                                 </>
                             )}
                         </div>
-
-                        {errors.images && images.length === 0 && <span className={styles.error}>{errors.images}</span>}
-
                         <div className={styles.previewRow}>
                             {previews.map((img, index) => (
                                 <div key={index} className={styles.previewImg}>
@@ -189,17 +200,13 @@ const AddCommissionModal = ({ onClose }) => {
                                             </div>
                                         </>
                                     ) : (
-                                        // Це просто заглушка, в ній НЕМАЄ інпуту
                                         <img src={addImageIcon} alt="preview slot" className={styles.uploadIconPreview} />
                                     )}
                                 </div>
                             ))}
                         </div>
                     </div>
-
-                    {/* --- ПРАВА КОЛОНКА (Без змін) --- */}
                     <div className={styles.rightColumn}>
-                        {/* (Name) */}
                         <div className={styles.formGroup}>
                             <div className={styles.formHeader}>
                                 <p>Name</p>
@@ -219,28 +226,25 @@ const AddCommissionModal = ({ onClose }) => {
                             />
                             {errors.name && <span className={styles.error}>{errors.name}</span>}
                         </div>
-                        {/* (Category) */}
+                        {/* ... Інші поля форми (category, style, format, size) ... */}
                         <div className={styles.formGroup}>
                             <p>Category</p>
                             <select id="category" className={styles.formSelect} value={category} onChange={(e) => setCategory(e.target.value)}>
                                 {categories.map(c => <option key={c} value={c}>{c}</option>)}
                             </select>
                         </div>
-                        {/* (Style) */}
                         <div className={styles.formGroup}>
                             <p>Style</p>
                             <select id="style" className={styles.formSelect} value={style} onChange={(e) => setStyle(e.target.value)}>
                                 {mockStyles.map(s => <option key={s} value={s}>{s}</option>)}
                             </select>
                         </div>
-                        {/* (File format) */}
                         <div className={styles.formGroup}>
                             <p>File format</p>
                             <select id="fileFormat" className={styles.formSelect} value={fileFormat} onChange={(e) => setFileFormat(e.target.value)}>
                                 {mockFormats.map(f => <option key={f} value={f}>{f}</option>)}
                             </select>
                         </div>
-                        {/* (Size) */}
                         <div className={styles.formGroup}>
                             <p>Size</p>
                             <div className={`${styles.sizeInputGroup} ${errors.size ? styles.errorBorderInput : ''}`}>
@@ -260,12 +264,9 @@ const AddCommissionModal = ({ onClose }) => {
                                     placeholder="H"
                                 />
                             </div>
-                            {errors.size && <span className={styles.error}>{errors.size}</span>}
                         </div>
                     </div>
                 </div>
-
-                {/* About (Без змін) */}
                 <div className={styles.formGroup}>
                     <p>About</p>
                     <textarea
@@ -279,8 +280,6 @@ const AddCommissionModal = ({ onClose }) => {
                     />
                     {errors.about && <span className={styles.error}>{errors.about}</span>}
                 </div>
-
-                {/* Actions (Без змін) */}
                 <div className={styles.actions}>
                     <div className={styles.priceInputWrapper}>
                         <input
