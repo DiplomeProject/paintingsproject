@@ -42,11 +42,17 @@
 }
 
 /* ОНОВЛЕНО: Стилі для тайтлу */
+/* ОНОВЛЕНО: Стилі для тайтлу */
 .artCardTitle {
     font-family: 'Roboto', sans-serif;
     font-weight: 400;
     font-size: 16px;
-    line-height: 1; /* 100% */
+    line-height: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 165px;
+    display: block;
 }
 
 .artistInfo {

@@ -2,27 +2,41 @@ import React, { useState, useEffect, useMemo } from "react";
 import axios from "axios";
 import styles from "./DigitalBrushProfile.module.css";
 import ArtCard from "../../../ArtCard/ArtCard";
-import CategoryFilters from "../../../CategoryFilters/CategoryFilters"; // Добавьте этот импорт
-import infoICon from "../../../../assets/infoIcon.svg";
-import infoICon1 from "../../../../assets/infoIcon1.svg";
-import infoICon2 from "../../../../assets/infoIcon2.svg";
+import CategoryFilters from "../../../CategoryFilters/CategoryFilters";
+import infoIcon from '../../../../assets/infoIcon.svg';
+import globeIcon from '../../../../assets/icons/globeIcon.svg';
+import heartIcon from '../../../../assets/icons/heartIcon.svg';
+import AdvancedFilters from "../../../AdvancedFilters/AdvancedFilters";
+import Pagination from "../../../hooks/Pagination/Pagination";
+import {usePagination} from "../../../hooks/Pagination/usePagination";
+import userIcon from "../../../../assets/icons/userIcon.svg";
+import pictureIcon from "../../../../assets/icons/pictureIcon.svg";
+import calendarIcon from "../../../../assets/icons/calendarIcon.svg";
+import comissionIcon from "../../../../assets/icons/comissionIcon.svg";
+import walletIcon from "../../../../assets/icons/walletIcon.svg";
+import closeIcon from "../../../../assets/closeCross.svg";
+import plusIcon from "../../../../assets/icons/plusIcon.svg";
 
-function DigitalBrushProfile({ user, onEditProfile, onLogout }) {
+const additionalFilterConfig = [
+    {
+        title: "SORT BY",
+        options: [
+            { name: "LATEST" },
+            { name: "POPULAR" },
+            { name: "OLDEST" },
+            { name: "PRICE: LOW TO HIGH" },
+            { name: "PRICE: HIGH TO LOW" }
+        ]
+    }
+];
+
+
+const profileCategories = ['ICONS', 'UI/UX', 'ADVERTISING', 'BRENDING'];
+
+function DigitalBrushProfile({ user, onLogout }) {
     const [paintings, setPaintings] = useState([]);
-    const [currentPage, setCurrentPage] = useState(0);
-    const [activeCategory, setActiveCategory] = useState(null); // Добавьте состояние для активной категории
+    const [activeCategory, setActiveCategory] = useState(null);
     const itemsPerPage = 24;
-
-    const [showUploadModal, setShowUploadModal] = useState(false);
-    const [selectedImage, setSelectedImage] = useState(null);
-    const [imageTitle, setImageTitle] = useState("");
-    const [imageDescription, setImageDescription] = useState("");
-
-    // Добавьте категории для профиля
-    const profileCategories = [
-        "ICONS", "UI/UX", "ADVERTISING", "BRANDING", "POSTER",
-        "ARCHITECTURE", "FASHION", "SKETCH", "PHOTOGRAPHY"
-    ];
 
     useEffect(() => {
         const fetchPaintings = async () => {
@@ -41,285 +55,163 @@ function DigitalBrushProfile({ user, onEditProfile, onLogout }) {
             }
         };
 
-        fetchPaintings();
-    }, []);
-
-    const handleImageUpload = async (e) => {
-        e.preventDefault();
-
-        const formData = new FormData();
-        formData.append("image", selectedImage);
-        formData.append("title", imageTitle);
-        formData.append("description", imageDescription);
-
-        try {
-            const response = await axios.post(
-                "http://localhost:8080/upload",
-                formData,
-                { withCredentials: true }
-            );
-            if (response.data.success) {
-                setShowUploadModal(false);
-                setSelectedImage(null);
-                setImageTitle("");
-                setImageDescription("");
-                // Refresh paintings after upload
-                const paintingsResponse = await axios.get(
-                    "http://localhost:8080/getuserpaintings",
-                    { withCredentials: true }
-                );
-                if (paintingsResponse.data.success) {
-                    setPaintings(paintingsResponse.data.paintings);
-                }
-            } else {
-                console.error("Upload failed:", response.data.message);
-            }
-        } catch (err) {
-            console.error("Error uploading image:", err);
+        if (user) {
+            fetchPaintings();
         }
-    };
+    }, [user]);
 
-    // Добавьте обработчик для категорий
     const handleCategoryClick = (category) => {
         if (activeCategory === category) {
             setActiveCategory(null);
         } else {
             setActiveCategory(category);
         }
+        setCurrentPage(0);
     };
 
-    // Фильтрация картин по категории
     const filteredPaintings = useMemo(() => {
         if (!activeCategory) {
             return paintings;
         }
         return paintings.filter(painting =>
-            painting.category?.toUpperCase() === activeCategory.toUpperCase()
+            (painting.style || "").toUpperCase().includes(activeCategory.toUpperCase())
         );
     }, [paintings, activeCategory]);
 
-    const totalPages = Math.ceil(filteredPaintings.length / itemsPerPage);
-    const startIndex = currentPage * itemsPerPage;
-    const displayedPaintings = useMemo(
-        () => filteredPaintings.slice(startIndex, startIndex + itemsPerPage),
-        [filteredPaintings, startIndex]
-    );
+    const {
+        currentPage,
+        setCurrentPage,
+        totalPages,
+        displayedData
+    } = usePagination(filteredPaintings, itemsPerPage);
 
-    const renderPageNumbers = () => {
-        if (totalPages <= 5) {
-            return Array.from({ length: totalPages }, (_, i) => (
-                <button
-                    key={i}
-                    className={i === currentPage ? styles.activePage : ""}
-                    onClick={() => setCurrentPage(i)}
-                >
-                    {i + 1}
-                </button>
-            ));
-        }
+    useEffect(() => {
+        setCurrentPage(0);
+    }, [activeCategory, setCurrentPage]);
 
-        const pages = [];
-        pages.push(
-            <button
-                key={0}
-                className={0 === currentPage ? styles.activePage : ""}
-                onClick={() => setCurrentPage(0)}
-            >
-                1
-            </button>
-        );
-
-        if (currentPage > 2) {
-            pages.push(
-                <span key="dots1" className={styles.paginationDots}>
-                    ...
-                </span>
-            );
-        }
-
-        if (currentPage > 0 && currentPage < totalPages - 1) {
-            pages.push(
-                <button
-                    key={currentPage}
-                    className={styles.activePage}
-                    onClick={() => setCurrentPage(currentPage)}
-                >
-                    {currentPage + 1}
-                </button>
-            );
-        }
-
-        if (currentPage < totalPages - 3) {
-            pages.push(
-                <span key="dots2" className={styles.paginationDots}>
-                    ...
-                </span>
-            );
-        }
-
-        pages.push(
-            <button
-                key={totalPages - 1}
-                className={totalPages - 1 === currentPage ? styles.activePage : ""}
-                onClick={() => setCurrentPage(totalPages - 1)}
-            >
-                {totalPages}
-            </button>
-        );
-
-        return pages;
-    };
+    const totalLikes = "0";
 
     return (
-        <div className={styles.profileView}>
-            <main className={styles.main}>
-                <aside className={styles.profileSidebar}>
-                    <div className={styles.profileCard}>
-                        <div className={styles.avatarContainer}>
-                            <img
-                                src={user.profileImage || "/images/icons/profile.jpg"}
-                                alt="Kira Kudo"
-                                className={styles.avatar}
-                            />
-                        </div>
+        <div className={styles.pageContainer}>
+            <div className={styles.contentWrapper}>
 
-                        <div className={styles.nameStatusContainer}>
-                            <h2 className={styles.name}>Kira Kudo <span className={styles.status}>(available)</span></h2>
-                        </div>
+                {/* --- ЛІВА ЧАСТИНА (SIDEBAR) --- */}
+                <aside className={styles.sidebar}>
+                    <div className={styles.avatarContainer}>
+                        <img
+                            src={user.profileImage || "/images/profileImg.jpg"}
+                            alt={user.name}
+                            className={styles.avatar}
+                        />
+                    </div>
 
-                        <div className={styles.infoColumn}>
-                            <span className={styles.infoItem}>
-                                <img src={infoICon} className={styles.infoIcon} alt="Style icon" />
-                                Retro/Psychedelia
-                            </span>
-                            <span className={styles.infoItem}>
-                                <img src={infoICon1} className={styles.infoIcon} alt="Language icon" />
-                                En/Укр
-                            </span>
-                            <span className={styles.infoItem}>
-                                <img src={infoICon2} className={styles.infoIcon} alt="Followers icon" />
-                                52.5k
-                            </span>
-                        </div>
+                    <div>
+                        <h1 className={styles.artistName}>
+                            {user.name || "Artist"}
+                            <span className={styles.status}>(available)</span>
+                        </h1>
+                    </div>
 
-                        <p className={styles.description}>
-                            I create visual solutions that not only look good, but also work - helping businesses stand out and users enjoy the interaction.
-                        </p>
-
-                        <div className={styles.buttons}>
-                            <button onClick={onEditProfile}>Settings profile</button>
-                            <button onClick={() => setShowUploadModal(true)}>My images</button>
-                            <button>My Commission</button>
-                            <button>Payment</button>
-                            <button>Calendar</button>
-                            <button className={styles.logoutButton} onClick={onLogout}>
-                                Log out
-                            </button>
+                    <div className={styles.metaInfo}>
+                        {/* Стиль (можна додати поле style в user, якщо нема - хардкод) */}
+                        <div className={styles.metaRow}>
+                            <img src={infoIcon} alt="Style" className={styles.socialicon} />
+                            <span>Retro/Psychedelia</span>
                         </div>
+                        {/* Країна/Мова */}
+                        <div className={styles.metaRow}>
+                            <img src={globeIcon} alt="Country" className={styles.socialicon} />
+                            <span>En/Ukr</span>
+                        </div>
+                        {/* Лайки/Підписники */}
+                        <div className={styles.metaRow}>
+                            <img src={heartIcon} alt="Likes" className={styles.socialicon} />
+                            <span>{totalLikes}</span>
+                        </div>
+                    </div>
+
+                    <p className={styles.bio}>
+                        {user.bio || "Welcome to my profile! No description provided yet."}
+                    </p>
+
+                    {/* Блок кнопок керування профілем */}
+                    <div className={styles.actionButtonsContainer}>
+                        <button className={styles.profileSettingsBtn}>
+                            <img src={userIcon} alt="UserIcon" className={styles.btnicon} />
+                            Settings profile
+                        </button>
+                        <button className={styles.imagesBtn}>
+                            <img src={pictureIcon} alt="PictureIcon" className={styles.btnicon} />
+                            My images
+                            <img src={plusIcon} alt="PlusIcon" className={styles.plusIcon}/>
+                        </button>
+                        <button className={styles.comissionBtn}>
+                            <img src={comissionIcon} alt="ComissionIcon" className={styles.btnicon} />
+                            My Commission
+                            <img src={plusIcon} alt="PlusIcon" className={styles.plusIcon}/>
+                        </button>
+                        <button className={styles.paymentBtn}>
+                            <img src={walletIcon} alt="PaymentIcon" className={styles.btnicon} />
+                            Payment
+                        </button>
+                        <button className={styles.calendarBtn}>
+                            <img src={calendarIcon} alt="CalendarIcon" className={styles.btnicon} />
+                            Calendar
+                        </button>
+                        <button className={styles.logoutBtn} onClick={onLogout}>
+                            <img src={closeIcon} alt="CalendarIcon" className={styles.btnicon} />
+                            Log out
+                        </button>
                     </div>
                 </aside>
 
-                {showUploadModal && (
-                    <div className={styles.modalOverlay}>
-                        <div className={styles.modalContent}>
-                            <div className={styles.modalHeader}>
-                                <h5>Upload New Image</h5>
-                                <button
-                                    type="button"
-                                    className={styles.closeButton}
-                                    onClick={() => setShowUploadModal(false)}
-                                >
-                                    &times;
-                                </button>
-                            </div>
-                            <div className={styles.modalBody}>
-                                <form onSubmit={handleImageUpload}>
-                                    <div className={styles.formGroup}>
-                                        <label htmlFor="imageTitle">Title</label>
-                                        <input
-                                            type="text"
-                                            id="imageTitle"
-                                            value={imageTitle}
-                                            onChange={(e) => setImageTitle(e.target.value)}
-                                            required
-                                        />
-                                    </div>
-                                    <div className={styles.formGroup}>
-                                        <label htmlFor="imageDescription">Description</label>
-                                        <textarea
-                                            id="imageDescription"
-                                            value={imageDescription}
-                                            onChange={(e) => setImageDescription(e.target.value)}
-                                            required
-                                        ></textarea>
-                                    </div>
-                                    <div className={styles.formGroup}>
-                                        <label htmlFor="imageUpload">Select Image</label>
-                                        <input
-                                            type="file"
-                                            id="imageUpload"
-                                            onChange={(e) => setSelectedImage(e.target.files[0])}
-                                            accept="image/*"
-                                            required
-                                        />
-                                    </div>
-                                    <button type="submit" className={styles.saveButton}>
-                                        Upload Image
-                                    </button>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-                )}
+                {/* --- ПРАВА ЧАСТИНА (GALLERY) --- */}
+                <main className={styles.gallerySection}>
 
-                <section className={styles.gallerySection}>
-                    <div className={styles.filters}>
-                        {/* Замените хардкод фильтров на компонент CategoryFilters */}
+                    {/* Фільтри */}
+                    <div className={styles.topControls}>
                         <CategoryFilters
                             categories={profileCategories}
                             activeCategory={activeCategory}
                             onCategoryClick={handleCategoryClick}
                         />
-                        <div className={styles.additional}>ADDITIONAL FILTERS ▾</div>
+
+                        <AdvancedFilters filterConfig={additionalFilterConfig} />
                     </div>
 
-                    <div className={styles.gallery}>
-                        {displayedPaintings.length > 0 ? (
-                            displayedPaintings.map((painting) => (
+                    {/* Сітка */}
+                    <div className={styles.artGrid}>
+                        {displayedData.length > 0 ? (
+                            displayedData.map((painting) => (
                                 <ArtCard
                                     key={painting.id}
-                                    imageUrl={painting.image_url}
-                                    title={painting.title}
-                                    artistName="Kira Kudo"
-                                    artistStyle="Retro/Psychedelia"
-                                    likes={painting.likes || 0}
-                                    price={painting.price || ""}
+                                    art={{
+                                        id: painting.id,
+                                        title: painting.title,
+                                        imageUrl: painting.image_url,
+                                        price: painting.price,
+                                        artistName: user.name,
+                                        likes: painting.likes || 0,
+                                        artistId: user.id,
+                                        category: painting.Category,
+                                        style: painting.style
+                                    }}
                                 />
                             ))
                         ) : (
-                            <p>No artworks yet.</p>
+                            <div className={styles.noArtworks}>You haven't uploaded any artworks yet.</div>
                         )}
                     </div>
 
-                    {totalPages > 1 && (
-                        <div className={styles.pagination}>
-                            <button
-                                onClick={() => setCurrentPage((p) => Math.max(p - 1, 0))}
-                                disabled={currentPage === 0}
-                            >
-                                ‹
-                            </button>
-                            {renderPageNumbers()}
-                            <button
-                                onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages - 1))}
-                                disabled={currentPage === totalPages - 1}
-                            >
-                                ›
-                            </button>
-                        </div>
-                    )}
-                </section>
-            </main>
+                    {/* Пагінація */}
+                    <Pagination
+                        currentPage={currentPage}
+                        totalPages={totalPages}
+                        onPageChange={setCurrentPage}
+                    />
+                </main>
+            </div>
+
         </div>
     );
 }
