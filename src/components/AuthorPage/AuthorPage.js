@@ -8,8 +8,8 @@ import AdvancedFilters from '../AdvancedFilters/AdvancedFilters'; // Імпор�
 import Pagination from '../hooks/Pagination/Pagination';
 import { usePagination } from '../hooks/Pagination/usePagination';
 import infoIcon from '../../assets/infoIcon.svg'
-import globeIcon from '../../assets/globeIcon.svg'
-import heartIcon from '../../assets/heartIcon.svg'
+import globeIcon from '../../assets/icons/globeIcon.svg'
+import heartIcon from '../../assets/icons/heartIcon.svg'
 import AddCommissionModal from '../Commission/CommissionModals/AddCommissionModal';
 
 // Конфіг

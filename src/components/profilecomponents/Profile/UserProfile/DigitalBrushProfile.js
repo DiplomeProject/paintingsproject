@@ -1,255 +1,143 @@
-import React, { useState, useEffect, useMemo } from "react";
-import axios from "axios";
+import React, { useState } from "react";
 import styles from "./DigitalBrushProfile.module.css";
-import ArtCard from "../../../ArtCard/ArtCard";
+import MyImages from "./MyImages/MyImages";
+import ProfileSettings from "./SettingsProfile/SettingsProfile";
 
-function DigitalBrushProfile({ user, onEditProfile, onLogout }) {
-  // === 1. State for paintings + pagination ===
-  const [paintings, setPaintings] = useState([]);
-  const [currentPage, setCurrentPage] = useState(0);
-  const itemsPerPage = 24;
+import infoIcon from '../../../../assets/infoIcon.svg';
+import globeIcon from '../../../../assets/icons/globeIcon.svg';
+import heartIcon from '../../../../assets/icons/heartIcon.svg';
+import userIcon from "../../../../assets/icons/userIcon.svg";
+import pictureIcon from "../../../../assets/icons/pictureIcon.svg";
+import calendarIcon from "../../../../assets/icons/calendarIcon.svg";
+import comissionIcon from "../../../../assets/icons/comissionIcon.svg";
+import walletIcon from "../../../../assets/icons/walletIcon.svg";
+import closeIcon from "../../../../assets/closeCross.svg";
+import plusIcon from "../../../../assets/icons/plusIcon.svg";
 
-  const [showUploadModal, setShowUploadModal] = useState(false);
-  const [selectedImage, setSelectedImage] = useState(null);
-  const [imageTitle, setImageTitle] = useState("");
-  const [imageDescription, setImageDescription] = useState("");
+function DigitalBrushProfile({ user, onLogout }) {
+    // Стан для відстеження поточної вкладки
+    // Можливі варіанти: 'settings', 'images', 'commission', 'payment', 'calendar'
+    const [activeTab, setActiveTab] = useState('images');
 
-  // === 2. Fetch user paintings from backend ===
-  useEffect(() => {
-    const fetchPaintings = async () => {
-      try {
-        const response = await axios.get(
-          "http://localhost:8080/getuserpaintings",
-          { withCredentials: true }
-        );
-        if (response.data.success) {
-          setPaintings(response.data.paintings);
-        } else {
-          console.error("Failed to load paintings:", response.data.message);
+    const totalLikes = "0"; // Можна потім брати з user
+
+    // Функція для рендерингу правої частини
+    const renderContent = () => {
+        switch (activeTab) {
+            case 'settings':
+                return <ProfileSettings user={user} />;
+            case 'images':
+                return <MyImages user={user} />;
+            case 'commission':
+                return <div className={styles.placeholder}>Commission Component (Coming Soon)</div>;
+            case 'payment':
+                return <div className={styles.placeholder}>Payment Component (Coming Soon)</div>;
+            case 'calendar':
+                return <div className={styles.placeholder}>Calendar Component (Coming Soon)</div>;
+            default:
+                return <MyImages user={user} />;
         }
-      } catch (err) {
-        console.error("Error fetching paintings:", err);
-      }
     };
 
-    fetchPaintings();
-  }, []);
+    return (
+        <div className={styles.pageContainer}>
+            <div className={styles.contentWrapper}>
 
-  const handleImageUpload = async (e) => {
-    e.preventDefault();
+                {/* --- ЛІВА ЧАСТИНА (SIDEBAR) --- */}
+                <aside className={styles.sidebar}>
+                    <div className={styles.avatarContainer}>
+                        <img
+                            src={user.profileImage || "/images/profileImg.jpg"}
+                            alt={user.name}
+                            className={styles.avatar}
+                        />
+                    </div>
 
-    const formData = new FormData();
-    formData.append("image", selectedImage);
-    formData.append("title", imageTitle);
-    formData.append("description", imageDescription);
-    setShowUploadModal(true);
+                    <div>
+                        <h1 className={styles.artistName}>
+                            {user.name || "Artist"}
+                            <span className={styles.status}>(available)</span>
+                        </h1>
+                    </div>
 
-    try {
-      const response = await axios.post(
-        "http://localhost:8080/upload",
-        formData,
-        { withCredentials: true }
-      );
-      if (response.data.success) {
-        //setShowUploadModal(false);
-      } else {
-        console.error("Upload failed:", response.data.message);
-      }
-    } catch (err) {
-      console.error("Error uploading image:", err);
-    }
-  };
+                    <div className={styles.metaInfo}>
+                        <div className={styles.metaRow}>
+                            <img src={infoIcon} alt="Style" className={styles.socialicon} />
+                            <span>Retro/Psychedelia</span>
+                        </div>
+                        <div className={styles.metaRow}>
+                            <img src={globeIcon} alt="Country" className={styles.socialicon} />
+                            <span>En/Ukr</span>
+                        </div>
+                        <div className={styles.metaRow}>
+                            <img src={heartIcon} alt="Likes" className={styles.socialicon} />
+                            <span>{totalLikes}</span>
+                        </div>
+                    </div>
 
-  // === 3. Pagination logic ===
-  const totalPages = Math.ceil(paintings.length / itemsPerPage);
-  const startIndex = currentPage * itemsPerPage;
-  const displayedPaintings = useMemo(
-    () => paintings.slice(startIndex, startIndex + itemsPerPage),
-    [paintings, startIndex]
-  );
+                    <p className={styles.bio}>
+                        {user.bio || "Welcome to my profile! No description provided yet."}
+                    </p>
 
-  // === 4. Render pagination buttons ===
-  const renderPageNumbers = () => {
-    if (totalPages <= 5) {
-      return Array.from({ length: totalPages }, (_, i) => (
-        <button
-          key={i}
-          className={i === currentPage ? styles.activePage : ""}
-          onClick={() => setCurrentPage(i)}
-        >
-          {i + 1}
-        </button>
-      ));
-    }
+                    {/* КНОПКИ З ЛОГІКОЮ АКТИВНОГО СТАНУ */}
+                    <div className={styles.actionButtonsContainer}>
 
-    const pages = [];
-    pages.push(
-      <button
-        key={0}
-        className={0 === currentPage ? styles.activePage : ""}
-        onClick={() => setCurrentPage(0)}
-      >
-        1
-      </button>
+                        <button
+                            className={`${styles.profileSettingsBtn} ${activeTab === 'settings' ? styles.active : ''}`}
+                            onClick={() => setActiveTab('settings')}
+                        >
+                            <img src={userIcon} alt="UserIcon" className={styles.btnicon} />
+                            Settings profile
+                        </button>
+
+                        <button
+                            className={`${styles.imagesBtn} ${activeTab === 'images' ? styles.active : ''}`}
+                            onClick={() => setActiveTab('images')}
+                        >
+                            <img src={pictureIcon} alt="PictureIcon" className={styles.btnicon} />
+                            My images
+                            <img src={plusIcon} alt="PlusIcon" className={styles.plusIcon}/>
+                        </button>
+
+                        <button
+                            className={`${styles.comissionBtn} ${activeTab === 'commission' ? styles.active : ''}`}
+                            onClick={() => setActiveTab('commission')}
+                        >
+                            <img src={comissionIcon} alt="ComissionIcon" className={styles.btnicon} />
+                            My Commission
+                            <img src={plusIcon} alt="PlusIcon" className={styles.plusIcon}/>
+                        </button>
+
+                        <button
+                            className={`${styles.paymentBtn} ${activeTab === 'payment' ? styles.active : ''}`}
+                            onClick={() => setActiveTab('payment')}
+                        >
+                            <img src={walletIcon} alt="PaymentIcon" className={styles.btnicon} />
+                            Payment
+                        </button>
+
+                        <button
+                            className={`${styles.calendarBtn} ${activeTab === 'calendar' ? styles.active : ''}`}
+                            onClick={() => setActiveTab('calendar')}
+                        >
+                            <img src={calendarIcon} alt="CalendarIcon" className={styles.btnicon} />
+                            Calendar
+                        </button>
+
+                        <button className={styles.logoutBtn} onClick={onLogout}>
+                            <img src={closeIcon} alt="LogoutIcon" className={styles.btnicon} />
+                            Log out
+                        </button>
+                    </div>
+                </aside>
+
+                {/* --- ПРАВА ЧАСТИНА (ЗМІННИЙ КОНТЕНТ) --- */}
+                <main className={styles.gallerySection}>
+                    {renderContent()}
+                </main>
+            </div>
+        </div>
     );
-
-    if (currentPage > 2) {
-      pages.push(
-        <span key="dots1" className={styles.paginationDots}>
-          ...
-        </span>
-      );
-    }
-
-    if (currentPage > 0 && currentPage < totalPages - 1) {
-      pages.push(
-        <button
-          key={currentPage}
-          className={styles.activePage}
-          onClick={() => setCurrentPage(currentPage)}
-        >
-          {currentPage + 1}
-        </button>
-      );
-    }
-
-    if (currentPage < totalPages - 3) {
-      pages.push(
-        <span key="dots2" className={styles.paginationDots}>
-          ...
-        </span>
-      );
-    }
-
-    pages.push(
-      <button
-        key={totalPages - 1}
-        className={totalPages - 1 === currentPage ? styles.activePage : ""}
-        onClick={() => setCurrentPage(totalPages - 1)}
-      >
-        {totalPages}
-      </button>
-    );
-
-    return pages;
-  };
-
-  // === 5. Render component ===
-  return (
-    <div className={styles.profileView}>
-      <main className={styles.main}>
-        <aside className={styles.profileSidebar}>
-          <div className={styles.profileCard}>
-            <div className={styles.avatarContainer}>
-              <img
-                src={user.profileImage || "/images/icons/profile.jpg"}
-                alt={`${user.name} ${user.surname}`}
-                className={styles.avatar}
-              />
-            </div>
-            <h2 className={styles.name}>
-              {user.name} {user.surname}{" "}
-              <span className={styles.status}>(available)</span>
-            </h2>
-            <div className={styles.info}>
-              <span>Retro/Psychedelia</span>
-              <span>En/Укр</span>
-              <span className={styles.followers}>52.5k Followers</span>
-            </div>
-            <p className={styles.description}>
-              {user.bio ||
-                "I create visual solutions that not only look good, but also work..."}
-            </p>
-            <div className={styles.buttons}>
-              <button onClick={onEditProfile}>Settings profile</button>
-              <button onClick={() => setShowUploadModal(true)}>Add image</button>
-              <button>My Commission</button>
-              <button>Payment</button>
-              <button onClick={onLogout}>Logout</button>
-            </div>
-          </div>
-        </aside>
-
-        {showUploadModal && (
-          <div className={styles.modalOverlay}>
-            <div className={styles.modalContent}>
-              <div className={styles.modalHeader}>
-                <h5>Upload New Image</h5>
-                <button type="button" className={styles.closeButton} onClick={() => setShowUploadModal(false)}>&times;</button>
-              </div>
-              <div className={styles.modalBody}>
-                <form onSubmit={handleImageUpload}>
-                  <div className={styles.formGroup}>
-                    <label htmlFor="imageTitle">Title</label>
-                    <input type="text" id="imageTitle" value={imageTitle} onChange={(e) => setImageTitle(e.target.value)} required />
-                  </div>
-                  <div className={styles.formGroup}>
-                    <label htmlFor="imageDescription">Description</label>
-                    <textarea id="imageDescription" value={imageDescription} onChange={(e) => setImageDescription(e.target.value)} required></textarea>
-                  </div>
-                  <div className={styles.formGroup}>
-                    <label htmlFor="imageUpload">Select Image</label>
-                    <input type="file" id="imageUpload" onChange={(e) => setSelectedImage(e.target.files[0])} required />
-                  </div>
-                  <button type="submit" className={styles.saveButton}>Upload Image</button>
-                </form>
-              </div>
-            </div>
-          </div>
-        )}
-
-        <section className={styles.gallerySection}>
-          <div className={styles.filters}>
-            <div className={styles.filterButtons}>
-              <button className={styles.active}>ICONS</button>
-              <button>UI/UX</button>
-              <button>ADVERTISING</button>
-              <button>BRANDING</button>
-            </div>
-            <div className={styles.additional}>ADDITIONAL FILTERS ▾</div>
-          </div>
-
-          <div className={styles.gallery}>
-            {displayedPaintings.length > 0 ? (
-              displayedPaintings.map((painting) => (
-                <ArtCard
-                  key={painting.id}
-                  imageUrl={painting.image_url}
-                  title={painting.title}
-                  artistName={user.name}
-                  artistStyle="Retro/Psychedelia"
-                  likes={painting.likes || 0}
-                  price={painting.price || ""}
-                />
-              ))
-            ) : (
-              <p>No artworks yet.</p>
-            )}
-          </div>
-
-          {totalPages > 1 && (
-            <div className={styles.pagination}>
-              <button
-                onClick={() => setCurrentPage((p) => Math.max(p - 1, 0))}
-                disabled={currentPage === 0}
-              >
-                ‹
-              </button>
-              {renderPageNumbers()}
-              <button
-                onClick={() =>
-                  setCurrentPage((p) => Math.min(p + 1, totalPages - 1))
-                }
-                disabled={currentPage === totalPages - 1}
-              >
-                ›
-              </button>
-            </div>
-          )}
-        </section>
-      </main>
-    </div>
-  );
 }
 
 export default DigitalBrushProfile;
