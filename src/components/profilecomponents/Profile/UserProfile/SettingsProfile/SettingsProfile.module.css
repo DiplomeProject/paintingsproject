@@ -1,0 +1,290 @@
+.settingsContainer {
+    color: white;
+    padding-right: 275px;
+}
+
+
+.statusSection {
+    display: flex;
+    gap: 40px;
+    margin-bottom: 102px;
+    padding-top: 10px;
+}
+
+.checkboxLabel {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    cursor: pointer;
+    font-size: 22px;
+    font-weight: 400;
+}
+
+.checkboxInput {
+    appearance: none;
+    width: 28px;
+    height: 28px;
+    background-color: #D9D9D9;
+    border-radius: 2px;
+    cursor: pointer;
+    position: relative;
+}
+
+.checkboxInput:checked {
+    background-color: #D9D9D9;
+}
+
+.checkboxInput:checked::after {
+    content: '✓';
+    position: absolute;
+    color: black;
+    font-size: 22px;
+    left: 4px;
+    top: -2px;
+}
+
+.formGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: 254px;
+    align-items: start;
+}
+
+.leftColumn, .rightColumn {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+.leftColumn > :nth-child(2) {
+    margin-bottom: 33px;
+}
+
+.leftColumn > :nth-child(3) {
+    margin-bottom: 33px;
+}
+
+.leftColumn > :nth-child(4) {
+    margin-bottom: 40px;
+}
+
+.avatarWrapper {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 100px;
+}
+
+.rightColumn > :nth-child(2) {
+    margin-bottom: 35px;
+}
+
+.rightColumn > :nth-child(3) {
+    margin-bottom: 35px;
+}
+
+
+/* --- GENERAL FORM STYLES --- */
+
+.formGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 13px; /* Відступ між Label та Input */
+    position: relative;
+}
+
+.formGroup label {
+    font-size: 22px;
+    color: #FFFFFF;
+    font-weight: 400;
+}
+
+/* Avatar Styles */
+.avatarContainer {
+    width: 269px;
+    height: 269px;
+    border-radius: 50%;
+    overflow: hidden;
+    cursor: pointer;
+    position: relative;
+    border: 12px solid #46464799;
+    background-color: #2a2a2a;
+    transition: border-color 0.3s ease;
+}
+
+.avatarContainer:hover {
+    border-color: #7E7E7E;
+}
+
+.avatarImage {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.avatarOverlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.avatarContainer:hover .avatarOverlay {
+    opacity: 1;
+}
+
+.uploadIcon {
+    filter: invert(1);
+}
+
+/* Інпути */
+.inputField {
+    background: #7E7E7E;
+    border: none;
+    border-radius: 7px;
+    height: 33px;
+    padding: 0 15px;
+    color: white;
+    font-size: 22px;
+    font-family: inherit;
+    outline: none;
+    width: 371px;
+}
+
+.inputField::placeholder {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+/* Tags Dropdown Styles */
+.tagsContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.tagRow {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+}
+
+.selectWrapper {
+    position: relative;
+    flex-grow: 1;
+    width: 401px;
+}
+
+.selectField {
+    width: 100%;
+    background: #7E7E7E;
+    border: none;
+    border-radius: 7px;
+    height: 33px;
+    padding: 0 15px;
+    color: white;
+    font-size: 22px;
+    font-family: inherit;
+    outline: none;
+    appearance: none;
+    cursor: pointer;
+}
+
+/* Focus Animation for Arrow */
+.arrowIcon {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-60%);
+    pointer-events: none;
+    color: white;
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+    transition: transform 0.3s ease;
+}
+
+.selectField:focus + .arrowIcon {
+    transform: translateY(-60%) rotate(180deg);
+}
+
+.removeTagBtn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: opacity 0.2s;
+}
+
+.removeTagBtn:hover {
+    opacity: 0.7;
+}
+
+.addTagButton {
+    background: none;
+    border: none;
+    cursor: pointer;
+    align-self: center;
+    margin-top: 5px;
+    padding: 5px;
+    transition: opacity 0.2s;
+}
+
+.addTagButton:hover {
+    opacity: 0.8;
+}
+
+.fullWidth {
+    grid-column: 1 / -1;
+    margin-top: 40px;
+}
+
+.textArea {
+    background: #7E7E7E;
+    border: none;
+    border-radius: 7px;
+    padding: 15px;
+    color: white;
+    font-size: 22px;
+    font-family: inherit;
+    resize: vertical;
+    min-height: 120px;
+    outline: none;
+}
+
+.saveButton {
+    background: #5454FE;
+    color: white;
+    border: none;
+    border-radius: 3px;
+    padding: 12px 60px;
+    font-size: 24px;
+    font-weight: 500;
+    cursor: pointer;
+    margin-top: 21px;
+    align-self: flex-start;
+    transition: background 0.2s;
+    width: 210px;
+}
+
+.saveButton:hover {
+    background: #4040e0;
+}
+
+@media (max-width: 900px) {
+    .formGrid {
+        grid-template-columns: 1fr;
+        gap: 30px;
+    }
+}
