@@ -282,6 +282,18 @@
     background: #4040e0;
 }
 
+.errorMessage {
+    color: #FF5252;
+    font-size: 14px;
+    margin-top: -8px;
+    margin-bottom: 5px;
+    font-weight: 500;
+}
+
+.inputError {
+    border: 1px solid #FF5252 !important;
+}
+
 @media (max-width: 900px) {
     .formGrid {
         grid-template-columns: 1fr;

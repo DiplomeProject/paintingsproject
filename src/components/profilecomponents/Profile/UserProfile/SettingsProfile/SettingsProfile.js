@@ -1,4 +1,5 @@
-import React, { useState, useRef } from "react";
+import React, {useState, useRef, useEffect} from "react";
+import axios from "axios";
 import styles from "./SettingsProfile.module.css";
 import deleteCrossIcon from "../../../../../assets/icons/deleteCrossIcon.svg";
 import plusIcon from "../../../../../assets/icons/plusIcon.svg";
@@ -13,31 +14,65 @@ const AVAILABLE_LANGUAGES = [
     "English", "Українська", "Deutsch", "Español", "Français", "Polski"
 ];
 
-function ProfileSettings({ user }) {
+function ProfileSettings({user}) {
     const fileInputRef = useRef(null);
 
     const [status, setStatus] = useState('available');
     const [avatarPreview, setAvatarPreview] = useState(user.profileImage || "https://via.placeholder.com/220");
     const [selectedFile, setSelectedFile] = useState(null);
 
+    const [errors, setErrors] = useState({});
+
     const [formData, setFormData] = useState({
-        displayName: user.name || "Kira Kudo",
-        username: user.username || "Kira Kudo",
+        username: "",
+        email: "",
         instagram: "",
         behance: "",
         tiktok: "",
-        twitter: "",
-        website: "",
-        description: "I create visual solutions..."
+        description: ""
     });
 
-    const [styleTags, setStyleTags] = useState(['Retro', 'Psychedelia']);
-    const [languageTags, setLanguageTags] = useState(['English', 'Українська']);
+    const [styleTags, setStyleTags] = useState([]);
+    const [languageTags, setLanguageTags] = useState(['English']);
+
+    useEffect(() => {
+        if (user) {
+            setFormData({
+                username: user.name || "",
+                email: user.email || "",
+                instagram: user.instagram || "", // Тепер береться з БД
+                behance: user.behance || "",     // Тепер береться з БД
+                tiktok: user.tiktok || "",       // Тепер береться з БД
+                description: user.bio || ""
+            });
+
+            if (user.profileImage) {
+                setAvatarPreview(user.profileImage);
+            }
+
+            // Завантаження стилів
+            if (user.styles && Array.isArray(user.styles) && user.styles.length > 0) {
+                setStyleTags(user.styles);
+            } else {
+                setStyleTags(['Retro']);
+            }
+
+            // Завантаження мов
+            if (user.languages && Array.isArray(user.languages) && user.languages.length > 0) {
+                setLanguageTags(user.languages);
+            } else {
+                setLanguageTags(['English']);
+            }
+        }
+    }, [user]);
 
     // --- Handlers ---
     const handleInputChange = (e) => {
-        const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [name]: value }));
+        const {name, value} = e.target;
+        setFormData(prev => ({...prev, [name]: value}));
+        if (errors[name]) {
+            setErrors(prev => ({...prev, [name]: null}));
+        }
     };
 
     const handleStatusChange = (newStatus) => {
@@ -58,7 +93,6 @@ function ProfileSettings({ user }) {
         setTags([...currentTags, availableOptions[0]]);
     };
 
-    // --- LOGIC: Avatar Upload ---
     const handleAvatarClick = () => {
         fileInputRef.current.click();
     };
@@ -72,14 +106,63 @@ function ProfileSettings({ user }) {
         }
     };
 
-    const handleSave = (e) => {
+    const handleSave = async (e) => {
         e.preventDefault();
-        console.log("Saving data:", { status, ...formData, styleTags, languageTags, selectedFile });
+        setErrors({});
+
+        const dataToSend = new FormData();
+
+        // Додаємо основні поля
+        dataToSend.append('username', formData.username);
+        dataToSend.append('email', formData.email);
+        dataToSend.append('description', formData.description);
+
+        // Додаємо нові соцмережі
+        dataToSend.append('instagram', formData.instagram);
+        dataToSend.append('behance', formData.behance);
+        dataToSend.append('tiktok', formData.tiktok);
+
+        // Додаємо масиви тегів
+        dataToSend.append('styleTags', JSON.stringify(styleTags));
+        dataToSend.append('languageTags', JSON.stringify(languageTags)); // Розкоментовано
+
+        if (selectedFile) {
+            dataToSend.append('profileImage', selectedFile);
+        }
+
+        try {
+            const response = await axios.post(
+                'http://localhost:8080/update-profile',
+                dataToSend,
+                {
+                    withCredentials: true,
+                    headers: {"Content-Type": "multipart/form-data"}
+                }
+            );
+
+            if (response.data.success) {
+                alert("Profile updated successfully!");
+                window.location.reload();
+            }
+        } catch (error) {
+            console.error("Error updating profile:", error);
+            if (error.response && error.response.status === 409) {
+                const msg = error.response.data.message.toLowerCase();
+                if (msg.includes("username")) {
+                    setErrors({username: error.response.data.message});
+                } else if (msg.includes("email")) {
+                    setErrors({email: error.response.data.message});
+                } else {
+                    alert(error.response.data.message);
+                }
+            } else {
+                alert("Failed to update profile. Please try again.");
+            }
+        }
     };
 
     return (
         <form className={styles.settingsContainer} onSubmit={handleSave}>
-            {/* statusSection прибрано звідси і перенесено в leftColumn */}
 
             <div className={styles.formGrid}>
                 {/* --- LEFT COLUMN --- */}
@@ -114,18 +197,20 @@ function ProfileSettings({ user }) {
                             name="username"
                             value={formData.username}
                             onChange={handleInputChange}
-                            className={styles.inputField}
+                            className={`${styles.inputField} ${errors.username ? styles.inputError : ''}`}
                         />
+                        {errors.username && <span className={styles.errorMessage}>{errors.username}</span>}
                     </div>
                     <div className={styles.formGroup}>
                         <label>Email</label>
                         <input
                             type="text"
                             name="email"
-                            value="kudo.kira@gmail.com"
-                            readOnly
-                            className={styles.inputField}
+                            value={formData.email}
+                            onChange={handleInputChange}
+                            className={`${styles.inputField} ${errors.email ? styles.inputError : ''}`}
                         />
+                        {errors.email && <span className={styles.errorMessage}>{errors.email}</span>}
                     </div>
 
                     {/* Styles Tags */}
@@ -151,7 +236,7 @@ function ProfileSettings({ user }) {
                                         className={styles.removeTagBtn}
                                         onClick={() => removeTag(index, setStyleTags, styleTags)}
                                     >
-                                        <img src={deleteCrossIcon} alt="Remove" />
+                                        <img src={deleteCrossIcon} alt="Remove"/>
                                     </button>
                                 </div>
                             ))}
@@ -161,7 +246,7 @@ function ProfileSettings({ user }) {
                             className={styles.addTagButton}
                             onClick={() => addTag(setStyleTags, styleTags, AVAILABLE_STYLES)}
                         >
-                            <img src={plusIcon} alt="Add" />
+                            <img src={plusIcon} alt="Add"/>
                         </button>
                     </div>
 
@@ -188,7 +273,7 @@ function ProfileSettings({ user }) {
                                         className={styles.removeTagBtn}
                                         onClick={() => removeTag(index, setLanguageTags, languageTags)}
                                     >
-                                        <img src={deleteCrossIcon} alt="Remove" />
+                                        <img src={deleteCrossIcon} alt="Remove"/>
                                     </button>
                                 </div>
                             ))}
@@ -198,7 +283,7 @@ function ProfileSettings({ user }) {
                             className={styles.addTagButton}
                             onClick={() => addTag(setLanguageTags, languageTags, AVAILABLE_LANGUAGES)}
                         >
-                            <img src={plusIcon} alt="Add" />
+                            <img src={plusIcon} alt="Add"/>
                         </button>
                     </div>
                 </div>
@@ -212,7 +297,7 @@ function ProfileSettings({ user }) {
                             type="file"
                             ref={fileInputRef}
                             onChange={handleFileChange}
-                            style={{ display: 'none' }}
+                            style={{display: 'none'}}
                             accept="image/*"
                         />
 
@@ -223,7 +308,7 @@ function ProfileSettings({ user }) {
                                 className={styles.avatarImage}
                             />
                             <div className={styles.avatarOverlay}>
-                                <img src={uploadIconPlaceholder} className={styles.uploadIcon} alt="Upload" />
+                                <img src={uploadIconPlaceholder} className={styles.uploadIcon} alt="Upload"/>
                             </div>
                         </div>
                     </div>
@@ -231,15 +316,18 @@ function ProfileSettings({ user }) {
                     {/* Social Links */}
                     <div className={styles.formGroup}>
                         <label>Instagram (link)</label>
-                        <input type="text" name="instagram" value={formData.instagram} onChange={handleInputChange} className={styles.inputField} />
+                        <input type="text" name="instagram" value={formData.instagram} onChange={handleInputChange}
+                               className={styles.inputField}/>
                     </div>
                     <div className={styles.formGroup}>
                         <label>Behance (link)</label>
-                        <input type="text" name="behance" value={formData.behance} onChange={handleInputChange} className={styles.inputField} />
+                        <input type="text" name="behance" value={formData.behance} onChange={handleInputChange}
+                               className={styles.inputField}/>
                     </div>
                     <div className={styles.formGroup}>
                         <label>Tik Tok (link)</label>
-                        <input type="text" name="tiktok" value={formData.tiktok} onChange={handleInputChange} className={styles.inputField} />
+                        <input type="text" name="tiktok" value={formData.tiktok} onChange={handleInputChange}
+                               className={styles.inputField}/>
                     </div>
                 </div>
 
