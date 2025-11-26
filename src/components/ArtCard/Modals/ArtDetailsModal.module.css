@@ -10,38 +10,6 @@
     align-items: center;
 }
 
-/*.modal {*/
-/*    background-color: #342E4CF2;*/
-/*    border-radius: 16px;*/
-/*    !*padding: 111px 115px 0 135px;*!*/
-/*    padding: 2rem 2rem 0 2rem;*/
-/*    max-width: 80rem;*/
-/*    width: 100%;*/
-/*    max-height: 90dvh;*/
-/*    color: white;*/
-/*    font-family: "Roboto", sans-serif;*/
-/*    font-weight: 400;*/
-/*    position: relative;*/
-/*    box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);*/
-/*}*/
-
-/*.closeBtn {*/
-/*    !*position: absolute;*!*/
-/*    !*top: 20px;*!*/
-/*    !*right: 20px;*!*/
-/*    cursor: pointer;*/
-/*    font-size: 24px;*/
-/*    color: #fff;*/
-/*    background: none;*/
-/*    border: none;*/
-/*    z-index: 1000;*/
-/*    margin-left: auto;*/
-/*}*/
-/*.closeBtn img {*/
-/*    width: 42px;*/
-/*    height: 42px;*/
-/*}*/
-
 .modalContent {
     display: flex;
     gap: 20px;
@@ -143,7 +111,16 @@
     font-size: 30px;
     color: #D9D9D9;
     margin: 0 0 90px 0;
-    /*margin-bottom: 25px;*/
+    cursor: pointer;
+    width: fit-content;
+    text-decoration: none;
+    transition: color 0.2s ease, text-decoration 0.2s ease;
+}
+
+.artistName:hover {
+    text-decoration: underline;
+    text-underline-offset: 4px;
+    /*color: #ffffff;*/
 }
 
 .detailsList {

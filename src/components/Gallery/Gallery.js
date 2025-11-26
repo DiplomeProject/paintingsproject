@@ -2,7 +2,7 @@ import React, {useState, useMemo, useEffect} from "react";
 import styles from "./Gallery.module.css";
 import {useNavigate} from "react-router-dom";
 import ArtCard from '../ArtCard/ArtCard';
-import ArtDetailsModal from "../ArtCard/Modals/ArtDetailsModal";
+// import ArtDetailsModal from "../ArtCard/Modals/ArtDetailsModal"; // ВИДАЛЕНО
 
 // Дані-заглушки для верхньої секції
 const placeholderFeaturedCards = [
@@ -43,7 +43,7 @@ function Gallery({paintings: paintingsFromProps = []}) {
     const [scatteredImages, setScatteredImages] = useState([]);
     const navigate = useNavigate();
     const [searchQuery, setSearchQuery] = useState('');
-    const [selectedArt, setSelectedArt] = useState(null);
+    // const [selectedArt, setSelectedArt] = useState(null); // ВИДАЛЕНО
 
     const handleNavigation = (path) => {
         navigate(path);
@@ -74,7 +74,10 @@ function Gallery({paintings: paintingsFromProps = []}) {
                 likes: `${(Math.random() * 500).toFixed(1)}k`,
                 price: (Math.random() * 200).toFixed(2),
 
-                // --- Додані поля для ArtDetailsModal ---
+                // Додаємо ID автора для тестів, щоб працював перехід
+                artistId: i,
+
+                // --- Додані поля для повноти даних (хоча вони можуть дозавантажитися з API) ---
                 images: [ randomImage, `/images/image${(randomIndex % 4) + 1}.png` ],
                 category: "Abstract",
                 style: "Abstract",
@@ -85,11 +88,8 @@ function Gallery({paintings: paintingsFromProps = []}) {
         });
     }, []);
 
-    // ОНОВЛЕНО: Генерація даних для "Trends" з новою структурою
     const slides = useMemo(() => {
         const itemsPerSlide = 16;
-
-        // Крок 1: Фільтруємо "майстер-список" на основі пошукового запиту
         const filteredPaintings = searchQuery
             ? allTrendPaintings.filter(card =>
                 card.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -98,7 +98,6 @@ function Gallery({paintings: paintingsFromProps = []}) {
             )
             : allTrendPaintings;
 
-        // Крок 2: Розбиваємо відфільтровані результати на "слайди"
         const newSlides = [];
         for (let i = 0; i < filteredPaintings.length; i += itemsPerSlide) {
             newSlides.push(filteredPaintings.slice(i, i + itemsPerSlide));
@@ -109,7 +108,7 @@ function Gallery({paintings: paintingsFromProps = []}) {
 
     const handleSearchChange = (event) => {
         setSearchQuery(event.target.value);
-        setCurrentSlide(0); // Повертаємось на перший слайд при новому пошуку
+        setCurrentSlide(0);
     };
 
     return (
@@ -137,7 +136,7 @@ function Gallery({paintings: paintingsFromProps = []}) {
 
                 {/* --- СЕКЦІЇ З КОНТЕНТОМ --- */}
                 <div className={styles.textContentWrapper}>
-                    {/* --- Секція 1: Для художників --- */}
+                    {/* ... (Секції контенту без змін) ... */}
                     <div className={styles.contentSection}>
                         <div className={styles.textContainer}>
                             <div className={styles.textHeader1}>
@@ -145,8 +144,7 @@ function Gallery({paintings: paintingsFromProps = []}) {
                             </div>
                             <div className={styles.text1}>
                                 Create a profile, upload your paintings, and find buyers all over the world.
-                                DigitalBrush is a
-                                space where your talent becomes visible and valuable.
+                                DigitalBrush is a space where your talent becomes visible and valuable.
                             </div>
                             <button className={styles.button1} onClick={() => {
                                 handleNavigation('/profile');
@@ -155,19 +153,18 @@ function Gallery({paintings: paintingsFromProps = []}) {
                         </div>
                         <div className={styles.imageCardsContainer}>
                             {featuredCards.map(card => (
-                                <div key={card.id} className={card.className}> {/* Зовнішня рамка */}
+                                <div key={card.id} className={card.className}>
                                     <div className={styles.cardContentWrapper}>
                                         <div
-                                            className={styles.cardImage} /* Верхня частина з картинкою */
+                                            className={styles.cardImage}
                                             style={{backgroundImage: `url(${card.imageUrl})`}}
                                         ></div>
-                                        <div className={styles.cardInfo}> {/* Нижня частина з текстом */}
+                                        <div className={styles.cardInfo}>
                                             <p className={styles.cardTitle}>{card.title}</p>
                                             <span className={styles.cardLikes}>
                                                 <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"
                                                      xmlns="http://www.w3.org/2000/svg">
-                                                    <path
-                                                        d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                                                    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
                                                 </svg>
                                                 {card.likes}
                                             </span>
@@ -178,7 +175,6 @@ function Gallery({paintings: paintingsFromProps = []}) {
                         </div>
                     </div>
 
-                    {/* --- Секція 2: Для покупців --- */}
                     <div className={styles.contentSection}>
                         <div className={styles.ImagesContainer}>
                             {scatteredImages.map(image => (
@@ -195,8 +191,7 @@ function Gallery({paintings: paintingsFromProps = []}) {
                             </div>
                             <div className={styles.text1}>
                                 Choose works that resonate with your emotions. Here, art is not just a commodity, but a
-                                way to
-                                tell the world something important.
+                                way to tell the world something important.
                             </div>
                             <button className={styles.button1} onClick={() => {
                                 handleNavigation('/profile');
@@ -242,15 +237,14 @@ function Gallery({paintings: paintingsFromProps = []}) {
                                             {slide.map((card) => (
                                                 <ArtCard
                                                     key={card.id}
-                                                    art={card} // 1. Передаємо весь об'єкт
-                                                    onArtClick={setSelectedArt} // 2. Передаємо функцію
+                                                    art={card}
+                                                    // onArtClick БІЛЬШЕ НЕ ПОТРІБЕН
                                                 />
                                             ))}
                                         </div>
                                     ))}
                                 </div>
 
-                                {/* Показуємо точки, тільки якщо слайдів більше одного */}
                                 {slides.length > 1 && (
                                     <div className={styles.carouselDots}>
                                         {slides.map((_, i) => (
@@ -271,12 +265,6 @@ function Gallery({paintings: paintingsFromProps = []}) {
                     )}
                 </div>
             </div>
-            {selectedArt && (
-                <ArtDetailsModal
-                    art={selectedArt}
-                    onClose={() => setSelectedArt(null)}
-                />
-            )}
         </main>
     );
 }

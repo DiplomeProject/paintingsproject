@@ -1,0 +1,157 @@
+.pageContainer {
+    min-height: 100vh;
+    color: #ffffff;
+    padding-bottom: 4rem;
+    font-family: 'Roboto', sans-serif;
+    font-weight: 400;
+    box-sizing: border-box;
+}
+
+.contentWrapper {
+    display: flex;
+    flex-direction: row;
+    padding: 66px 47px;
+    gap: 132px;
+}
+
+.sidebar {
+    flex: 0 0 330px;
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+.avatarContainer {
+    width: 304px;
+    height: 304px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 13px solid #46464799;
+    align-self: flex-start;
+}
+
+.avatar {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.artistName {
+    display: flex;
+    font-size: 30px;
+    font-weight: 400;
+    margin: 0;
+    line-height: 1.2;
+    align-items: center;
+    gap: 5px;
+}
+
+.metaInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 19px;
+    font-size: 22px;
+    color: #e0e0e0;
+}
+
+.metaRow {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.icon {
+    width: 20px;
+    height: 20px;
+    opacity: 0.9;
+}
+
+.bio {
+    font-family: 'Roboto', sans-serif;
+    font-weight: 300;
+    font-style: normal;
+    font-size: 22px;
+    letter-spacing: 0;
+    color: #C6C4C4;
+    margin: 0;
+}
+
+.commissionBtn {
+    background: #5454FE;
+    border: none;
+    border-radius: 17px;
+    padding: 14px 0;
+    color: white;
+    font-weight: 400;
+    font-size: 24px;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.2s;
+    width: 100%;
+    font-family: inherit;
+    height: 63px;
+}
+
+.commissionBtn:hover {
+    background: #4646d6;
+    transform: translateY(-2px);
+}
+
+.gallerySection {
+    flex: 1;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.topControls {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.artGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(212px, 1fr));
+    gap: 17px;
+    margin-bottom: 40px;
+}
+
+.noArt {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 3rem;
+    color: #888;
+    font-size: 1.2rem;
+}
+
+.loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    color: white;
+    background: #050511;
+}
+
+@media (max-width: 768px) {
+    .contentWrapper {
+        padding: 1rem;
+    }
+    .avatarContainer {
+        margin: 0 auto;
+    }
+    .sidebar {
+        align-items: center;
+        text-align: center;
+    }
+    .metaInfo {
+        align-items: center;
+    }
+    .bio {
+        text-align: center;
+    }
+    .artGrid {
+        grid-template-columns: repeat(auto-fill, minmax(100%, 1fr));
+    }
+}

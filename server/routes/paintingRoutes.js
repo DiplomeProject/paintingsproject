@@ -13,17 +13,39 @@ const router = express.Router();
    GET ALL PAINTINGS (main only)
 ===================================================== */
 router.get('/api/paintings', async (req, res) => {
-    try {
-        const [rows] = await db.query(`
-            SELECT p.Painting_ID, p.Title, p.Image, p.Description, c.Name AS author_name
-            FROM paintings p
-            JOIN creators c ON p.Creator_ID = c.Creator_ID
-        `);
-        res.json(rows);
-    } catch (err) {
-        console.error('Error fetching paintings:', err);
-        res.status(500).send('Error fetching paintings');
-    }
+  try {
+      const [rows] = await db.query(`
+          SELECT p.Painting_ID, p.Title, p.Image, p.Description, p.Price, p.Style,
+                 p.Creator_ID, c.Name AS author_name
+          FROM paintings p
+                   JOIN creators c ON p.Creator_ID = c.Creator_ID
+      `);
+
+    const paintings = rows.map(row => {
+      const blob = row.Image;
+      const image = blob ? `data:image/jpeg;base64,${Buffer.from(blob).toString('base64')}` : null;
+        return {
+            Painting_ID: row.Painting_ID,
+            id: row.Painting_ID,
+            Title: row.Title,
+            title: row.Title,
+            Description: row.Description,
+            description: row.Description,
+            Price: row.Price,
+            price: row.Price,
+            Style: row.Style,
+            style: row.Style,
+            author_name: row.author_name,
+            Creator_ID: row.Creator_ID,
+            image, // data URI or null
+        };
+    });
+
+    res.json({ success: true, paintings });
+  } catch (err) {
+    console.error('Error fetching paintings:', err);
+    res.status(500).json({ success: false, message: 'Error fetching paintings' });
+  }
 });
 
 /* =====================================================
@@ -84,39 +106,60 @@ router.post("/upload", auth, uploadMemory.any(), async (req, res) => {
    GET PAINTING + ALL IMAGES IN SAME BATCH
 ===================================================== */
 router.get('/api/paintings/:id', async (req, res) => {
-    const paintingId = req.params.id;
+  const paintingId = req.params.id;
 
-    try {
-        // 1️⃣ Get the main painting
-        const [paintingRows] = await db.query(`
-            SELECT p.*, c.Name AS author_name
-            FROM paintings p
-            JOIN creators c ON p.Creator_ID = c.Creator_ID
-            WHERE p.Painting_ID = ?
-        `, [paintingId]);
+  try {
+    // 1️⃣ Get the main painting with author info
+    const [paintingRows] = await db.query(
+      `SELECT p.*, c.Name AS author_name
+       FROM paintings p
+       JOIN creators c ON p.Creator_ID = c.Creator_ID
+       WHERE p.Painting_ID = ?`,
+      [paintingId]
+    );
 
-        if (paintingRows.length === 0) {
-            return res.status(404).json({ message: 'Painting not found' });
-        }
-
-        const painting = paintingRows[0];
-
-        // 2️⃣ Get all additional images from the batch
-        const [extraImages] = await db.query(`
-            SELECT Image 
-            FROM painting_images 
-            WHERE Batch_ID = ?
-        `, [painting.Batch_ID]);
-
-        res.json({
-            main: painting,
-            gallery: extraImages
-        });
-
-    } catch (err) {
-        console.error('Error fetching painting:', err);
-        res.status(500).json({ message: 'Error fetching painting' });
+    if (paintingRows.length === 0) {
+      return res.status(404).json({ success: false, message: 'Painting not found' });
     }
+
+    const painting = paintingRows[0];
+
+    // Convert main image to base64 URL
+    const mainImage = painting.Image
+      ? `data:image/jpeg;base64,${Buffer.from(painting.Image).toString('base64')}`
+      : null;
+
+    // 2️⃣ Get all additional images from the batch
+    const [extraImagesRows] = await db.query(
+      `SELECT Image FROM painting_images WHERE Batch_ID = ?`,
+      [painting.Batch_ID]
+    );
+
+    const gallery = extraImagesRows.map(img => 
+      img.Image ? `data:image/jpeg;base64,${Buffer.from(img.Image).toString('base64')}` : null
+    );
+
+      res.json({
+          success: true,
+          painting: {
+              id: painting.Painting_ID,
+              title: painting.Title,
+              description: painting.Description,
+              author_name: painting.author_name,
+              artistId: painting.Creator_ID,
+              creator_id: painting.Creator_ID,
+              price: painting.Price,
+              style: painting.Style,
+              mainImage,
+              gallery,
+              batchId: painting.Batch_ID
+          }
+      });
+
+  } catch (err) {
+    console.error('Error fetching painting:', err);
+    res.status(500).json({ success: false, message: 'Error fetching painting' });
+  }
 });
 
 /* =====================================================

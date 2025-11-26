@@ -1,8 +1,43 @@
 /* AdvancedFilters.module.css */
 
+.wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+    width: 100%;
+}
+
+/* Стилі кнопки перенесені сюди */
+.toggleButton {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    color: #fff;
+    font-size: 18px;
+    font-weight: 400;
+    background: none;
+    border: none;
+    width: fit-content;
+    padding: 0;
+    font-family: 'Roboto', sans-serif;
+}
+
+.icon {
+    transition: transform 0.3s ease;
+    transform: rotate(0deg);
+}
+
+.rotatedIcon {
+    transition: transform 0.3s ease;
+    transform: rotate(180deg);
+}
+
+/* Основний контейнер сітки */
 .filtersContainer {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    display: flex;
+    /*grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));*/
     gap: 40px;
     padding: 30px;
     background: rgba(30, 30, 50, 0.6);
@@ -11,6 +46,14 @@
     margin-bottom: 40px;
     color: white;
     font-family: 'Roboto', sans-serif;
+    width: 100%;
+    box-sizing: border-box;
+    animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
 .filterColumn {
@@ -57,7 +100,7 @@
 .subList {
     position: absolute;
     top: 0;
-    left: 105%; /* З'являється праворуч за замовчуванням */
+    left: 105%;
     width: 250px;
     background: #0d0b1f;
     border: 1px solid rgba(255, 255, 255, 0.2);
@@ -66,8 +109,6 @@
     z-index: 10;
     max-height: 300px;
     overflow-y: auto;
-
-    /* ОНОВЛЕНО: Анімація появи */
     visibility: hidden;
     opacity: 0;
     transform: scaleY(0.95);
@@ -81,7 +122,6 @@
     transform: scaleY(1);
 }
 
-/* ОНОВЛЕНО: Стиль для під-меню, що відкривається вліво */
 .subList.opensLeft {
     left: auto;
     right: 105%;
