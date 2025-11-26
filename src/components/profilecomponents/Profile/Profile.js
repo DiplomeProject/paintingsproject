@@ -83,7 +83,7 @@ function Profile() {
             // Бекенд очікує: username, email, password, birthday
             // registerData приходить з компонента Register
             const response = await axios.post(
-                "http://localhost:8080/register",
+                "/register",
                 {
                     username: registerData.name, // Мапимо name на username
                     email: registerData.email,
