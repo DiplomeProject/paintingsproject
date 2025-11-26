@@ -66,7 +66,10 @@ const Shop = () => {
         .then(res => {
             const payload = res.data;
             const list = Array.isArray(payload) ? payload : (payload.paintings || []);
-            const mapped = list.map(p => {
+            const mapped = (list || []).map(p => {
+                // server may send width/height as lowercase or uppercase fields
+                const width = p.width ?? p.Width ?? null;
+                const height = p.height ?? p.Height ?? null;
                 const imageSrc = p.imageUrl || p.Image || p.image || p.image_url || normalizeImage(p.Image);
                 const images = [];
                 if (p.images && Array.isArray(p.images)) {
@@ -78,18 +81,21 @@ const Shop = () => {
                     images.push(imageSrc);
                 }
                 return {
-                    id: p.Painting_ID || p.id || Math.random().toString(36).slice(2,9),
+                    id: p.Painting_ID || p.id || p.ID || Math.random().toString(36).slice(2,9),
                     title: p.Title || p.title || '',
-                    artistName: p.author_name || p.creatorName || 'Artist',
+                    artistName: p.author_name || p.creatorName || p.artistName || 'Artist',
                     description: p.Description || p.description || '',
-                    imageUrl: imageSrc || '/images/placeholder.png', // preview
-                    images, // optional small array for initial previews
+                    imageUrl: imageSrc || '/images/placeholder.png',
+                    images,
                     likes: p.likes || `${Math.floor(Math.random() * 500)}k`,
                     price: p.Price || p.price || (Math.random() * 200 + 20).toFixed(2),
-                    category: categories.includes(p.Category) ? p.Category : categories[0],
+                    category: categories.includes(p.Category) ? p.Category : (p.category || categories[0]),
                     style: p.Style || p.style || "Neo-minimalism",
                     fileFormat: p.Format || p.format || "PNG",
-                    size: p.Size || p.size || "1080 x 1920"
+                    // expose width/height separately and keep size string
+                    width: width,
+                    height: height,
+                    size: p.size || (width && height ? `${width} x ${height}` : (p.Size || p.size || ""))
                 };
             });
             if (mounted) setCards(mapped);
