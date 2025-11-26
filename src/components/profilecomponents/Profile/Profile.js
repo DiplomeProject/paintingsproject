@@ -41,13 +41,17 @@ function Profile() {
                     if (data.user.profileImage) {
                         setImagePreview(data.user.profileImage);
                     }
+                    // Save user data AND userId to localStorage
+                    localStorage.setItem("user", JSON.stringify(data.user));
+                    localStorage.setItem("userId", data.user.Creator_ID || data.user.id || '');
                 } else {
                     setUser(null);
+                    localStorage.removeItem("user");
+                    localStorage.removeItem("userId");
                 }
             })
             .catch(error => console.error('Error checking session:', error));
     }, []);
-
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -94,7 +98,9 @@ function Profile() {
                 password: formData.password,
             }, { withCredentials: true });
             setUser(response.data.user);
+            // Save user data AND userId to localStorage
             localStorage.setItem("user", JSON.stringify(response.data.user));
+            localStorage.setItem("userId", response.data.user.Creator_ID || response.data.user.id || '');
             setFormData({
                 name: response.data.user.name || '',
                 surname: response.data.user.surname || '',
@@ -137,6 +143,9 @@ function Profile() {
         try {
             await axios.post('http://localhost:8080/logout', {}, { withCredentials: true });
             setUser(null);
+            // Clear localStorage on logout
+            localStorage.removeItem("user");
+            localStorage.removeItem("userId");
             setView('login');
         } catch (error) {
             console.error('Logout failed:', error);
