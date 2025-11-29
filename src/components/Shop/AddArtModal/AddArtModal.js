@@ -3,6 +3,7 @@ import styles from './AddArtModal.module.css';
 import axios from "axios";
 import closeIcon from '../../../assets/closeCross.svg';
 import addImageIcon from '../../../assets/image-placeholder-icon.svg';
+import url  from '../../../../server/URL';
 
 const getOptions = (config, title) => {
   const section = config.find(f => f.title === title);
@@ -105,7 +106,7 @@ const AddArtModal = ({ onClose, categories, filterConfig, existingPaintingId = n
 
     const fetchPainting = async () => {
       try {
-        const res = await axios.get(`http://localhost:8080/api/paintings/${existingPaintingId}`, { withCredentials: true });
+        const res = await axios.get(`${url}/api/paintings/${existingPaintingId}`, { withCredentials: true });
 
         if (res.data.success) {
           const painting = res.data.painting;
