@@ -1,7 +1,7 @@
 import React, {useState} from "react";
 import styles from "./Register.module.css";
 import {EyeIcon, EyeSlashIcon} from "./AuthIcons";
-import url  from '../../../URL';
+import url  from '../../../../server/URL';
 
 function Register({toggleForm}) {
     const [showPassword, setShowPassword] = useState(false);
@@ -62,7 +62,7 @@ function Register({toggleForm}) {
                 alert("Невірний код підтвердження");
             }
 
-            const response = await fetch(`${url}/register`, {
+            const response = await fetch("http://localhost:8080/register", {
                 method: "POST",
                 headers: {"Content-Type": "application/json"},
                 credentials: "include",
