@@ -1,1 +1,1 @@
-export const url = 'https://bestartgallery.pp.ua';
+export default 'https://bestartgallery.pp.ua';
