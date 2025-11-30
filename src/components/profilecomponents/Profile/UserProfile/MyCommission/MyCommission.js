@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import styles from './MyCommission.module.css';
-import CategoryFilters from "../../../../CategoryFilters/CategoryFilters"; // Імпорт як у MyImages
+import CategoryFilters from "../../../../CategoryFilters/CategoryFilters";
 
-// Масив категорій для фільтрації
 const commissionFilters = ['MY ORDERS', 'MY TASKS'];
 
-// Дані-заглушки
+// ... DUMMY_DB_DATA залишається без змін ...
 const DUMMY_DB_DATA = [
     {
         Commission_ID: 101,
@@ -50,24 +49,25 @@ const DUMMY_DB_DATA = [
 ];
 
 function MyCommission({ user }) {
-    const currentUserId = user?.id || 1;
+    const currentUserId = user?.id ? Number(user.id) : 1;
 
-    // За замовчуванням активна перша категорія
     const [activeFilter, setActiveFilter] = useState('MY ORDERS');
     const [commissions, setCommissions] = useState([]);
 
     useEffect(() => {
-        setCommissions(DUMMY_DB_DATA);
-    }, []);
+        // Адаптуємо мокові дані під поточного юзера (якщо у даних ID=2, міняємо на ваш)
+        const adjustedData = DUMMY_DB_DATA.map(item => ({
+            ...item,
+            Customer_ID: item.Customer_ID === 2 ? currentUserId : item.Customer_ID,
+            Creator_ID: item.Creator_ID === 2 ? currentUserId : item.Creator_ID
+        }));
+        setCommissions(adjustedData);
+    }, [currentUserId]);
 
-    // Логіка кліку по категорії (працює як перемикач вкладок)
     const handleFilterClick = (category) => {
-        // Якщо потрібно, щоб можна було "вимкнути" фільтр і показати пустий екран - додайте перевірку на null,
-        // але для логіки Orders/Tasks краще завжди тримати одну активною.
         setActiveFilter(category);
     };
 
-    // Логіка фільтрації
     const displayedCommissions = commissions.filter(item => {
         if (activeFilter === 'MY ORDERS') {
             return item.Customer_ID === currentUserId;
@@ -87,15 +87,21 @@ function MyCommission({ user }) {
         }
     };
 
+    // ОНОВЛЕНА ФУНКЦІЯ RENDER DOTS
     const renderDots = (status) => {
         const filledCount = getFilledDotsCount(status);
         const dots = [];
         for (let i = 0; i < 3; i++) {
-            const isPurple = i < 2;
+            // Визначаємо стиль для кожної конкретної крапки
+            let specificClass = '';
+            if (i === 0) specificClass = styles.dotFirst;
+            if (i === 1) specificClass = styles.dotSecond;
+            if (i === 2) specificClass = styles.dotThird;
+
             dots.push(
                 <div
                     key={i}
-                    className={`${styles.dot} ${i < filledCount ? styles.filled : ''} ${isPurple ? styles.purple : ''}`}
+                    className={`${styles.dot} ${specificClass} ${i < filledCount ? styles.filled : ''}`}
                 ></div>
             );
         }
@@ -104,7 +110,6 @@ function MyCommission({ user }) {
 
     return (
         <div className={styles.container}>
-            {/* Використання спільного компонента CategoryFilters */}
             <div className={styles.filtersWrapper}>
                 <CategoryFilters
                     categories={commissionFilters}
@@ -113,12 +118,10 @@ function MyCommission({ user }) {
                 />
             </div>
 
-            {/* Контент */}
             {displayedCommissions.length > 0 ? (
                 <div className={styles.commissionGrid}>
                     {displayedCommissions.map((item) => (
                         <div key={item.Commission_ID} className={styles.commissionCard}>
-
                             <div className={styles.imagePriceWrapper}>
                                 <div className={styles.imageWrapper}>
                                     <img

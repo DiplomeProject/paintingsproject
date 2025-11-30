@@ -122,35 +122,49 @@
 }
 
 .statusLabel {
-    font-family: 'Roboto', sans-serif;
-    font-size: 14px;
+    font-size: 18px;
     color: #e0e0e0;
 }
 
 .dotsContainer {
     display: flex;
-    gap: 8px;
+    gap: 13px;
 }
 
 .dot {
-    width: 12px;
-    height: 12px;
+    width: 14px;
+    height: 14px;
     border-radius: 50%;
-    border: 2px solid #AA1E97;
     background: transparent;
+    border: 2px solid transparent;
+    box-sizing: border-box;
 }
 
-.dot.filled {
-    background: #AA1E97;
-    box-shadow: 0 0 4px #AA1E97;
+.dotFirst {
+    border-color: #8E40F2;
+}
+.dotFirst.filled {
+    background: linear-gradient(180deg, #8E40F2 0%, #A242EB 100%);
+    border-color: transparent;
+    box-shadow: 0 0 4px rgba(142, 64, 242, 0.4);
 }
 
-.dot.purple {
-    border-color: #853FF6;
+.dotSecond {
+    border-color: #B744E4;
 }
-.dot.purple.filled {
-    background: #853FF6;
-    box-shadow: 0 0 4px #853FF6;
+.dotSecond.filled {
+    background: linear-gradient(180deg, #B744E4 0%, #CB46DD 100%);
+    border-color: transparent;
+    box-shadow: 0 0 4px rgba(183, 68, 228, 0.4);
+}
+
+.dotThird {
+    border-color: #E149D5;
+}
+.dotThird.filled {
+    background: linear-gradient(180deg, #E149D5 0%, #F64BCE 100%);
+    border-color: transparent;
+    box-shadow: 0 0 4px rgba(225, 73, 213, 0.4);
 }
 
 @media (max-width: 768px) {
