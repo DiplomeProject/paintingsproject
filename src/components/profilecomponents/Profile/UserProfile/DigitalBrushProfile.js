@@ -13,6 +13,7 @@ import comissionIcon from "../../../../assets/icons/comissionIcon.svg";
 import walletIcon from "../../../../assets/icons/walletIcon.svg";
 import closeIcon from "../../../../assets/closeCross.svg";
 import plusIcon from "../../../../assets/icons/plusIcon.svg";
+import MyCommission from "./MyCommission/MyCommission";
 
 function DigitalBrushProfile({ user, onLogout }) {
     // Стан для відстеження поточної вкладки
@@ -29,7 +30,7 @@ function DigitalBrushProfile({ user, onLogout }) {
             case 'images':
                 return <MyImages user={user} />;
             case 'commission':
-                return <div className={styles.placeholder}>Commission Component (Coming Soon)</div>;
+                return <MyCommission user={user} />;
             case 'payment':
                 return <div className={styles.placeholder}>Payment Component (Coming Soon)</div>;
             case 'calendar':

@@ -1,7 +1,7 @@
 import React, {useState} from "react";
 import styles from "./Register.module.css";
 import {EyeIcon, EyeSlashIcon} from "./AuthIcons";
-import url  from '../../../../server/URL';
+import url  from '../../../URL';
 
 function Register({toggleForm}) {
     const [showPassword, setShowPassword] = useState(false);
