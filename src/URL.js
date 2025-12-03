@@ -1,1 +1,1 @@
-export default 'https://bestartgallery.pp.ua';
+export default 'http://172.17.3.23:8080';
