@@ -62,7 +62,7 @@ function Register({toggleForm}) {
                 alert("Невірний код підтвердження");
             }
 
-            const response = await fetch("http://localhost:8080/register", {
+            const response = await fetch(`${url}/register`, {
                 method: "POST",
                 headers: {"Content-Type": "application/json"},
                 credentials: "include",
