@@ -14,5 +14,3 @@ const pool = mysql.createPool({
 module.exports = pool;
 
 
-// ✅ Export the pool itself, not a wrapper
-module.exports = pool;
