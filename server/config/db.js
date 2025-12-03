@@ -4,7 +4,7 @@ const pool = mysql.createPool({
   host: "172.17.3.23",
   port: 3306,
   user: "artuser",
-  password: "VRdQ1Q0KOydNJ413f",
+  password: "VRdQ1Q0KOydNJ413f>",
   database: "PaintingDB",
   waitForConnections: true,
   connectionLimit: 10,
