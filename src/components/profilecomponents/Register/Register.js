@@ -62,7 +62,7 @@ function Register({toggleForm}) {
                 alert("Невірний код підтвердження");
             }
 
-            const response = await fetch(`${url}/register`, {
+            const response = await fetch(`http://172.17.3.23:3000/register`, {
                 method: "POST",
                 headers: {"Content-Type": "application/json"},
                 credentials: "include",
