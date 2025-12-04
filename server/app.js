@@ -17,8 +17,12 @@ app.use(cors({
         'http://172.17.3.24:8080',
         'http://localhost:3000'
     ],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true
 }));
+
+app.options('*', cors());
 
 app.use(session({
     secret: require('crypto').randomBytes(64).toString('hex'),
