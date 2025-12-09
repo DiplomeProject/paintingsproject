@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import styles from "./DigitalBrushProfile.module.css";
 import MyImages from "./MyImages/MyImages";
 import ProfileSettings from "./SettingsProfile/SettingsProfile";
+import CommissionChat from "./MyCommission/CommissionChat/CommissionChat";
 
 import infoIcon from '../../../../assets/infoIcon.svg';
 import globeIcon from '../../../../assets/icons/globeIcon.svg';
@@ -14,13 +15,54 @@ import walletIcon from "../../../../assets/icons/walletIcon.svg";
 import closeIcon from "../../../../assets/closeCross.svg";
 import plusIcon from "../../../../assets/icons/plusIcon.svg";
 import MyCommission from "./MyCommission/MyCommission";
+import AddArtModal from "../../../Shop/AddArtModal/AddArtModal";
+import AddCommissionModal from "../../../Commission/CommissionModals/AddCommissionModal";
+
+
+const filterConfig = [
+    { title: "SORT BY", options: [{ name: "NONE" }, { name: "RATING" }, { name: "LATEST" }, { name: "EXPENSIVE" }, { name: "CHEAP" }]},
+    { title: "STYLE", options: [{ name: "NONE STYLE", subOptions: [
+                "Retro Futurism", "Mid-Century", "Modern, Art Deco", "Bauhaus, Y2K", "Aesthetic", "Memphis Style",
+                "Grunge", "Psychedelic Art", "Surrealism, Neo-Psychedelia, Op Art", "Dreamcore", "Weirdcore",
+                "Hyperrealism", "Social Realism", "Digital Realism", "Cinematic Realism", "Cyberpunk",
+                "Synthwave", "Vaporwave", "Minimalism", "Brutalism", "Postmodern", "Collage."
+            ] }]}
+];
+
+const categories = [
+    "2D AVATARS", "3D MODELS", "BOOKS", "ANIME", "ICONS", "GAMES", "MOCKUPS", "UI/UX",
+    "ADVERTISING", "BRENDING", "POSTER", "ARCHITECTURE", "FASHION", "SKETCH", "PHOTOGRAPHY"
+];
 
 function DigitalBrushProfile({ user, onLogout }) {
     // Стан для відстеження поточної вкладки
     // Можливі варіанти: 'settings', 'images', 'commission', 'payment', 'calendar'
     const [activeTab, setActiveTab] = useState('images');
+    const [showAddArtModal, setShowAddArtModal] = useState(false);
+    const [showAddCommissionModal, setShowAddCommissionModal] = useState(false);
+    const [activeChatCommissionId, setActiveChatCommissionId] = useState(null);
 
     const totalLikes = "0"; // Можна потім брати з user
+
+    const handleOpenChat = (commissionId) => {
+        setActiveChatCommissionId(commissionId);
+        setActiveTab('chat');
+    };
+
+    const handleOpenAddArt = (e) => {
+        e.stopPropagation();
+        setShowAddArtModal(true);
+    };
+
+    const handleOpenAddCommission = (e) => {
+        e.stopPropagation();
+        setShowAddCommissionModal(true);
+    };
+
+    const handleBackToCommissionList = () => {
+        setActiveChatCommissionId(null);
+        setActiveTab('commission');
+    };
 
     // Функція для рендерингу правої частини
     const renderContent = () => {
@@ -30,7 +72,15 @@ function DigitalBrushProfile({ user, onLogout }) {
             case 'images':
                 return <MyImages user={user} />;
             case 'commission':
-                return <MyCommission user={user} />;
+                return <MyCommission user={user} onOpenChat={handleOpenChat} />;
+            case 'chat':
+                return (
+                    <CommissionChat
+                        commissionId={activeChatCommissionId}
+                        user={user}
+                        onBack={handleBackToCommissionList}
+                    />
+                );
             case 'payment':
                 return <div className={styles.placeholder}>Payment Component (Coming Soon)</div>;
             case 'calendar':
@@ -97,7 +147,9 @@ function DigitalBrushProfile({ user, onLogout }) {
                         >
                             <img src={pictureIcon} alt="PictureIcon" className={styles.btnicon} />
                             My images
-                            <img src={plusIcon} alt="PlusIcon" className={styles.plusIcon}/>
+                            <img src={plusIcon} alt="PlusIcon" className={styles.plusIcon}
+                                 onClick={handleOpenAddArt}
+                            />
                         </button>
 
                         <button
@@ -106,7 +158,7 @@ function DigitalBrushProfile({ user, onLogout }) {
                         >
                             <img src={comissionIcon} alt="ComissionIcon" className={styles.btnicon} />
                             My Commission
-                            <img src={plusIcon} alt="PlusIcon" className={styles.plusIcon}/>
+                            <img src={plusIcon} alt="PlusIcon" className={styles.plusIcon} onClick={handleOpenAddCommission}/>
                         </button>
 
                         <button
@@ -137,6 +189,21 @@ function DigitalBrushProfile({ user, onLogout }) {
                     {renderContent()}
                 </main>
             </div>
+
+            {showAddArtModal && (
+                <AddArtModal
+                    onClose={() => setShowAddArtModal(false)}
+                    categories={categories}       // Переконайтеся, що ці дані приходять у DigitalBrushProfile
+                    filterConfig={filterConfig}   // або передайте сюди дефолтні значення
+                />
+            )}
+
+            {showAddCommissionModal && (
+                <AddCommissionModal
+                    onClose={() => setShowAddCommissionModal(false)}
+                    targetCreatorId={null}
+                />
+            )}
         </div>
     );
 }

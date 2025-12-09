@@ -167,6 +167,25 @@
     box-shadow: 0 0 4px rgba(225, 73, 213, 0.4);
 }
 
+.loadingContainer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 400px;
+    width: 100%;
+}
+
+.loadingLogo {
+    width: 100px;
+    height: 100px;
+    animation: rotateLogo 2s linear infinite;
+}
+
+@keyframes rotateLogo {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
 @media (max-width: 768px) {
     .commissionGrid {
         grid-template-columns: 1fr;
