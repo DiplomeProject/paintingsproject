@@ -37,7 +37,7 @@ app.use(session({
 }));
 
 // Routes
-app.use('/api/auth', authRoutes);
+app.use('/api', authRoutes);
 app.use('/api/paintings', paintingRoutes);
 app.use('/api/profile', profileRoutes);
 app.use('/api/search', searchRoutes);
