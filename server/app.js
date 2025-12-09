@@ -36,6 +36,8 @@ app.use(session({
     }
 }));
 
+app.options('*', cors());
+
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/paintings', paintingRoutes);
