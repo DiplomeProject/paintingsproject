@@ -19,10 +19,16 @@ app.use(express.json());
 app.use(cors({
     origin: [
         'http://172.17.3.24:8080',
+        'http://localhost:8080',
         'http://localhost:3000'
     ],
-    credentials: true
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
 }));
+
+// Обработка preflight запросов
+app.options('*', cors());
 
 // Session
 app.use(session({
