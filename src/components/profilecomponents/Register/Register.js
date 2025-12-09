@@ -60,9 +60,10 @@ function Register({toggleForm}) {
         try {
             if (userCode.trim() !== generatedCode.trim()) {
                 alert("Невірний код підтвердження");
+                return;
             }
 
-            const response = await fetch(`${url}/register`, {
+            const response = await fetch(`${url}/api/register`, {
                 method: "POST",
                 headers: {"Content-Type": "application/json"},
                 credentials: "include",

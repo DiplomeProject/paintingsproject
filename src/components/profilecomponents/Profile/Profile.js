@@ -24,7 +24,7 @@ function Profile() {
 
     // Перевірка сесії при завантаженні
     useEffect(() => {
-        axios.get(`http://172.17.3.23:3000/check-session`, { withCredentials: true })
+        axios.get(`http://172.17.3.23:3000/api/check-session`, { withCredentials: true })
             .then(response => {
                 if (response.data.loggedIn) {
                     const userData = response.data.user;
@@ -53,7 +53,7 @@ function Profile() {
     const handleLogin = async (e) => {
         e.preventDefault();
         try {
-            const response = await axios.post(`http://172.17.3.23:3000/login`, {
+            const response = await axios.post(`http://172.17.3.23:3000/api/login`, {
                 email: formData.email,
                 password: formData.password,
             }, { withCredentials: true });
@@ -84,7 +84,7 @@ function Profile() {
             // Бекенд очікує: username, email, password, birthday
             // registerData приходить з компонента Register
             const response = await axios.post(
-                `${url}/register`,
+                `${url}/api/register`,
                 {
                     username: registerData.name, // Мапимо name на username
                     email: registerData.email,
@@ -107,7 +107,7 @@ function Profile() {
 
     const handleLogout = async () => {
         try {
-            await axios.post(`http://172.17.3.23:3000/logout`, {}, { withCredentials: true });
+            await axios.post(`http://172.17.3.23:3000/api/logout`, {}, { withCredentials: true });
             setUser(null);
             setView('login');
             setFormData({ name: '', bio: '', email: '', password: '' });
