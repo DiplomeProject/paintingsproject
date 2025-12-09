@@ -63,7 +63,7 @@ function Register({toggleForm}) {
                 return;
             }
 
-            const response = await fetch(`${url}/api/register`, {
+            const response = await fetch(`${url}/api/auth/register`, {
                 method: "POST",
                 headers: {"Content-Type": "application/json"},
                 credentials: "include",
