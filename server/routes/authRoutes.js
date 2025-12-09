@@ -3,7 +3,7 @@ const bcrypt = require('bcrypt');
 const db = require('../config/db');
 const router = express.Router();
 
-// Реєстрація
+// Register
 router.post('/register', async (req, res) => {
     const { username, email, password, birthday } = req.body;
     try {
@@ -17,8 +17,8 @@ router.post('/register', async (req, res) => {
     }
 });
 
-// Перевірка email
-router.post('/checkEmail', async (req, res) => {
+// Check email
+router.post('/check-email', async (req, res) => {
     try {
         const [rows] = await db.query('SELECT Email FROM creators WHERE Email = ?', [req.body.email]);
         res.json({ exists: rows.length > 0 });
@@ -27,7 +27,7 @@ router.post('/checkEmail', async (req, res) => {
     }
 });
 
-// Логін
+// Login
 router.post('/login', async (req, res) => {
     const { email, password } = req.body;
     try {
@@ -59,13 +59,13 @@ router.post('/login', async (req, res) => {
     }
 });
 
-// Перевірка сесії
-router.get('/check-session', async (req, res) => {
+// Check session
+router.get('/check-session', (req, res) => {
     if (!req.session.user) return res.json({ loggedIn: false });
     res.json({ loggedIn: true, user: req.session.user });
 });
 
-// Логаут
+// Logout
 router.post('/logout', (req, res) => {
     req.session.destroy(err => {
         if (err) return res.status(500).json({ success: false });
