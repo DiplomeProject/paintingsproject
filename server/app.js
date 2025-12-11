@@ -12,21 +12,29 @@ const artistsRoutes = require('./Artists/Artists');
 
 const app = express();
 
-// --- REAL CORS CONFIG ---
-app.use(cors({
-    origin: (origin, callback) => callback(null, true),  // allow all origins
+const corsOptions = {
+    origin: (origin, callback) => callback(null, true),
     credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Origin', 'X-Requested-With', 'Content-Type', 'Accept', 'Authorization']
-}));
+    methods: ['GET','POST','PUT','DELETE','OPTIONS'],
+    allowedHeaders: ['Origin','X-Requested-With','Content-Type','Accept','Authorization']
+};
 
-// Must be BEFORE session
-app.options('*', cors()); 
+// CORS MUST BE FIRST
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
+
+// Allow OPTIONS to bypass session entirely
+app.use((req, res, next) => {
+    if (req.method === 'OPTIONS') {
+        return res.sendStatus(204);
+    }
+    next();
+});
 
 // JSON parser
 app.use(express.json());
 
-// Session (now AFTER CORS)
+// session
 app.use(session({
     secret: process.env.SESSION_SECRET || 'fallback-secret-for-dev',
     resave: false,
@@ -38,6 +46,7 @@ app.use(session({
         sameSite: 'lax'
     }
 }));
+
 
 // Routes
 app.use('/api/auth', authRoutes);
