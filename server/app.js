@@ -12,10 +12,10 @@ const artistsRoutes = require('./Artists/Artists');
 
 const app = express();
 
-// Middleware
+// 1. JSON Parser ПЕРВЫМ
 app.use(express.json());
 
-// CORS
+// 2. CORS - ВАЖНЫЙ ПОРЯДОК!
 app.use(cors({
     origin: [
         'http://172.17.3.24:8080',
@@ -24,27 +24,27 @@ app.use(cors({
     ],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+    exposedHeaders: ['set-cookie']
 }));
 
-// Обработка preflight запросов
+// 3. Обработка preflight ОДИН РАЗ
 app.options('*', cors());
 
-// Session
+// 4. Session
 app.use(session({
     secret: process.env.SESSION_SECRET || 'fallback-secret-for-dev',
     resave: false,
     saveUninitialized: false,
     cookie: {
-        secure: process.env.NODE_ENV === 'production', // true in production
-        maxAge: 24 * 60 * 60 * 1000, // 1 day
+        secure: false, // ВАЖНО: false для HTTP
+        httpOnly: true,
+        maxAge: 24 * 60 * 60 * 1000,
         sameSite: 'lax'
     }
 }));
 
-app.options('*', cors());
-
-// Routes
+// 5. Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/paintings', paintingRoutes);
 app.use('/api/profile', profileRoutes);
