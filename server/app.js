@@ -14,9 +14,11 @@ const app = express();
 
 const corsOptions = {
     origin: [
-        'http://172.17.3.24:8080',
+        'http://172.17.3.24:8080', // Frontend Origin (Source)
+        'http://172.17.3.23:3000', // Backend Target URL (Destination) - ADD THIS
         'http://localhost:8080',
-        'http://127.0.0.1:8080'
+        'http://127.0.0.1:8080',
+        'http://172.17.3.23:3000' // Make sure the target URL's origin is also explicitly allowed
     ],
     credentials: true,
     methods: ['GET','POST','PUT','DELETE','OPTIONS'],
