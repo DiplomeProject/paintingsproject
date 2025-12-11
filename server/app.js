@@ -12,23 +12,21 @@ const artistsRoutes = require('./Artists/Artists');
 
 const app = express();
 
-// 1. JSON Parser
+// --- REAL CORS CONFIG ---
+app.use(cors({
+    origin: (origin, callback) => callback(null, true),  // allow all origins
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Origin', 'X-Requested-With', 'Content-Type', 'Accept', 'Authorization']
+}));
+
+// Must be BEFORE session
+app.options('*', cors()); 
+
+// JSON parser
 app.use(express.json());
 
-// 2. CORS - МАКСИМАЛЬНО ОТКРЫТЫЙ (временно для теста)
-app.use((req, res, next) => {
-    res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
-    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
-    res.header('Access-Control-Allow-Credentials', 'true');
-    
-    if (req.method === 'OPTIONS') {
-        return res.sendStatus(200);
-    }
-    next();
-});
-
-// 3. Session
+// Session (now AFTER CORS)
 app.use(session({
     secret: process.env.SESSION_SECRET || 'fallback-secret-for-dev',
     resave: false,
@@ -41,7 +39,7 @@ app.use(session({
     }
 }));
 
-// 4. Routes
+// Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/paintings', paintingRoutes);
 app.use('/api/profile', profileRoutes);
