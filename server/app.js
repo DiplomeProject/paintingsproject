@@ -12,39 +12,36 @@ const artistsRoutes = require('./Artists/Artists');
 
 const app = express();
 
-// 1. JSON Parser ПЕРВЫМ
+// 1. JSON Parser
 app.use(express.json());
 
-// 2. CORS - ВАЖНЫЙ ПОРЯДОК!
-app.use(cors({
-    origin: [
-        'http://172.17.3.24:8080',
-        'http://localhost:8080',
-        'http://localhost:3000'
-    ],
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
-    exposedHeaders: ['set-cookie']
-}));
+// 2. CORS - МАКСИМАЛЬНО ОТКРЫТЫЙ (временно для теста)
+app.use((req, res, next) => {
+    res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+    res.header('Access-Control-Allow-Credentials', 'true');
+    
+    if (req.method === 'OPTIONS') {
+        return res.sendStatus(200);
+    }
+    next();
+});
 
-// 3. Обработка preflight ОДИН РАЗ
-app.options('*', cors());
-
-// 4. Session
+// 3. Session
 app.use(session({
     secret: process.env.SESSION_SECRET || 'fallback-secret-for-dev',
     resave: false,
     saveUninitialized: false,
     cookie: {
-        secure: false, // ВАЖНО: false для HTTP
+        secure: false,
         httpOnly: true,
         maxAge: 24 * 60 * 60 * 1000,
         sameSite: 'lax'
     }
 }));
 
-// 5. Routes
+// 4. Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/paintings', paintingRoutes);
 app.use('/api/profile', profileRoutes);
