@@ -12,24 +12,28 @@ const artistsRoutes = require('./Artists/Artists');
 
 const app = express();
 
+// 1. UPDATE: Add your specific frontend IP here. 
+// Do not use '*' or generic callbacks when credentials are strictly required.
 const corsOptions = {
-    origin: (origin, callback) => callback(null, true),
+    origin: [
+        'http://172.17.3.24:8080', 
+        'http://localhost:8080',
+        'http://127.0.0.1:8080'
+    ],
     credentials: true,
-    methods: ['GET','POST','PUT','DELETE','OPTIONS'],
-    allowedHeaders: ['Origin','X-Requested-With','Content-Type','Accept','Authorization']
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Origin', 'X-Requested-With', 'Content-Type', 'Accept', 'Authorization']
 };
 
-// CORS MUST BE FIRST
+// 2. APPLY CORS: Apply it immediately, before any other middleware
 app.use(cors(corsOptions));
-app.options('*', cors(corsOptions));
 
-// Allow OPTIONS to bypass session entirely
-app.use((req, res, next) => {
-    if (req.method === 'OPTIONS') {
-        return res.sendStatus(204);
-    }
-    next();
-});
+// 3. REMOVED: The manual "app.use" for OPTIONS was deleted here. 
+// The cors() middleware above automatically handles headers, 
+// and Express handles the OPTIONS response status by default or via the line below.
+
+// Enable pre-flight for all routes
+app.options('*', cors(corsOptions));
 
 // JSON parser
 app.use(express.json());
@@ -40,10 +44,10 @@ app.use(session({
     resave: false,
     saveUninitialized: false,
     cookie: {
-        secure: false,
+        secure: false, // Set to true if using https
         httpOnly: true,
         maxAge: 24 * 60 * 60 * 1000,
-        sameSite: 'lax'
+        sameSite: 'lax' // Important for CORS/Cookies across different ports
     }
 }));
 
