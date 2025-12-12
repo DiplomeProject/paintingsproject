@@ -15,6 +15,7 @@
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
     "express-session": "^1.18.2",
+    "hasown": "^2.0.2",
     "lucide-react": "^0.544.0",
     "muller": "^1.1.0",
     "multer": "^2.0.2",

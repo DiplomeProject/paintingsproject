@@ -1,6 +1,7 @@
 import React, {useState} from "react";
 import styles from "./Register.module.css";
 import {EyeIcon, EyeSlashIcon} from "./AuthIcons";
+import emailjs from '@emailjs/browser';
 
 function Register({toggleForm}) {
     const [showPassword, setShowPassword] = useState(false);
@@ -21,8 +22,21 @@ function Register({toggleForm}) {
 
     const sendVerificationEmail = async (name, email, code) => {
         try {
-            console.log(code);
             console.log("Attempting to send email with EmailJS...");
+                const result = await emailjs.send(
+                    "service_fv0f2qo",
+                    "template_zn93brw",
+                    {
+                    name: name,
+                    verification_code: code,
+                    to_email: email,
+                    reply_to: email,
+                    },
+                    "7Gw-RPTO7wMAtHcSb"
+                );
+                console.log("EmailJS response:", result);
+                console.log("Verification code sent successfully");
+      
             // EmailJS код здесь
             console.log("Verification code sent successfully");
             return true;
