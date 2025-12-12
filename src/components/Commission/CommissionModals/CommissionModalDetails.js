@@ -97,6 +97,31 @@ const CommissionModalDetails = ({ commission, onClose }) => {
         }
     };
 
+    const handleAccept = async () => {
+        if (!commission?.id) return;
+        try {
+            const userId = localStorage.getItem('userId');
+            if (!userId) {
+                alert("User not logged in");
+                return;
+            }
+            const response = await axios.patch(
+                `http://localhost:8080/api/commissions/${commission.id}/accept`,
+                { customerId: userId },
+                { withCredentials: true }
+            );
+            if (response.data.success) {
+                alert("Commission accepted successfully!");
+                onClose();
+            }
+        } catch (err) {
+            console.error(err);
+            alert("Failed to accept commission");
+        }
+    };
+
+
+
     // Перевіряємо, чи є взагалі зображення для прев'ю
     const hasMultipleImages = previewImages.length > 0;
 
@@ -172,8 +197,9 @@ const CommissionModalDetails = ({ commission, onClose }) => {
 
                 <div className={styles.actions}>
                     <button className={styles.priceBtn}>{commission.price}$</button>
-                    <button className={styles.takeBtn}>Take</button>
+                    <button className={styles.takeBtn} onClick={handleAccept}>Accept</button>
                 </div>
+
             </div>
 
             {isViewerOpen && (

@@ -154,7 +154,6 @@ router.post(
 
 
 // Updated GET route for Commissions.js backend
-
 router.get('/api/commissions/public', async (req, res) => {
     const sql = `
         SELECT c.*,
@@ -424,4 +423,38 @@ router.get('/api/commissions/:id', async (req, res) => {
     }
 });
 
+
+
+// PATCH endpoint to accept a commission
+router.patch('/api/commissions/:id/accept', async (req, res) => {
+    const { id } = req.params;
+    const user = req.session.user;
+    if (!user || !user.id) {
+        return res.status(401).json({ success: false, message: 'Not logged in' });
+    }
+
+    const customerId = user.id; // use logged-in user ID
+
+    try {
+        const sql = `
+            UPDATE commissions
+            SET Status = 'in_progress',
+                Customer_ID = ?
+            WHERE Commission_ID = ? AND Status = 'open'
+        `;
+
+        const [result] = await db.query(sql, [customerId, id]);
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ success: false, message: 'Commission not found or already accepted' });
+        }
+
+        res.json({ success: true, message: `Commission ${id} accepted by customer ${customerId}` });
+    } catch (err) {
+        console.error('Error accepting commission:', err);
+        res.status(500).json({ success: false, message: 'Database error while accepting commission' });
+    }
+});
+
 module.exports = router;
+
