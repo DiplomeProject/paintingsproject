@@ -15,10 +15,9 @@ const app = express();
 const corsOptions = {
     // FIX: Use explicit origins for security and compatibility with credentials: true
     origin: [
-        'http://172.17.3.24:8080', // Frontend Origin (Source)
-        'http://172.17.3.23:3000', // Backend Target URL (Destination)
-        'http://localhost:8080',
-        'http://127.0.0.1:8080'
+        'http://172.17.3.24:8080',
+        'http://localhost:3000',
+        'http://localhost:8080'
     ],
     credentials: true,
     methods: ['GET','POST','PUT','DELETE','OPTIONS'],
