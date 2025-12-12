@@ -5,9 +5,9 @@ import Register from "../Register/Register";
 import ForgotPassword from "../Login/ForgotPassword/ForgotPassword";
 import styles from './Profile.module.css';
 import DigitalBrushProfile from "./UserProfile/DigitalBrushProfile";
-import url  from '../../../URL';
+// import url  from '../../../URL';
 
-function Profile({setIsLoggedIn}) {
+function Profile({ setIsLoggedIn }) {
     const [user, setUser] = useState(null);
     const [view, setView] = useState('login');
     const [isLogin, setIsLogin] = useState(true);
@@ -24,7 +24,7 @@ function Profile({setIsLoggedIn}) {
 
     // Перевірка сесії при завантаженні
     useEffect(() => {
-        axios.get(`http://172.17.3.23:3000/api/auth/check-session`, { withCredentials: true })
+        axios.get('http://localhost:8080/check-session', { withCredentials: true })
             .then(response => {
                 if (response.data.loggedIn) {
                     const userData = response.data.user;
@@ -53,7 +53,7 @@ function Profile({setIsLoggedIn}) {
     const handleLogin = async (e) => {
         e.preventDefault();
         try {
-            const response = await axios.post(`http://172.17.3.23:3000/api/auth/login`, {
+            const response = await axios.post('http://localhost:8080/login', {
                 email: formData.email,
                 password: formData.password,
             }, { withCredentials: true });
@@ -61,13 +61,13 @@ function Profile({setIsLoggedIn}) {
             if (response.data.success) {
                 const userData = response.data.user;
                 setUser(userData);
-                if (setIsLoggedIn) setIsLoggedIn(true);
                 setFormData({
                     name: userData.name || '',
                     bio: userData.bio || '',
                     email: userData.email || '',
                     password: ''
                 });
+                if (setIsLoggedIn) setIsLoggedIn(true);
                 if (userData.profileImage) {
                     setImagePreview(userData.profileImage);
                 }
@@ -85,7 +85,7 @@ function Profile({setIsLoggedIn}) {
             // Бекенд очікує: username, email, password, birthday
             // registerData приходить з компонента Register
             const response = await axios.post(
-                `${url}/api/auth/register`,
+                "http://localhost:8080/register",
                 {
                     username: registerData.name, // Мапимо name на username
                     email: registerData.email,
@@ -108,7 +108,7 @@ function Profile({setIsLoggedIn}) {
 
     const handleLogout = async () => {
         try {
-            await axios.post(`http://172.17.3.23:3000/api/auth/logout`, {}, { withCredentials: true });
+            await axios.post('http://localhost:8080/logout', {}, { withCredentials: true });
             setUser(null);
             setView('login');
             if (setIsLoggedIn) setIsLoggedIn(false);
