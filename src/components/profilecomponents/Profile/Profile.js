@@ -5,6 +5,7 @@ import Register from "../Register/Register";
 import ForgotPassword from "../Login/ForgotPassword/ForgotPassword";
 import styles from './Profile.module.css';
 import DigitalBrushProfile from "./UserProfile/DigitalBrushProfile";
+import url  from '../../../URL';
 
 function Profile() {
     const [user, setUser] = useState(null);

@@ -1,0 +1,306 @@
+.chatContainer {
+    display: flex;
+    justify-content: center;
+    gap: 135px;
+    height: 100%;
+    min-height: 800px;
+    background-color: transparent;
+    color: white;
+    /*padding: 40px;*/
+    box-sizing: border-box;
+}
+
+/* --- ЛІВА КОЛОНКА --- */
+.detailsColumn {
+    width: 500px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+/* 1. Інфо (ПОВНІСТЮ ПРОЗОРЕ) */
+.headerInfo {
+    display: flex;
+    gap: 25px;
+    background: transparent; /* Прозорий фон */
+    padding: 0;
+}
+
+.thumbImage {
+    width: 212px;
+    height: 271px;
+    object-fit: cover;
+    border-radius: 0; /* Гострі кути як на постері макету */
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+}
+
+.textInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    max-width: 323px;
+}
+
+.categoryTitle {
+    font-size: 26px;
+    text-transform: uppercase;
+    margin: 0;
+}
+
+.descriptionText {
+    margin: 0;
+    font-size: 20px;
+}
+
+.priceTag {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 120px;
+    height: 40px;
+    background: rgba(30, 30, 35, 0.6); /* Напівпрозорий темний */
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 6px;
+    font-size: 20px;
+    font-weight: 500;
+    color: #fff;
+    margin-top: 10px;
+    backdrop-filter: blur(5px);
+}
+
+/* --- СЕКЦІЯ СТАТУСУ --- */
+.statusContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.statusHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 5px;
+}
+
+.statusTitleBlock {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    font-size: 32px;
+    font-weight: 400;
+    font-family: 'Roboto', sans-serif;
+}
+
+.bigDot {
+    width: 32px;
+    height: 32px;
+    background-color: #a855f7; /* Фіолетовий */
+    border-radius: 50%;
+}
+
+.dotsRow {
+    display: flex;
+    gap: 15px;
+}
+
+.hollowDot {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 2px solid #d053f5;
+    background: transparent;
+}
+.hollowDot.filled {
+    background: #d053f5;
+}
+
+/* --- ГОЛОВНИЙ БОКС (РАМКА) --- */
+.stageBox {
+    width: 100%;
+    height: 500px; /* Високий квадрат */
+    position: relative;
+    border-radius: 12px;
+
+    /* Градієнтна рамка (скляний ефект) */
+    background:
+            linear-gradient(rgba(45, 45, 50, 0.6), rgba(45, 45, 50, 0.6)) padding-box,
+            linear-gradient(180deg, rgba(100, 100, 110, 1) 0%, rgba(60, 60, 70, 0.3) 100%) border-box;
+    border: 3px solid transparent;
+
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.imageArea {
+    flex: 1;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    background: rgba(30, 30, 30, 0.4);
+}
+
+.currentStageImage {
+    max-width: 80%;
+    max-height: 80%;
+    object-fit: contain;
+    border: 5px solid #dcdcdc; /* Біла рамка як на постері */
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    transform: rotate(-2deg); /* Легкий нахил для стилю, як на макеті */
+}
+
+/* Кнопка додавання (Внизу, на всю ширину) */
+.addSketchBar {
+    width: 100%;
+    height: 60px;
+    background: rgba(80, 80, 80, 0.7); /* Сірий фон кнопки */
+    backdrop-filter: blur(10px);
+    border-top: 1px solid rgba(255,255,255,0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: #fff;
+    font-size: 18px;
+    font-weight: 500;
+    transition: background 0.3s;
+}
+
+.addSketchBar:hover {
+    background: rgba(100, 100, 100, 0.9);
+}
+
+/* Блок дій (Прийняти/Відхилити) */
+.actionsOverlay {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    display: flex;
+    gap: 10px;
+    z-index: 10;
+}
+
+.actionBtn {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    transition: transform 0.2s;
+}
+.actionBtn:hover { transform: scale(1.1); }
+.checkBtn svg { fill: #2ecc71; width: 35px; height: 35px; }
+.crossBtn svg { fill: #e74c3c; width: 35px; height: 35px; }
+
+
+/* --- ПРАВА КОЛОНКА (ЧАТ) --- */
+.chatColumn {
+    width: 600px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    border-radius: 12px;
+
+    /* Тонка градієнтна рамка */
+    background:
+            linear-gradient(rgba(30, 30, 35, 0.9), rgba(30, 30, 35, 0.9)) padding-box,
+            linear-gradient(180deg, rgba(89, 92, 100, 1), rgba(71, 77, 95, 0.3)) border-box;
+    border: 1px solid transparent;
+}
+
+.chatHeader {
+    padding: 25px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.headerUserName {
+    font-size: 22px;
+    font-weight: 500;
+}
+
+.messagesList {
+    flex: 1;
+    padding: 30px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+}
+
+.messageRow {
+    display: flex;
+    gap: 20px;
+    max-width: 80%;
+}
+.messageRow.own {
+    align-self: flex-end;
+    flex-direction: row-reverse;
+}
+
+.userAvatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid rgba(255,255,255,0.1);
+}
+
+.bubble {
+    background: rgba(255, 255, 255, 0.1); /* Напівпрозорий сірий */
+    padding: 20px;
+    border-radius: 0 16px 16px 16px;
+    font-size: 15px;
+    line-height: 1.5;
+    color: #ddd;
+    border: 1px solid rgba(255,255,255,0.05);
+}
+.messageRow.own .bubble {
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 16px 0 16px 16px;
+}
+
+/* Зображення в чаті */
+.chatImageAttachment {
+    width: 200px;
+    border-radius: 8px;
+    border: 4px solid #dcdcdc;
+    margin-top: 10px;
+}
+.bubble:has(> .chatImageAttachment:only-child) {
+    background: transparent;
+    padding: 0;
+    border: none;
+}
+
+/* Input */
+.inputArea {
+    padding: 20px;
+    border-top: 1px solid rgba(255,255,255,0.05);
+}
+.inputWrapper {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+.chatInput {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: white;
+    font-size: 16px;
+    outline: none;
+}

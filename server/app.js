@@ -14,7 +14,6 @@ const app = express();
 app.use(express.json());
 app.use(cors({
     origin: [
-        'https://bestartgallery.pp.ua/',
         'http://172.17.3.24:8080',
         'http://localhost:3000'
     ],

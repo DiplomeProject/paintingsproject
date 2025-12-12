@@ -1,0 +1,1 @@
+export default 'https://bestartgallery.pp.ua';
