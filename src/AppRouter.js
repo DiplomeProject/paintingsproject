@@ -9,12 +9,12 @@ import ArtistsPage from "./components/Artists/ArtistsPage";
 import CheckoutPage from './components/CheckoutPage/CheckoutPage';
 import AuthorPage from "./components/AuthorPage/AuthorPage";
 
-export default function AppRouter({ onViewArtDetails }) {
+export default function AppRouter({ onViewArtDetails, setIsLoggedIn }) {
     return (
         <Routes>
             <Route path='/' element={<HomePage />} />
             <Route path='homepage' element={<HomePage />} />
-            <Route path='profile' element={<Profile />} />
+            <Route path='profile' element={<Profile setIsLoggedIn={setIsLoggedIn} />} />
             <Route path='register' element={<Register />} />
             <Route path='shop' element={<Shop />} />
             <Route path='artists' element={<ArtistsPage />} />

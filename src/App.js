@@ -22,7 +22,10 @@ function App() {
                 <ModalProvider isLoggedIn={isLoggedIn}>
                     <div className="App">
                         <Nav isLoggedIn={isLoggedIn} />
-                        <AppRouter />
+                        <AppRouter
+                            onViewArtDetails={() => {}} // (якщо у вас тут була функція)
+                            setIsLoggedIn={setIsLoggedIn}
+                        />
                         <Footer/>
                     </div>
                 </ModalProvider>

@@ -5,9 +5,9 @@ import Register from "../Register/Register";
 import ForgotPassword from "../Login/ForgotPassword/ForgotPassword";
 import styles from './Profile.module.css';
 import DigitalBrushProfile from "./UserProfile/DigitalBrushProfile";
-import url  from '../../../URL';
+// import url  from '../../../URL';
 
-function Profile() {
+function Profile({ setIsLoggedIn }) {
     const [user, setUser] = useState(null);
     const [view, setView] = useState('login');
     const [isLogin, setIsLogin] = useState(true);
@@ -67,6 +67,7 @@ function Profile() {
                     email: userData.email || '',
                     password: ''
                 });
+                if (setIsLoggedIn) setIsLoggedIn(true);
                 if (userData.profileImage) {
                     setImagePreview(userData.profileImage);
                 }
@@ -110,6 +111,7 @@ function Profile() {
             await axios.post('http://localhost:8080/logout', {}, { withCredentials: true });
             setUser(null);
             setView('login');
+            if (setIsLoggedIn) setIsLoggedIn(false);
             setFormData({ name: '', bio: '', email: '', password: '' });
         } catch (error) {
             console.error('Logout failed:', error);
