@@ -49,6 +49,12 @@ function DigitalBrushProfile({ user, onLogout }) {
         setActiveTab('chat');
     };
 
+    const formatTags = (tags) => {
+        if (!tags || tags.length === 0) return "Not specified";
+        if (Array.isArray(tags)) return tags.slice(0, 2).join('/'); // Беремо перші 2
+        return tags; // Якщо це просто рядок
+    };
+
     const handleOpenAddArt = (e) => {
         e.stopPropagation();
         setShowAddArtModal(true);
@@ -114,15 +120,18 @@ function DigitalBrushProfile({ user, onLogout }) {
                     <div className={styles.metaInfo}>
                         <div className={styles.metaRow}>
                             <img src={infoIcon} alt="Style" className={styles.socialicon} />
-                            <span>Retro/Psychedelia</span>
+                            {/* Відображаємо стилі з об'єкта user */}
+                            <span>{formatTags(user.styles)}</span>
                         </div>
                         <div className={styles.metaRow}>
                             <img src={globeIcon} alt="Country" className={styles.socialicon} />
-                            <span>En/Ukr</span>
+                            {/* Відображаємо мови з об'єкта user */}
+                            <span>{formatTags(user.languages)}</span>
                         </div>
                         <div className={styles.metaRow}>
                             <img src={heartIcon} alt="Likes" className={styles.socialicon} />
-                            <span>{totalLikes}</span>
+                            {/* Відображаємо лайки з об'єкта user */}
+                            <span>{user.likes || 0}</span>
                         </div>
                     </div>
 

@@ -27,10 +27,11 @@ router.post('/checkEmail', async (req, res) => {
     }
 });
 
-// Логін
+// Login
 router.post('/login', async (req, res) => {
     const { email, password } = req.body;
     try {
+        // Додаємо вибірку нових полів: styles, languages, likes
         const [rows] = await db.query('SELECT * FROM creators WHERE Email = ?', [email]);
         if (rows.length === 0) return res.status(401).json({ success: false, message: 'User not found' });
 
@@ -43,13 +44,30 @@ router.post('/login', async (req, res) => {
             ? `data:image/jpeg;base64,${imageData.toString('base64')}`
             : imageData || 'img/icons/profile.jpg';
 
+        // --- ЛОГІКА ПАРСИНГУ ДАНИХ ДЛЯ СЕСІЇ ---
+        let userStyles = [];
+        let userLanguages = [];
+
+        try {
+            // Якщо в базі це JSON-рядок '["Retro"]', парсимо його. Якщо null/пусто — буде []
+            if (user.styles) userStyles = (typeof user.styles === 'string') ? JSON.parse(user.styles) : user.styles;
+            if (user.languages) userLanguages = (typeof user.languages === 'string') ? JSON.parse(user.languages) : user.languages;
+        } catch (e) {
+            console.error("JSON parse error for user data:", e);
+        }
+
+        // Зберігаємо розширені дані в сесії
         req.session.user = {
             id: user.Creator_ID,
             name: user.Name,
             email: user.Email,
             bio: user.Other_Details || '',
             profileImage,
-            _imageBlob: Buffer.isBuffer(imageData) ? imageData : null
+            _imageBlob: Buffer.isBuffer(imageData) ? imageData : null,
+            // Додаємо нові поля:
+            styles: userStyles,       // Масив або рядок
+            languages: userLanguages, // Масив або рядок
+            likes: user.likes || 0    // Число
         };
 
         res.json({ success: true, message: 'Login successful', user: req.session.user });
@@ -58,6 +76,7 @@ router.post('/login', async (req, res) => {
         res.status(500).json({ success: false, message: 'Internal server error' });
     }
 });
+
 
 // Перевірка сесії
 router.get('/check-session', async (req, res) => {
