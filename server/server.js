@@ -8,8 +8,6 @@ db.getConnection()
     .then(conn => {
         console.log('✅ Database connected');
         conn.release();
-        app.listen(PORT, '172.17.3.23', () => {
-            console.log(`🚀 Server running on http://172.17.3.23:${PORT}`);
-        });
+        app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
     })
     .catch(err => console.error('❌ DB connection failed:', err));

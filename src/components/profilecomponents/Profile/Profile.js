@@ -7,7 +7,7 @@ import styles from './Profile.module.css';
 import DigitalBrushProfile from "./UserProfile/DigitalBrushProfile";
 import url  from '../../../URL';
 
-function Profile() {
+function Profile({setIsLoggedIn}) {
     const [user, setUser] = useState(null);
     const [view, setView] = useState('login');
     const [isLogin, setIsLogin] = useState(true);
@@ -61,6 +61,7 @@ function Profile() {
             if (response.data.success) {
                 const userData = response.data.user;
                 setUser(userData);
+                if (setIsLoggedIn) setIsLoggedIn(true);
                 setFormData({
                     name: userData.name || '',
                     bio: userData.bio || '',
@@ -110,6 +111,7 @@ function Profile() {
             await axios.post(`http://172.17.3.23:3000/api/auth/logout`, {}, { withCredentials: true });
             setUser(null);
             setView('login');
+            if (setIsLoggedIn) setIsLoggedIn(false);
             setFormData({ name: '', bio: '', email: '', password: '' });
         } catch (error) {
             console.error('Logout failed:', error);
