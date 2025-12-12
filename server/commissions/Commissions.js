@@ -429,27 +429,37 @@ router.get('/api/commissions/:id', async (req, res) => {
 router.patch('/api/commissions/:id/accept', async (req, res) => {
     const { id } = req.params;
     const user = req.session.user;
+
+    // Перевірка сесії
     if (!user || !user.id) {
         return res.status(401).json({ success: false, message: 'Not logged in' });
     }
 
-    const customerId = user.id; // use logged-in user ID
+    // Той, хто приймає замовлення - це Виконавець (Creator)
+    const creatorId = user.id;
 
     try {
+        // Оновлюємо Creator_ID, а не Customer_ID!
         const sql = `
             UPDATE commissions
             SET Status = 'in_progress',
-                Customer_ID = ?
-            WHERE Commission_ID = ? AND Status = 'open'
+                Creator_ID = ?
+            WHERE Commission_ID = ?
+              AND Status = 'open'
+              AND Customer_ID != ? -- (Опціонально) Заборона брати власні замовлення
         `;
 
-        const [result] = await db.query(sql, [customerId, id]);
+        // Передаємо creatorId, id комішену, і (опціонально) перевірку на власника
+        const [result] = await db.query(sql, [creatorId, id, creatorId]);
 
         if (result.affectedRows === 0) {
-            return res.status(404).json({ success: false, message: 'Commission not found or already accepted' });
+            return res.status(404).json({
+                success: false,
+                message: 'Commission not found, already accepted, or you are trying to accept your own commission'
+            });
         }
 
-        res.json({ success: true, message: `Commission ${id} accepted by customer ${customerId}` });
+        res.json({ success: true, message: `Commission ${id} accepted by artist ${creatorId}` });
     } catch (err) {
         console.error('Error accepting commission:', err);
         res.status(500).json({ success: false, message: 'Database error while accepting commission' });

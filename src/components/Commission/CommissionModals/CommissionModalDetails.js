@@ -100,23 +100,29 @@ const CommissionModalDetails = ({ commission, onClose }) => {
     const handleAccept = async () => {
         if (!commission?.id) return;
         try {
-            const userId = localStorage.getItem('userId');
-            if (!userId) {
-                alert("User not logged in");
-                return;
-            }
+            // const userId = localStorage.getItem('userId');
+            // if (!userId) {
+            //     alert("User not logged in");
+            //     return;
+            // }
             const response = await axios.patch(
                 `http://localhost:8080/api/commissions/${commission.id}/accept`,
-                { customerId: userId },
+                {}, // Тіло запиту пусте, бекенд бере ID з сесії
                 { withCredentials: true }
             );
+
             if (response.data.success) {
                 alert("Commission accepted successfully!");
                 onClose();
             }
         } catch (err) {
             console.error(err);
-            alert("Failed to accept commission");
+            // Якщо сесія прострочена, бекенд поверне 401, і ми це обробимо тут
+            if (err.response && err.response.status === 401) {
+                alert("Please log in to accept commissions.");
+            } else {
+                alert("Failed to accept commission: " + (err.response?.data?.message || err.message));
+            }
         }
     };
 
