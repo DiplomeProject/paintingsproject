@@ -33,7 +33,7 @@ export default function ArtistsPage() {
     const [artistsData, setArtistsData] = useState([]);
 
     useEffect(() => {
-        axios.get("http://localhost:8080/check-session", { withCredentials: true })
+        axios.get('/auth/check-session')
             .catch(err => console.log(err));
     }, []);
 
@@ -57,7 +57,7 @@ export default function ArtistsPage() {
     useEffect(() => {
         const fetchArtists = async () => {
             try {
-                const res = await axios.get('http://localhost:8080/getartists', { withCredentials: true });
+                const res = await axios.get('/artists/getartists');
                 const serverArtists = Array.isArray(res.data) ? res.data : (res.data.artists || []);
 
                 const mapped = serverArtists.map((a, idx) => {

@@ -116,7 +116,7 @@ const AddCommissionModal = ({ onClose, targetCreatorId = null }) => {
             formData.append("price", price);
 
             // Використовуємо ЄДИНИЙ ендпоінт
-            const apiUrl = "http://localhost:8080/api/commissions/create";
+            const apiUrl = "/commissions/create";
 
             // Додаємо creatorId тільки якщо він існує
             if (targetCreatorId) {
@@ -132,8 +132,7 @@ const AddCommissionModal = ({ onClose, targetCreatorId = null }) => {
             }
 
             const response = await axios.post(apiUrl, formData, {
-                headers: { "Content-Type": "multipart/form-data" },
-                withCredentials: true
+                headers: { "Content-Type": "multipart/form-data" }
             });
 
             if (response.data.success) {

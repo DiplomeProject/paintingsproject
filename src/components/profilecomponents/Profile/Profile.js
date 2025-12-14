@@ -5,8 +5,9 @@ import Register from "../Register/Register";
 import ForgotPassword from "../Login/ForgotPassword/ForgotPassword";
 import styles from './Profile.module.css';
 import DigitalBrushProfile from "./UserProfile/DigitalBrushProfile";
+// import url  from '../../../URL';
 
-function Profile() {
+function Profile({ setIsLoggedIn }) {
     const [user, setUser] = useState(null);
     const [view, setView] = useState('login');
     const [isLogin, setIsLogin] = useState(true);
@@ -23,7 +24,7 @@ function Profile() {
 
     // Перевірка сесії при завантаженні
     useEffect(() => {
-        axios.get('http://localhost:8080/check-session', { withCredentials: true })
+        axios.get('/auth/check-session')
             .then(response => {
                 if (response.data.loggedIn) {
                     const userData = response.data.user;
@@ -52,10 +53,10 @@ function Profile() {
     const handleLogin = async (e) => {
         e.preventDefault();
         try {
-            const response = await axios.post('http://localhost:8080/login', {
+            const response = await axios.post('/auth/login', {
                 email: formData.email,
                 password: formData.password,
-            }, { withCredentials: true });
+            });
 
             if (response.data.success) {
                 const userData = response.data.user;
@@ -66,6 +67,7 @@ function Profile() {
                     email: userData.email || '',
                     password: ''
                 });
+                if (setIsLoggedIn) setIsLoggedIn(true);
                 if (userData.profileImage) {
                     setImagePreview(userData.profileImage);
                 }
@@ -83,14 +85,14 @@ function Profile() {
             // Бекенд очікує: username, email, password, birthday
             // registerData приходить з компонента Register
             const response = await axios.post(
-                "http://localhost:8080/register",
+                "/auth/register",
                 {
                     username: registerData.name, // Мапимо name на username
                     email: registerData.email,
                     password: registerData.password,
                     birthday: null // Можна додати поле дати народження у форму Register
                 },
-                { withCredentials: true }
+                {}
             );
 
             if (response.data.success) {
@@ -106,9 +108,10 @@ function Profile() {
 
     const handleLogout = async () => {
         try {
-            await axios.post('http://localhost:8080/logout', {}, { withCredentials: true });
+            await axios.post('/auth/logout', {});
             setUser(null);
             setView('login');
+            if (setIsLoggedIn) setIsLoggedIn(false);
             setFormData({ name: '', bio: '', email: '', password: '' });
         } catch (error) {
             console.error('Logout failed:', error);

@@ -32,8 +32,7 @@ function MyImages({ user }) {
         const fetchPaintings = async () => {
             try {
                 const response = await axios.get(
-                    "http://localhost:8080/getuserpaintings",
-                    { withCredentials: true }
+                    "/profile/getuserpaintings"
                 );
                 if (response.data.success) {
                     setPaintings(response.data.paintings);

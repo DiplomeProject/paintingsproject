@@ -44,7 +44,7 @@ function filePathToDataUri(filePath) {
 // 1. СТВОРЕННЯ ПУБЛІЧНОГО КОМІШЕНУ (із збереженням зображення в base64)
 // Create a public commission (with up to 5 images)
 router.post(
-    '/api/commissions/create',
+    '/create',
     upload.fields([
         {name: 'referenceImage', maxCount: 1},
         {name: 'image2', maxCount: 1},
@@ -154,7 +154,7 @@ router.post(
 
 
 // Updated GET route for Commissions.js backend
-router.get('/api/commissions/public', async (req, res) => {
+router.get('/public', async (req, res) => {
     const sql = `
         SELECT c.*,
                cr.Name  AS customer_name,
@@ -240,8 +240,69 @@ router.get('/api/commissions/public', async (req, res) => {
     }
 });
 
+router.get('/my', async (req, res) => {
+    // 1. Перевірка авторизації
+    if (!req.session.user) {
+        return res.status(401).json({ success: false, message: 'Unauthorized' });
+    }
+
+    const userId = req.session.user.id;
+
+    // 2. SQL: вибираємо комісії, де юзер є замовником АБО виконавцем
+    const sql = `
+        SELECT c.*,
+               cust.Name as CustomerName,
+               creat.Name as CreatorName
+        FROM commissions c
+        LEFT JOIN creators cust ON c.Customer_ID = cust.Creator_ID
+        LEFT JOIN creators creat ON c.Creator_ID = creat.Creator_ID
+        WHERE c.Customer_ID = ? OR c.Creator_ID = ?
+        ORDER BY c.Created_At DESC
+    `;
+
+    try {
+        const [results] = await db.query(sql, [userId, userId]);
+
+        // 3. Нормалізація зображень (використовуємо ту ж логіку, що і в public route)
+        const myCommissions = results.map((commission) => {
+            let imageUrl = null;
+            const ref = commission.ReferenceImage;
+
+            if (ref) {
+                let refAsString = null;
+                if (Buffer.isBuffer(ref)) {
+                    refAsString = ref.toString('utf8');
+                } else if (typeof ref === 'string') {
+                    refAsString = ref;
+                }
+
+                if (refAsString) {
+                    const trimmed = refAsString.trim();
+                    if (trimmed.startsWith('data:image')) {
+                        imageUrl = trimmed;
+                    } else {
+                        // Використовуємо допоміжну функцію filePathToDataUri, яка є у вашому файлі
+                        imageUrl = filePathToDataUri(trimmed);
+                    }
+                }
+            }
+
+            return {
+                ...commission,
+                ReferenceImage: imageUrl // Оновлюємо поле для фронтенду
+            };
+        });
+
+        res.json({ success: true, commissions: myCommissions });
+
+    } catch (err) {
+        console.error('Error fetching user commissions:', err);
+        res.status(500).json({ success: false, message: 'Database error' });
+    }
+});
+
 // Get full details (including all images) - normalized same as public GET
-router.get('/api/commissions/:id', async (req, res) => {
+router.get('/:id', async (req, res) => {
     const {id} = req.params;
 
     const sql = `
@@ -332,7 +393,7 @@ router.get('/api/commissions/:id', async (req, res) => {
 
         const images = [image1, image2, image3, image4, image5].filter(Boolean);
 
-        console.log(`[GET /api/commissions/${id}] images normalized: ${images.length}`);
+        console.log(`[GET /${id}] images normalized: ${images.length}`);
 
         res.json({
             success: true,
@@ -345,6 +406,9 @@ router.get('/api/commissions/:id', async (req, res) => {
                 size: commission.Size,
                 format: commission.Format,
                 price: commission.Price,
+                Customer_ID: commission.Customer_ID,
+                Creator_ID: commission.Creator_ID,
+                status: commission.Status,
                 images,   // array of normalized image sources (data: URIs or URLs)
                 image1,   // individual normalized fields (may be null)
                 image2,
@@ -362,30 +426,40 @@ router.get('/api/commissions/:id', async (req, res) => {
 
 
 // PATCH endpoint to accept a commission
-router.patch('/api/commissions/:id/accept', async (req, res) => {
+router.patch('/:id/accept', async (req, res) => {
     const { id } = req.params;
     const user = req.session.user;
+
+    // Перевірка сесії
     if (!user || !user.id) {
         return res.status(401).json({ success: false, message: 'Not logged in' });
     }
 
-    const customerId = user.id; // use logged-in user ID
+    // Той, хто приймає замовлення - це Виконавець (Creator)
+    const creatorId = user.id;
 
     try {
+        // Оновлюємо Creator_ID, а не Customer_ID!
         const sql = `
             UPDATE commissions
             SET Status = 'in_progress',
-                Customer_ID = ?
-            WHERE Commission_ID = ? AND Status = 'open'
+                Creator_ID = ?
+            WHERE Commission_ID = ?
+              AND Status = 'open'
+              AND Customer_ID != ? -- (Опціонально) Заборона брати власні замовлення
         `;
 
-        const [result] = await db.query(sql, [customerId, id]);
+        // Передаємо creatorId, id комішену, і (опціонально) перевірку на власника
+        const [result] = await db.query(sql, [creatorId, id, creatorId]);
 
         if (result.affectedRows === 0) {
-            return res.status(404).json({ success: false, message: 'Commission not found or already accepted' });
+            return res.status(404).json({
+                success: false,
+                message: 'Commission not found, already accepted, or you are trying to accept your own commission'
+            });
         }
 
-        res.json({ success: true, message: `Commission ${id} accepted by customer ${customerId}` });
+        res.json({ success: true, message: `Commission ${id} accepted by artist ${creatorId}` });
     } catch (err) {
         console.error('Error accepting commission:', err);
         res.status(500).json({ success: false, message: 'Database error while accepting commission' });

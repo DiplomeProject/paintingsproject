@@ -53,7 +53,7 @@ const Shop = () => {
 
     // check session
     useEffect(() => {
-        axios.get("http://localhost:8080/check-session", { withCredentials: true })
+        axios.get('/auth/check-session')
             .then(res => setIsLoggedIn(!!res.data?.loggedIn))
             .catch(() => setIsLoggedIn(false));
     }, []);
@@ -62,7 +62,7 @@ const Shop = () => {
     useEffect(() => {
     let mounted = true;
         setLoading(true);
-    axios.get("http://localhost:8080/api/paintings", { withCredentials: true })
+    axios.get('/paintings')
         .then(res => {
             const payload = res.data;
             const list = Array.isArray(payload) ? payload : (payload.paintings || []);
@@ -106,7 +106,7 @@ const Shop = () => {
 
 
     useEffect(() => {
-        axios.get("http://localhost:8080/check-session", { withCredentials: true })
+        axios.get('/auth/check-session')
             .then(res => {
                 console.log('Session check (Shop):', res.data.loggedIn);
                 setIsLoggedIn(res.data.loggedIn);

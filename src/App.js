@@ -11,7 +11,7 @@ function App() {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
 
     useEffect(() => {
-        axios.get("http://localhost:8080/check-session", { withCredentials: true })
+        axios.get('/auth/check-session')
             .then(res => setIsLoggedIn(res.data.loggedIn))
             .catch(() => setIsLoggedIn(false));
     }, []);
@@ -22,7 +22,10 @@ function App() {
                 <ModalProvider isLoggedIn={isLoggedIn}>
                     <div className="App">
                         <Nav isLoggedIn={isLoggedIn} />
-                        <AppRouter />
+                        <AppRouter
+                            onViewArtDetails={() => {}} // (якщо у вас тут була функція)
+                            setIsLoggedIn={setIsLoggedIn}
+                        />
                         <Footer/>
                     </div>
                 </ModalProvider>

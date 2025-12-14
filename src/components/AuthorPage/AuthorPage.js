@@ -40,7 +40,7 @@ const AuthorPage = () => {
     useEffect(() => {
         const fetchArtist = async () => {
             try {
-                const res = await axios.get(`http://localhost:8080/artist/${id}`);
+                const res = await axios.get(`/artists/artist/${id}`);
                 setArtist(res.data);
             } catch (error) {
                 console.error("Error loading artist:", error);

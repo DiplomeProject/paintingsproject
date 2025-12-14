@@ -3,6 +3,12 @@ import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
+import axios from 'axios';
+
+// Configure global axios defaults
+const API_BASE = process.env.REACT_APP_API_BASE || 'http://localhost:8080/api';
+axios.defaults.baseURL = API_BASE;
+axios.defaults.withCredentials = true;
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(

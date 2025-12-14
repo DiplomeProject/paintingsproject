@@ -12,7 +12,7 @@ const router = express.Router();
 /* =====================================================
    GET ALL PAINTINGS (main only)
 ===================================================== */
-router.get('/api/paintings', async (req, res) => {
+router.get('', async (req, res) => {
   try {
       const [rows] = await db.query(`
           SELECT p.Painting_ID, p.Title, p.Image, p.Description, p.Price, p.Style,
@@ -105,7 +105,7 @@ router.post("/upload", auth, uploadMemory.any(), async (req, res) => {
 /* =====================================================
    GET PAINTING + ALL IMAGES IN SAME BATCH
 ===================================================== */
-router.get('/api/paintings/:id', async (req, res) => {
+router.get('/:id', async (req, res) => {
   const paintingId = req.params.id;
 
   try {
@@ -165,7 +165,7 @@ router.get('/api/paintings/:id', async (req, res) => {
 /* =====================================================
    DELETE PAINTING (also deletes batch and all images)
 ===================================================== */
-router.delete('/paintings/:id', auth, async (req, res) => {
+router.delete('/delete/:id', auth, async (req, res) => {
     const paintingId = req.params.id;
     const userId = req.session.user.id;
 
