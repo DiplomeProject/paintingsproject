@@ -9,16 +9,44 @@ const uploadMemory = multer({ storage: multer.memoryStorage() });
 
 const router = express.Router();
 
+// Ensure auxiliary table for per-user likes exists (idempotent)
+let LIKES_TABLE_READY = false;
+async function ensureLikesTable() {
+  if (LIKES_TABLE_READY) return;
+  try {
+    await db.query(`
+      CREATE TABLE IF NOT EXISTS painting_likes (
+        Painting_ID BIGINT NOT NULL,
+        User_ID BIGINT NOT NULL,
+        Created_At DATETIME DEFAULT CURRENT_TIMESTAMP,
+        CONSTRAINT uq_painting_user UNIQUE (Painting_ID, User_ID),
+        INDEX idx_user (User_ID),
+        INDEX idx_painting (Painting_ID)
+      ) ENGINE=InnoDB;
+    `);
+    LIKES_TABLE_READY = true;
+  } catch (e) {
+    console.error('Failed to ensure painting_likes table:', e);
+  }
+}
+
 /* =====================================================
    GET ALL PAINTINGS (main only)
 ===================================================== */
 router.get('', async (req, res) => {
   try {
       const [rows] = await db.query(`
-          SELECT p.Painting_ID, p.Title, p.Image, p.Description, p.Price, p.Style,
-                 p.Creator_ID, c.Name AS author_name
+          SELECT p.Painting_ID,
+                 p.Title,
+                 p.Image,
+                 p.Description,
+                 p.Price,
+                 p.Style,
+                 p.Likes,
+                 p.Creator_ID,
+                 c.Name AS author_name
           FROM paintings p
-                   JOIN creators c ON p.Creator_ID = c.Creator_ID
+          JOIN creators c ON p.Creator_ID = c.Creator_ID
       `);
 
     const paintings = rows.map(row => {
@@ -35,6 +63,8 @@ router.get('', async (req, res) => {
             price: row.Price,
             Style: row.Style,
             style: row.Style,
+            Likes: row.Likes ?? null,
+            likes: row.Likes ?? 0,
             author_name: row.author_name,
             Creator_ID: row.Creator_ID,
             image, // data URI or null
@@ -163,6 +193,23 @@ router.get('/:id', async (req, res) => {
       const size = painting.Size || painting.size || (width && height ? `${width}x${height}` : null);
       const creationDate = painting.Creation_Date || painting.creation_date || painting.created_at || null;
 
+      // liked by current user?
+      let likedByCurrentUser = false;
+      try {
+          const userId = req.session?.user?.Creator_ID || req.session?.user?.id || null;
+          if (userId) {
+              await ensureLikesTable();
+              const [likeRows] = await db.query(
+                  'SELECT 1 FROM painting_likes WHERE Painting_ID = ? AND User_ID = ? LIMIT 1',
+                  [paintingId, userId]
+              );
+              likedByCurrentUser = likeRows.length > 0;
+          }
+      } catch (e) {
+          // non-fatal
+          likedByCurrentUser = false;
+      }
+
       res.json({
           success: true,
           painting: {
@@ -175,6 +222,8 @@ router.get('/:id', async (req, res) => {
               creator_id: painting.Creator_ID, // backward compatibility
               price: painting.Price,
               style: painting.Style,
+              likes: painting.Likes || painting.likes || 0,
+              likedByCurrentUser,
               category,
               format,
               size,
@@ -190,6 +239,67 @@ router.get('/:id', async (req, res) => {
   } catch (err) {
     console.error('Error fetching painting:', err);
     res.status(500).json({ success: false, message: 'Error fetching painting' });
+  }
+});
+
+/* =====================================================
+   LIKE / UNLIKE A PAINTING (toggle per user)
+===================================================== */
+router.post('/:id/like', auth, async (req, res) => {
+  const paintingId = parseInt(req.params.id, 10);
+  const userId = req.session?.user?.Creator_ID || req.session?.user?.id;
+
+  if (!Number.isFinite(paintingId)) {
+    return res.status(400).json({ success: false, message: 'Invalid painting id' });
+  }
+  if (!userId) {
+    return res.status(401).json({ success: false, message: 'Unauthorized' });
+  }
+
+  try {
+    // Ensure dependencies
+    await ensureLikesTable();
+
+    // Check painting exists
+    const [existsRows] = await db.query('SELECT Painting_ID FROM paintings WHERE Painting_ID = ?', [paintingId]);
+    if (existsRows.length === 0) {
+      return res.status(404).json({ success: false, message: 'Painting not found' });
+    }
+
+    // Is currently liked by this user?
+    const [likeRows] = await db.query(
+      'SELECT 1 FROM painting_likes WHERE Painting_ID = ? AND User_ID = ? LIMIT 1',
+      [paintingId, userId]
+    );
+
+    let liked;
+    if (likeRows.length > 0) {
+      // Unlike: remove link and decrement counter (not below 0)
+      await db.query('DELETE FROM painting_likes WHERE Painting_ID = ? AND User_ID = ?', [paintingId, userId]);
+      await db.query('UPDATE paintings SET Likes = CASE WHEN Likes > 0 THEN Likes - 1 ELSE 0 END WHERE Painting_ID = ?', [paintingId]);
+      liked = false;
+    } else {
+      // Like: add link and increment counter
+      try {
+        await db.query('INSERT INTO painting_likes (Painting_ID, User_ID) VALUES (?, ?)', [paintingId, userId]);
+        await db.query('UPDATE paintings SET Likes = COALESCE(Likes, 0) + 1 WHERE Painting_ID = ?', [paintingId]);
+        liked = true;
+      } catch (e) {
+        // In case of race/duplicate, ensure consistency
+        if (e && e.code === 'ER_DUP_ENTRY') {
+          liked = true;
+        } else {
+          throw e;
+        }
+      }
+    }
+
+    // Return fresh counter
+    const [[{ Likes } = { Likes: 0 }]] = await db.query('SELECT COALESCE(Likes, 0) AS Likes FROM paintings WHERE Painting_ID = ?', [paintingId]);
+    return res.json({ success: true, liked, likes: Likes });
+  } catch (err) {
+    console.error('Error toggling like:', err);
+    return res.status(500).json({ success: false, message: 'Error toggling like' });
   }
 });
 

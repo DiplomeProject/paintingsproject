@@ -42,6 +42,9 @@ export const ModalProvider = ({ children, isLoggedIn }) => {
                         description: p.description,
                         price: p.price,
                         style: p.style,
+                        // Лайки та стан лайку користувача
+                        likes: p.likes ?? p.Likes ?? prev?.likes ?? 0,
+                        likedByCurrentUser: !!p.likedByCurrentUser,
                         // Нові поля з БД
                         category: p.category ?? prev?.category,
                         fileFormat: p.format ?? prev?.fileFormat,

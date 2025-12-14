@@ -72,7 +72,7 @@ export default function ArtistsPage() {
                             artistName: name,
                             artistStyle: p.style || a.Style || a.style || '',
                             likes: p.likes || 0,
-                            price: p.price || '',
+                            price: p.Price || p.price || '',
                             artistId: currentArtistId
                         }))
                         : [];
