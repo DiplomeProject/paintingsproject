@@ -99,7 +99,7 @@ const [totalPages, setTotalPages] = useState(0);
 const [isLoggedIn, setIsLoggedIn] = useState(false);
 
     useEffect(() => {
-        axios.get("http://localhost:8080/check-session", { withCredentials: true })
+        axios.get('/auth/check-session')
             .then(res => {
                 setIsLoggedIn(res.data.loggedIn);
             })
@@ -112,12 +112,11 @@ const [isLoggedIn, setIsLoggedIn] = useState(false);
         const fetchCommissions = async () => {
             setLoading(true);
             try {
-                const response = await axios.get("http://localhost:8080/api/commissions/public", {
+                const response = await axios.get('/commissions/public', {
                     params: {
                         page: currentPage + 1,
                         limit: itemsPerPage
-                    },
-                    withCredentials: true
+                    }
                 });
 
                 if (response.data.success && Array.isArray(response.data.commissions)) {

@@ -24,7 +24,7 @@ function Profile({ setIsLoggedIn }) {
 
     // Перевірка сесії при завантаженні
     useEffect(() => {
-        axios.get('http://localhost:8080/check-session', { withCredentials: true })
+        axios.get('/auth/check-session')
             .then(response => {
                 if (response.data.loggedIn) {
                     const userData = response.data.user;
@@ -53,10 +53,10 @@ function Profile({ setIsLoggedIn }) {
     const handleLogin = async (e) => {
         e.preventDefault();
         try {
-            const response = await axios.post('http://localhost:8080/login', {
+            const response = await axios.post('/auth/login', {
                 email: formData.email,
                 password: formData.password,
-            }, { withCredentials: true });
+            });
 
             if (response.data.success) {
                 const userData = response.data.user;
@@ -85,14 +85,14 @@ function Profile({ setIsLoggedIn }) {
             // Бекенд очікує: username, email, password, birthday
             // registerData приходить з компонента Register
             const response = await axios.post(
-                "http://localhost:8080/register",
+                "/auth/register",
                 {
                     username: registerData.name, // Мапимо name на username
                     email: registerData.email,
                     password: registerData.password,
                     birthday: null // Можна додати поле дати народження у форму Register
                 },
-                { withCredentials: true }
+                {}
             );
 
             if (response.data.success) {
@@ -108,7 +108,7 @@ function Profile({ setIsLoggedIn }) {
 
     const handleLogout = async () => {
         try {
-            await axios.post('http://localhost:8080/logout', {}, { withCredentials: true });
+            await axios.post('/auth/logout', {});
             setUser(null);
             setView('login');
             if (setIsLoggedIn) setIsLoggedIn(false);

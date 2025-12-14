@@ -122,8 +122,7 @@ const AddArtModal = ({
     const fetchPainting = async () => {
       try {
         const res = await axios.get(
-          `http://localhost:8080/api/paintings/${existingPaintingId}`,
-          { withCredentials: true }
+          `/paintings/${existingPaintingId}`
         );
 
         if (res.data.success) {
@@ -212,6 +211,11 @@ const AddArtModal = ({
     setSubmitting(true);
 
     try {
+      if (existingPaintingId) {
+        alert('Оновлення картини наразі не підтримується API. Будь ласка, створіть нову картину.');
+        setSubmitting(false);
+        return;
+      }
       const formData = new FormData();
 
       formData.append("title", name);
@@ -233,13 +237,10 @@ const AddArtModal = ({
         }
       });
 
-      const endpoint = existingPaintingId
-        ? `http://localhost:8080/api/paintings/${existingPaintingId}`
-        : "http://localhost:8080/upload";
+      const endpoint = '/paintings/upload';
 
       const res = await axios.post(endpoint, formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-        withCredentials: true
+        headers: { "Content-Type": "multipart/form-data" }
       });
 
       if (res.data.success) {

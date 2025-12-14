@@ -30,7 +30,7 @@ const CommissionModalDetails = ({ commission, onClose }) => {
             setMainImage(initialMain);
             setPreviewImages([]); // Очищуємо прев'ю перед запитом
 
-            axios.get(`http://localhost:8080/api/commissions/${commission.id}`, { withCredentials: true })
+            axios.get(`/commissions/${commission.id}`)
                 .then(response => {
                     if (response.data.success && response.data.commission && response.data.commission.images) {
 
@@ -106,9 +106,8 @@ const CommissionModalDetails = ({ commission, onClose }) => {
             //     return;
             // }
             const response = await axios.patch(
-                `http://localhost:8080/api/commissions/${commission.id}/accept`,
-                {}, // Тіло запиту пусте, бекенд бере ID з сесії
-                { withCredentials: true }
+                `/commissions/${commission.id}/accept`,
+                {}
             );
 
             if (response.data.success) {

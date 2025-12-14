@@ -11,7 +11,7 @@ function App() {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
 
     useEffect(() => {
-        axios.get("http://localhost:8080/check-session", { withCredentials: true })
+        axios.get('/auth/check-session')
             .then(res => setIsLoggedIn(res.data.loggedIn))
             .catch(() => setIsLoggedIn(false));
     }, []);

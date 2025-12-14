@@ -20,7 +20,7 @@ const corsOptions = {
         'http://localhost:8080'
     ],
     credentials: true,
-    methods: ['GET','POST','PUT','DELETE','OPTIONS'],
+    methods: ['GET','POST','PUT','DELETE','OPTIONS','PATCH'],
     allowedHeaders: ['Origin','X-Requested-With','Content-Type','Accept','Authorization']
 };
 

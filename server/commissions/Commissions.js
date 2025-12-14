@@ -44,7 +44,7 @@ function filePathToDataUri(filePath) {
 // 1. СТВОРЕННЯ ПУБЛІЧНОГО КОМІШЕНУ (із збереженням зображення в base64)
 // Create a public commission (with up to 5 images)
 router.post(
-    '/api/commissions/create',
+    '/create',
     upload.fields([
         {name: 'referenceImage', maxCount: 1},
         {name: 'image2', maxCount: 1},
@@ -154,7 +154,7 @@ router.post(
 
 
 // Updated GET route for Commissions.js backend
-router.get('/api/commissions/public', async (req, res) => {
+router.get('/public', async (req, res) => {
     const sql = `
         SELECT c.*,
                cr.Name  AS customer_name,
@@ -240,7 +240,7 @@ router.get('/api/commissions/public', async (req, res) => {
     }
 });
 
-router.get('/api/commissions/my', async (req, res) => {
+router.get('/my', async (req, res) => {
     // 1. Перевірка авторизації
     if (!req.session.user) {
         return res.status(401).json({ success: false, message: 'Unauthorized' });
@@ -302,7 +302,7 @@ router.get('/api/commissions/my', async (req, res) => {
 });
 
 // Get full details (including all images) - normalized same as public GET
-router.get('/api/commissions/:id', async (req, res) => {
+router.get('/:id', async (req, res) => {
     const {id} = req.params;
 
     const sql = `
@@ -393,7 +393,7 @@ router.get('/api/commissions/:id', async (req, res) => {
 
         const images = [image1, image2, image3, image4, image5].filter(Boolean);
 
-        console.log(`[GET /api/commissions/${id}] images normalized: ${images.length}`);
+        console.log(`[GET /${id}] images normalized: ${images.length}`);
 
         res.json({
             success: true,
@@ -426,7 +426,7 @@ router.get('/api/commissions/:id', async (req, res) => {
 
 
 // PATCH endpoint to accept a commission
-router.patch('/api/commissions/:id/accept', async (req, res) => {
+router.patch('/:id/accept', async (req, res) => {
     const { id } = req.params;
     const user = req.session.user;
 

@@ -17,7 +17,7 @@ function GalleryArtist({ user }) {
     useEffect(() => {
         const loadPaintings = async () => {
             try {
-                const response = await axios.get('http://localhost:8080/loadPaintAuthor', { withCredentials: true });
+                const response = await axios.get('/profile/getuserpaintings');
                 setPaintings(response.data);
             } catch (error) {
                 console.error('Error loading the paintings:', error);
@@ -59,32 +59,8 @@ function GalleryArtist({ user }) {
 
     const handleUpdatePainting = async (e) => {
         e.preventDefault();
-        if (!selectedPainting) return;
-
-        try {
-            const formDataToSend = new FormData();
-            formDataToSend.append('title', formData.title);
-            formDataToSend.append('description', formData.description);
-            if (formData.image) formDataToSend.append('image', formData.image);
-
-            const response = await axios.put(
-                `http://localhost:8080/paintings/${selectedPainting.Painting_ID}`,
-                formDataToSend,
-                { withCredentials: true }
-            );
-
-            setPaintings((prev) =>
-                prev.map((painting) =>
-                    painting.Painting_ID === selectedPainting.Painting_ID ? response.data : painting
-                )
-            );
-
-            setShowModal(false);
-            alert('Картина успішно оновлена');
-        } catch (error) {
-            console.error('Error updating:', error);
-            alert('Помилка при оновленні');
-        }
+        alert('Оновлення картини наразі не підтримується API. Будь ласка, видаліть і додайте заново.');
+        return;
     };
 
 const handleAddNewPainting = async (e) => {
@@ -96,8 +72,7 @@ const handleAddNewPainting = async (e) => {
     if (formData.image) formDataToSend.append('image', formData.image);
 
     console.log('Sending upload request with:', formDataToSend);
-    const response = await axios.post('http://localhost:8080/upload', formDataToSend, {
-      withCredentials: true,
+    const response = await axios.post('/paintings/upload', formDataToSend, {
       headers: { 'Content-Type': 'multipart/form-data' },
     });
     console.log('Upload response:', response);
@@ -114,7 +89,7 @@ const handleAddNewPainting = async (e) => {
     const handleDeletePainting = async (paintingId) => {
         if (!window.confirm('Видалити цю картину?')) return;
         try {
-            await axios.delete(`http://localhost:8080/paintings/${paintingId}`, { withCredentials: true });
+            await axios.delete(`/paintings/delete/${paintingId}`);
             setPaintings(paintings.filter((p) => p.Painting_ID !== paintingId));
             alert('Картина видалена');
         } catch (error) {
