@@ -84,11 +84,58 @@ const AuthorPage = () => {
     if (!artist) return <div className={styles.loading}>Artist not found</div>;
 
     const artistName = artist.Name || artist.name;
-    const artistImage = artist.imageBase64 || artist.image || '/images/profileImg.jpg';
-    const artistStyle = artist.Style || artist.style || 'Retro/Psychedelia';
-    const artistCountry = artist.Country || 'En/Ukr';
-    const artistBio = artist.Bio || artist.Description || "I create visual solutions that not only look good, but also work - helping businesses stand out and users enjoy the interaction.";
-    const totalLikes = artist.likesCount || artist.paintings?.reduce((sum, p) => sum + (parseFloat(p.likes) || 0), 0) || "52.5k";
+    const artistImage = artist.imageBase64 || artist.avatar || artist.image || '/images/profileImg.jpg';
+
+    // Resolve styles from DB: creators.styles may be JSON string or array; fallback to single Style or from artworks
+    const resolveStyles = (a) => {
+        let raw = a.styles !== undefined ? a.styles : (a.Styles !== undefined ? a.Styles : undefined);
+        if (Array.isArray(raw)) return raw.filter(Boolean).map(s => String(s));
+        if (typeof raw === 'string' && raw.trim()) {
+            try {
+                const parsed = JSON.parse(raw);
+                if (Array.isArray(parsed)) return parsed.filter(Boolean).map(s => String(s));
+            } catch (e) {
+                const split = raw.split(/[;,/|]+/).map(s => s.trim()).filter(Boolean);
+                if (split.length) return split;
+            }
+        }
+        const single = a.Style || a.style;
+        if (single) return [String(single)];
+        if (Array.isArray(a.paintings)) {
+            const set = new Set();
+            a.paintings.forEach(p => {
+                const ps = p.Style || p.style;
+                if (ps) set.add(String(ps));
+            });
+            if (set.size) return Array.from(set);
+        }
+        return [];
+    };
+
+    // Languages from creators table: may be array or JSON string; no longer using Country
+    const resolveLanguages = (a) => {
+        let raw = a.languages !== undefined ? a.languages : (a.Languages !== undefined ? a.Languages : undefined);
+        if (Array.isArray(raw)) return raw.filter(Boolean).map(s => String(s));
+        if (typeof raw === 'string' && raw.trim()) {
+            try {
+                const parsed = JSON.parse(raw);
+                if (Array.isArray(parsed)) return parsed.filter(Boolean).map(s => String(s));
+            } catch (e) {
+                const split = raw.split(/[;,/|]+/).map(s => s.trim()).filter(Boolean);
+                if (split.length) return split;
+            }
+        }
+        return [];
+    };
+
+    const stylesArr = resolveStyles(artist);
+    const artistStyle = stylesArr.length ? stylesArr.join(' / ') : 'No style provided yet.';
+
+    const languagesArr = resolveLanguages(artist);
+    const artistLanguages = languagesArr.length ? languagesArr.join(' / ') : 'No languages provided yet.';
+    const artistBio = artist.bio || artist.Bio || artist.Other_Details || artist.Description || "No bio provided yet.";
+    const likesFromPaintings = Array.isArray(artist.paintings) ? artist.paintings.reduce((sum, p) => sum + (Number(p.likes) || 0), 0) : 0;
+    const totalLikes = Number(artist.likesCount || artist.likes || artist.Likes || likesFromPaintings) || 0;
 
     return (
         <div className={styles.pageContainer}>
@@ -113,12 +160,12 @@ const AuthorPage = () => {
                             <span>{artistStyle}</span>
                         </div>
                         <div className={styles.metaRow}>
-                            <img src={globeIcon} alt="Country"/>
-                            <span>{artistCountry}</span>
+                            <img src={globeIcon} alt="Languages"/>
+                            <span>{artistLanguages}</span>
                         </div>
                         <div className={styles.metaRow}>
                             <img src={heartIcon} alt="Likes"/>
-                            <span>{typeof totalLikes === 'number' && totalLikes > 1000 ? (totalLikes/1000).toFixed(1) + 'k' : totalLikes}</span>
+                            <span>{totalLikes > 1000 ? (totalLikes/1000).toFixed(1) + 'k' : totalLikes}</span>
                         </div>
                     </div>
 

@@ -38,11 +38,18 @@ export const ModalProvider = ({ children, isLoggedIn }) => {
                         images: allImages.length > 0 ? allImages : [basicArtData.imageUrl],
                         title: p.title,
                         artistName: p.author_name,
-                        artistId: p.Creator_ID || p.creator_id,
+                        artistId: p.artistId || p.Creator_ID || p.creator_id,
                         description: p.description,
                         price: p.price,
                         style: p.style,
-                        // Додайте інші поля, які приходять з API
+                        // Нові поля з БД
+                        category: p.category ?? prev?.category,
+                        fileFormat: p.format ?? prev?.fileFormat,
+                        size: p.size || ((p.width && p.height) ? `${p.width}x${p.height}` : prev?.size),
+                        width: p.width ?? prev?.width,
+                        height: p.height ?? prev?.height,
+                        creationDate: p.creationDate ?? p.Creation_Date ?? prev?.creationDate,
+                        authorAvatar: p.author_avatar ?? prev?.authorAvatar
                     }));
                 }
             } catch (err) {

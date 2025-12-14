@@ -111,7 +111,7 @@ router.get('/:id', async (req, res) => {
   try {
     // 1️⃣ Get the main painting with author info
     const [paintingRows] = await db.query(
-      `SELECT p.*, c.Name AS author_name
+      `SELECT p.*, c.Name AS author_name, c.Image AS author_image
        FROM paintings p
        JOIN creators c ON p.Creator_ID = c.Creator_ID
        WHERE p.Painting_ID = ?`,
@@ -139,6 +139,30 @@ router.get('/:id', async (req, res) => {
       img.Image ? `data:image/jpeg;base64,${Buffer.from(img.Image).toString('base64')}` : null
     );
 
+      // Normalize author avatar (if available)
+      let authorAvatar = null;
+      try {
+          if (painting.author_image) {
+              if (Buffer.isBuffer(painting.author_image)) {
+                  authorAvatar = `data:image/jpeg;base64,${Buffer.from(painting.author_image).toString('base64')}`;
+              } else if (typeof painting.author_image === 'string') {
+                  authorAvatar = painting.author_image.startsWith('data:')
+                      ? painting.author_image
+                      : painting.author_image; // could be a path/URL handled by frontend if needed
+              }
+          }
+      } catch (e) {
+          authorAvatar = null;
+      }
+
+      // Map additional descriptive fields if present in DB
+      const category = painting.Category || painting.category || null;
+      const format = painting.Format || painting.format || null;
+      const width = painting.Width || painting.width || null;
+      const height = painting.Height || painting.height || null;
+      const size = painting.Size || painting.size || (width && height ? `${width}x${height}` : null);
+      const creationDate = painting.Creation_Date || painting.creation_date || painting.created_at || null;
+
       res.json({
           success: true,
           painting: {
@@ -146,10 +170,17 @@ router.get('/:id', async (req, res) => {
               title: painting.Title,
               description: painting.Description,
               author_name: painting.author_name,
+              author_avatar: authorAvatar,
               artistId: painting.Creator_ID,
-              creator_id: painting.Creator_ID,
+              creator_id: painting.Creator_ID, // backward compatibility
               price: painting.Price,
               style: painting.Style,
+              category,
+              format,
+              size,
+              width,
+              height,
+              creationDate,
               mainImage,
               gallery,
               batchId: painting.Batch_ID
