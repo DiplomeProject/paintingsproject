@@ -132,10 +132,9 @@ function ProfileSettings({user}) {
 
         try {
             const response = await axios.post(
-                'http://localhost:8080/update-profile',
+                '/profile/update-profile',
                 dataToSend,
                 {
-                    withCredentials: true,
                     headers: {"Content-Type": "multipart/form-data"}
                 }
             );

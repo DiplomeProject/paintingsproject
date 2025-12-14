@@ -1,7 +1,7 @@
 import React, {useState} from "react";
 import styles from "./Register.module.css";
 import {EyeIcon, EyeSlashIcon} from "./AuthIcons";
-import url  from '../../../URL';
+import axios from 'axios';
 
 function Register({toggleForm}) {
     const [showPassword, setShowPassword] = useState(false);
@@ -63,18 +63,11 @@ function Register({toggleForm}) {
                 return;
             }
 
-            const response = await fetch(`${url}/api/auth/register`, {
-                method: "POST",
-                headers: {"Content-Type": "application/json"},
-                credentials: "include",
-                body: JSON.stringify(formData),
-            });
+            const { data } = await axios.post('/auth/register', formData);
 
-            const data = await response.json();
-
-            if (!response.ok) {
+            if (!data?.success) {
                 console.error("Registration error:", data);
-                alert(data.error || data.message || "Помилка реєстрації");
+                alert(data?.error || data?.message || "Помилка реєстрації");
             } else {
                 alert("Реєстрація успішна! Тепер ви можете увійти.");
                 toggleForm();

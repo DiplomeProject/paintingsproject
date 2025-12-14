@@ -20,7 +20,7 @@ const CommissionChat = ({ commissionId, user, onBack }) => {
     ]);
 
     useEffect(() => {
-        axios.get(`http://localhost:8080/api/commissions/${commissionId}`, { withCredentials: true })
+        axios.get(`/commissions/${commissionId}`)
             .then(res => {
                 if (res.data.success) {
                     setCommission(res.data.commission);

@@ -89,7 +89,7 @@ function MyCommission({ user, onOpenChat}) {
         if (!currentUserId) return;
 
         setIsLoading(true);
-        axios.get('http://localhost:8080/api/commissions/my', { withCredentials: true })
+        axios.get('/commissions/my')
             .then(response => {
                 if (response.data.success) {
                     setCommissions(response.data.commissions);
