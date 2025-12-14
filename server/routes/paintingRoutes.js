@@ -78,11 +78,19 @@ router.get('', async (req, res) => {
   }
 });
 
-/* =====================================================
-   UPLOAD IMAGES (up to 10) — uses Batch_ID
-===================================================== */
 router.post("/upload", auth, uploadMemory.any(), async (req, res) => {
-    const { title, description } = req.body;
+    // 1. ОТРИМУЄМО ВСІ ПОЛЯ, ЯКІ НАДСИЛАЄ ФРОНТЕНД
+    const {
+        title,
+        description,
+        category,
+        style,
+        format,
+        price,
+        width,
+        height
+    } = req.body;
+
     const Author = req.session.user?.name || null;
     const Creator_ID = req.session.user?.id || null;
 
@@ -104,11 +112,26 @@ router.post("/upload", auth, uploadMemory.any(), async (req, res) => {
         /* 2️⃣ First image becomes main painting */
         const mainImage = images[0].buffer;
 
+        // 2. ДОДАЄМО НОВІ ПОЛЯ В SQL ЗАПИТ
+        // Зверніть увагу: ми додали Category, Style, Format, Size, Width, Height, Price
         const [paintingResult] = await db.query(
-            `INSERT INTO paintings 
-                (Title, Description, Author, Creation_Date, Image, Creator_ID, Batch_ID)
-             VALUES (?, ?, ?, NOW(), ?, ?, ?)`,
-            [title, description, Author, mainImage, Creator_ID, Batch_ID]
+            `INSERT INTO paintings
+             (Title, Description, Category, Style, Format, Width, Height, Price, Author, Creation_Date, Image, Creator_ID, Batch_ID)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?, ?, ?)`,
+            [
+                title,
+                description,
+                category || null,
+                style || null,
+                format || null,
+                width || null,
+                height || null,
+                price || 0,
+                Author,
+                mainImage,
+                Creator_ID,
+                Batch_ID
+            ]
         );
 
         /* 3️⃣ Additional images go to painting_images */
