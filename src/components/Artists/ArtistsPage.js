@@ -72,17 +72,55 @@ export default function ArtistsPage() {
                             artistName: name,
                             artistStyle: p.style || a.Style || a.style || '',
                             likes: p.likes || 0,
-                            price: p.price || '',
+                            price: p.Price || p.price || '',
                             artistId: currentArtistId
                         }))
                         : [];
+
+                    // styles: prefer creators.styles (can be JSON string or array)
+                    const resolveStyles = () => {
+                        let raw = a.styles !== undefined ? a.styles : (a.Styles !== undefined ? a.Styles : undefined);
+                        if (Array.isArray(raw)) {
+                            return raw.filter(Boolean).map(s => String(s));
+                        }
+                        if (typeof raw === 'string' && raw.trim()) {
+                            try {
+                                const parsed = JSON.parse(raw);
+                                if (Array.isArray(parsed)) return parsed.filter(Boolean).map(s => String(s));
+                            } catch (e) {
+                                // not JSON, try to split by common separators
+                                const split = raw.split(/[;,/|]+/).map(s => s.trim()).filter(Boolean);
+                                if (split.length) return split;
+                            }
+                        }
+                        // fallback to single style field or from artworks
+                        const single = a.Style || a.style;
+                        if (single) return [String(single)];
+                        if (artworks.length) {
+                            const set = new Set();
+                            artworks.forEach(p => {
+                                const ps = p.style || p.Style || p.artistStyle;
+                                if (ps) set.add(String(ps));
+                            });
+                            if (set.size) return Array.from(set);
+                        }
+                        return [];
+                    };
+
+                    const stylesArr = resolveStyles();
+                    const styleDisplay = stylesArr.length ? stylesArr.join(' / ') : 'Unknown';
+
+                    // likes: prefer aggregated creator likes if present, else sum artworks likes
+                    const likesFromArtworks = artworks.reduce((s, p) => s + (Number(p.likes) || 0), 0);
+                    const likesCount = a.likesCount || a.likes || a.Likes || likesFromArtworks || 0;
                     return {
                         id: currentArtistId,
                         name,
                         country: a.Country || a.country || 'Unknown',
-                        style: a.Style || a.style || 'Unknown',
+                        style: styleDisplay,
+                        styles: stylesArr,
                         avatar: a.imageBase64 || a.profileImage || '/images/profileImg.jpg',
-                        likesCount: a.likesCount || 0,
+                        likesCount,
                         artworks
                     };
                 });

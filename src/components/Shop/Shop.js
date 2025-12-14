@@ -85,12 +85,15 @@ const Shop = () => {
                     description: p.Description || p.description || '',
                     imageUrl: imageSrc || '/images/placeholder.png',
                     images,
-                    likes: p.likes || `${Math.floor(Math.random() * 500)}k`,
-                    price: p.Price || p.price || (Math.random() * 200 + 20).toFixed(2),
-                    category: categories.includes(p.Category) ? p.Category : categories[0],
-                    style: p.Style || p.style || "Neo-minimalism",
-                    fileFormat: p.Format || p.format || "PNG",
-                    size: p.Size || p.size || "1080 x 1920"
+                    // Лайки ТІЛЬКИ з БД, без рандому
+                    likes: p.likes ?? p.Likes ?? 0,
+                    // Ціна ТІЛЬКИ з БД, без рандому
+                    price: p.Price ?? p.price ?? '',
+                    // Додаткові поля не вигадуємо — віддамо як є або порожнє
+                    category: p.Category ?? p.category ?? '',
+                    style: p.Style ?? p.style ?? '',
+                    fileFormat: p.Format ?? p.format ?? '',
+                    size: p.Size ?? p.size ?? ''
                 };
             });
             if (mounted) setCards(mapped);

@@ -32,9 +32,9 @@ function ArtCard(props) {
         title = '',
         artistName = '',
         artistStyle = '',
-        likes = 0,
-        price = ''
     } = source;
+    const price = (source && (source.price ?? source.Price)) ?? '';
+    const likes = (source && (source.likes ?? source.Likes)) ?? '';
 
     // Обробник кліку
     const handleClick = () => {

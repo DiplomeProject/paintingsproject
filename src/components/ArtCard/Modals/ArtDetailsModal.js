@@ -1,4 +1,5 @@
 import React, {useCallback, useEffect, useRef, useState} from 'react';
+import axios from 'axios';
 import styles from './ArtDetailsModal.module.css';
 import closeIcon from '../../../assets/closeCross.svg';
 import ImageViewer from "../ImageViewer/ImageViewer";
@@ -14,6 +15,7 @@ const ArtDetailsModal = ({art, onClose, isLoggedIn}) => {
     const [isViewerOpen, setIsViewerOpen] = useState(false);
     const [viewerInitialIndex, setViewerInitialIndex] = useState(0);
     const [isLiked, setIsLiked] = useState(false);
+    const [likes, setLikes] = useState(Number(art?.likes) || 0);
 
     const leftColumnRef = useRef(null);
     const rightInfoRef = useRef(null);
@@ -37,8 +39,31 @@ const ArtDetailsModal = ({art, onClose, isLoggedIn}) => {
         };
     }, []);
 
-    const handleLikeClick = () => {
-        setIsLiked(prev => !prev);
+    // Ініціалізуємо стани лайку при зміні переданого арт-об'єкта
+    useEffect(() => {
+        setIsLiked(!!(art?.likedByCurrentUser || art?.liked));
+        setLikes(Number(art?.likes) || 0);
+    }, [art]);
+
+    const [likeLoading, setLikeLoading] = useState(false);
+    const handleLikeClick = async () => {
+        if (!isLoggedIn) {
+            alert('Увійдіть, щоб ставити лайки.');
+            return;
+        }
+        if (!art?.id || likeLoading) return;
+        try {
+            setLikeLoading(true);
+            const res = await axios.post(`/paintings/${art.id}/like`);
+            if (res?.data?.success) {
+                setIsLiked(!!res.data.liked);
+                setLikes(Number(res.data.likes) || 0);
+            }
+        } catch (e) {
+            console.error('Like toggle failed:', e);
+        } finally {
+            setLikeLoading(false);
+        }
     };
 
     const handleArtistNameClick = () => {
@@ -199,14 +224,14 @@ const ArtDetailsModal = ({art, onClose, isLoggedIn}) => {
                                     <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                                         <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
                                     </svg>
-                                    {art.likes}
+                                    {likes}
                                 </span>
                             </div>
 
                             <div className={styles.buttonRow}>
                                 <button className={styles.buyBtn} onClick={handleBuyClick}>Buy</button>
 
-                                <button className={styles.likeBtn} onClick={handleLikeClick}>
+                                <button className={styles.likeBtn} onClick={handleLikeClick} disabled={likeLoading}>
                                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className={isLiked ? styles.likedHeart : styles.unlikedHeart}>
                                         <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
                                     </svg>
