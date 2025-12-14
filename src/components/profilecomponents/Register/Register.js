@@ -3,6 +3,7 @@ import styles from "./Register.module.css";
 import {EyeIcon, EyeSlashIcon} from "./AuthIcons";
 import emailjs from '@emailjs/browser';
 import axios from 'axios';
+import URL from "../../../URL";
 
 function Register({toggleForm}) {
     const [showPassword, setShowPassword] = useState(false);
@@ -77,7 +78,7 @@ function Register({toggleForm}) {
                 return;
             }
 
-            const { data } = await axios.post('/auth/register', formData);
+            const { data } = await axios.post(`${URL}/auth/register`, formData);
 
             if (!data?.success) {
                 console.error("Registration error:", data);
