@@ -10,155 +10,211 @@
     box-sizing: border-box;
 }
 
-/* --- ЛІВА КОЛОНКА --- */
 .detailsColumn {
-    width: 500px;
+    width: 550px;
     flex-shrink: 0;
     display: flex;
     flex-direction: column;
-    gap: 30px;
+    gap: 40px;
 }
 
-/* 1. Інфо (ПОВНІСТЮ ПРОЗОРЕ) */
+/* 1. Блок Інфо (Картинка + Текст) */
 .headerInfo {
     display: flex;
-    gap: 25px;
-    background: transparent; /* Прозорий фон */
-    padding: 0;
+    gap: 30px; /* Відступ між картинкою і текстом */
+    align-items: flex-start;
 }
 
 .thumbImage {
     width: 212px;
     height: 271px;
     object-fit: cover;
-    border-radius: 0; /* Гострі кути як на постері макету */
-    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    border-radius: 0;
+
+    /* Додаємо курсор, щоб показати клікабельність */
+    cursor: pointer;
+    transition: filter 0.2s;
+}
+
+.thumbImage:hover {
+    filter: brightness(1.1);
+}
+
+/* --- НОВІ СТИЛІ ДЛЯ ГАЛЕРЕЇ --- */
+
+/* Обгортка для головного фото та прев'ю */
+.imageWrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    width: 212px; /* Фіксуємо ширину по ширині головного фото */
+}
+
+/* Рядок з мініатюрами */
+.previewRow {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.previewImg {
+    /* 3 картинки в ряд: (64px * 3) + (10px * 2 відступи) = 212px */
+    width: 64px;
+    height: 64px;
+    object-fit: cover;
+    border-radius: 4px; /* Трохи округлені, або 0, якщо хочете гострі */
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: border-color 0.2s;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+}
+
+.previewImg:hover {
+    border-color: rgba(255, 255, 255, 0.5);
 }
 
 .textInfo {
     display: flex;
     flex-direction: column;
+    justify-content: flex-start;
     gap: 15px;
     max-width: 323px;
+    height: 271px;
 }
 
 .categoryTitle {
-    font-size: 26px;
-    text-transform: uppercase;
+    font-size: 24px;
+    font-weight: 400; /* Regular */
+    text-transform: uppercase; /* Великі літери */
     margin: 0;
+    color: #fff;
+    line-height: 1.2;
+    letter-spacing: 0.5px;
+
+    /* Стиль рамки виділення з Figma (синя лінія) не потрібен у верстці,
+       але шрифт має бути чітким */
 }
 
 .descriptionText {
     margin: 0;
-    font-size: 20px;
+    font-size: 16px;
+    line-height: 1.4;
+    color: #E0E0E0;
+    font-weight: 300;
 }
 
 .priceTag {
+    width: 189px;
+    height: 43px;
+
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 120px;
-    height: 40px;
-    background: rgba(30, 30, 35, 0.6); /* Напівпрозорий темний */
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 6px;
-    font-size: 20px;
-    font-weight: 500;
+
+    background: rgba(46, 46, 46, 0.6);
+    border: 1px solid #595C64;
+    border-radius: 4px;
+
+    font-size: 24px;
+    font-weight: 400;
     color: #fff;
-    margin-top: 10px;
-    backdrop-filter: blur(5px);
+
+    margin-top: auto;
 }
 
 /* --- СЕКЦІЯ СТАТУСУ --- */
 .statusContainer {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 30px;
 }
 
 .statusHeader {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding-bottom: 5px;
+    padding-right: 10px;
 }
 
 .statusTitleBlock {
     display: flex;
     align-items: center;
-    gap: 15px;
-    font-size: 32px;
-    font-weight: 400;
-    font-family: 'Roboto', sans-serif;
+    gap: 20px;
 }
 
+/* Великий фіолетовий круг */
 .bigDot {
-    width: 32px;
-    height: 32px;
-    background-color: #a855f7; /* Фіолетовий */
+    width: 48px;
+    height: 48px;
+    background-color: #A020F0; /* Яскравий фіолетовий */
     border-radius: 50%;
+    box-shadow: 0 0 15px rgba(160, 32, 240, 0.4);
 }
 
+.statusName {
+    font-size: 40px; /* Розмір тексту "Sketch" */
+    font-weight: 400;
+    color: #fff;
+    line-height: 1;
+}
+
+/* Пусті круги праворуч */
 .dotsRow {
     display: flex;
-    gap: 15px;
+    gap: 20px;
 }
 
 .hollowDot {
-    width: 28px;
-    height: 28px;
+    width: 45px;
+    height: 45px;
     border-radius: 50%;
-    border: 2px solid #d053f5;
+    border: 2px solid #D053F5; /* Неоновий контур */
     background: transparent;
-}
-.hollowDot.filled {
-    background: #d053f5;
+    box-shadow: 0 0 10px rgba(208, 83, 245, 0.2);
 }
 
-/* --- ГОЛОВНИЙ БОКС (РАМКА) --- */
+/* --- ГОЛОВНИЙ БОКС (Main Stage Box) --- */
 .stageBox {
     width: 100%;
-    height: 500px; /* Високий квадрат */
+    min-height: 400px; /* Або auto, залежно від контенту */
+    height: 551px;
     position: relative;
-    border-radius: 12px;
+    border-radius: 8px;
 
-    /* Градієнтна рамка (скляний ефект) */
+    /* Використовуємо той самий стиль градієнтної рамки, що й у чаті */
+    border: 3.16px solid transparent;
     background:
-            linear-gradient(rgba(45, 45, 50, 0.6), rgba(45, 45, 50, 0.6)) padding-box,
-            linear-gradient(180deg, rgba(100, 100, 110, 1) 0%, rgba(60, 60, 70, 0.3) 100%) border-box;
-    border: 3px solid transparent;
+            linear-gradient(#46464799, #46464799) padding-box,
+            linear-gradient(168.05deg, #595C64 1.51%, rgba(71, 77, 95, 0.44) 90.56%) border-box;
 
     display: flex;
     flex-direction: column;
     overflow: hidden;
 }
 
+/* Інші стилі для кнопки і картинки всередині stageBox залишаються без змін або підтягуються з попередніх кроків */
 .imageArea {
     flex: 1;
-    width: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
-    position: relative;
-    background: rgba(30, 30, 30, 0.4);
+    overflow: hidden;
 }
 
 .currentStageImage {
     max-width: 80%;
     max-height: 80%;
     object-fit: contain;
-    border: 5px solid #dcdcdc; /* Біла рамка як на постері */
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-    transform: rotate(-2deg); /* Легкий нахил для стилю, як на макеті */
 }
 
 /* Кнопка додавання (Внизу, на всю ширину) */
 .addSketchBar {
     width: 100%;
-    height: 60px;
-    background: rgba(80, 80, 80, 0.7); /* Сірий фон кнопки */
+    height: 43px;
+    background: #46464799;
     backdrop-filter: blur(10px);
     border-top: 1px solid rgba(255,255,255,0.1);
+    border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -200,33 +256,36 @@
 .checkBtn svg { fill: #2ecc71; width: 35px; height: 35px; }
 .crossBtn svg { fill: #e74c3c; width: 35px; height: 35px; }
 
-
 /* --- ПРАВА КОЛОНКА (ЧАТ) --- */
+
 .chatColumn {
-    width: 600px;
+    width: 666px;
     flex-shrink: 0;
     display: flex;
     flex-direction: column;
-    border-radius: 12px;
-
-    /* Тонка градієнтна рамка */
+    border-radius: 8px;
+    border: 3.16px solid transparent;
     background:
-            linear-gradient(rgba(30, 30, 35, 0.9), rgba(30, 30, 35, 0.9)) padding-box,
-            linear-gradient(180deg, rgba(89, 92, 100, 1), rgba(71, 77, 95, 0.3)) border-box;
-    border: 1px solid transparent;
+            linear-gradient(rgba(30, 30, 35, 0.3), rgba(30, 30, 35, 0.3)) padding-box,
+            linear-gradient(168.05deg, #595C64 1.51%, rgba(71, 77, 95, 0.44) 90.56%) border-box;
+
+    backdrop-filter: blur(10px);
+    overflow: hidden;
+    height: 947px;
 }
 
 .chatHeader {
-    padding: 25px;
-    border-bottom: 1px solid rgba(255,255,255,0.05);
+    padding: 0 20px;
     display: flex;
     align-items: center;
     justify-content: space-between;
+    min-height: 80px;
 }
 
 .headerUserName {
     font-size: 22px;
     font-weight: 500;
+    color: #fff;
 }
 
 .messagesList {
@@ -238,11 +297,14 @@
     gap: 25px;
 }
 
+/* --- ПОВІДОМЛЕННЯ (БУЛЬБАШКИ) --- */
+
 .messageRow {
     display: flex;
     gap: 20px;
-    max-width: 80%;
+    max-width: 85%;
 }
+
 .messageRow.own {
     align-self: flex-end;
     flex-direction: row-reverse;
@@ -254,48 +316,85 @@
     border-radius: 50%;
     object-fit: cover;
     border: 2px solid rgba(255,255,255,0.1);
+    flex-shrink: 0;
 }
 
 .bubble {
-    background: rgba(255, 255, 255, 0.1); /* Напівпрозорий сірий */
-    padding: 20px;
-    border-radius: 0 16px 16px 16px;
-    font-size: 15px;
+    position: relative;
+    padding: 16px;
+    border-radius: 9.57px;
+
+    font-size: 16px; /* Трохи збільшив шрифт для читабельності */
     line-height: 1.5;
-    color: #ddd;
-    border: 1px solid rgba(255,255,255,0.05);
-}
-.messageRow.own .bubble {
-    background: rgba(255, 255, 255, 0.15);
-    border-radius: 16px 0 16px 16px;
+    color: #E0E0E0; /* Світло-сірий текст */
+
+    /* --- СТИЛЬ БУЛЬБАШКИ (Як на макеті) --- */
+    border: 3.83px solid transparent;
+
+    /* Тут колір #464647 з прозорістю 60% (#99) */
+    background:
+            linear-gradient(#46464799, #46464799) padding-box,
+            linear-gradient(168.05deg, #595C64 1.51%, rgba(71, 77, 95, 0.44) 90.56%) border-box;
+
+    background-clip: padding-box, border-box;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.2); /* Тінь для об'єму */
 }
 
-/* Зображення в чаті */
-.chatImageAttachment {
-    width: 200px;
-    border-radius: 8px;
-    border: 4px solid #dcdcdc;
-    margin-top: 10px;
+/* Щоб власні повідомлення виглядали так само (видаляємо старі стилі, якщо вони були інші) */
+.messageRow.own .bubble {
+    /* Використовуємо той самий стиль, що і для вхідних, згідно з макетом */
+    background:
+            linear-gradient(#46464799, #46464799) padding-box,
+            linear-gradient(168.05deg, #595C64 1.51%, rgba(71, 77, 95, 0.44) 90.56%) border-box;
+    border-radius: 9.57px;
+    text-align: left;
 }
+
+/* Якщо це просто картинка без тексту */
 .bubble:has(> .chatImageAttachment:only-child) {
     background: transparent;
     padding: 0;
     border: none;
+    box-shadow: none;
 }
 
-/* Input */
-.inputArea {
-    padding: 20px;
-    border-top: 1px solid rgba(255,255,255,0.05);
+.chatImageAttachment {
+    width: 240px;
+    border-radius: 12px;
+    border: 3px solid #595C64;
+    margin-top: 5px;
 }
+
+/* --- ПОЛЕ ВВОДУ (INPUT) --- */
+
+.inputArea {
+    background: transparent;
+}
+
 .inputWrapper {
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 8px;
-    padding: 10px 20px;
+    position: relative; /* Щоб можна було позиціонувати іконку всередині */
     display: flex;
     align-items: center;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 0 20px;
+    height: 52px; /* Висота з макету */
+
+    border-radius: 9.57px;
+    border: 3.83px solid transparent;
+
+    /* Фон поля вводу такий самий, як у повідомлень */
+    background:
+            linear-gradient(#46464799, #46464799) padding-box,
+            linear-gradient(168.05deg, #595C64 1.51%, rgba(71, 77, 95, 0.44) 90.56%) border-box;
+    background-clip: padding-box, border-box;
+
+    transition: transform 0.2s;
 }
+
+.inputWrapper:focus-within {
+    transform: translateY(-1px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+}
+
 .chatInput {
     flex: 1;
     background: transparent;
@@ -303,4 +402,22 @@
     color: white;
     font-size: 16px;
     outline: none;
+    font-family: inherit;
+}
+
+.chatInput::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+/* Стиль для кнопки-іконки всередині інпуту (якщо ви додасте іконку картинки) */
+.inputIcon {
+    cursor: pointer;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+    margin-left: 10px;
+    display: flex;
+    align-items: center;
+}
+.inputIcon:hover {
+    opacity: 1;
 }
