@@ -22,7 +22,7 @@ const additionalFilterConfig = [
 
 const profileCategories = ['ICONS', 'UI/UX', 'ADVERTISING', 'BRENDING'];
 
-function MyImages({ user }) {
+function MyImages({ user, onTotalLikesChange }) {
     const [paintings, setPaintings] = useState([]);
     const [activeCategory, setActiveCategory] = useState(null);
     const itemsPerPage = 24;
@@ -35,7 +35,13 @@ function MyImages({ user }) {
                     "/profile/getuserpaintings"
                 );
                 if (response.data.success) {
-                    setPaintings(response.data.paintings);
+                    const list = response.data.paintings || [];
+                    setPaintings(list);
+                    // Обновляем суммарные лайки сразу после загрузки
+                    if (typeof onTotalLikesChange === 'function') {
+                        const total = list.reduce((sum, p) => sum + (Number(p.likes ?? p.Likes) || 0), 0);
+                        onTotalLikesChange(total);
+                    }
                 } else {
                     console.error("Failed to load paintings:", response.data.message);
                 }
@@ -48,6 +54,15 @@ function MyImages({ user }) {
             fetchPaintings();
         }
     }, [user]);
+
+    // Перераховуємо суму лайків при зміні локального списку картин
+    useEffect(() => {
+        if (typeof onTotalLikesChange === 'function') {
+            const total = (paintings || []).reduce((sum, p) => sum + (Number(p.likes ?? p.Likes) || 0), 0);
+            onTotalLikesChange(total);
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [paintings]);
 
     const handleCategoryClick = (category) => {
         if (activeCategory === category) {
@@ -102,7 +117,7 @@ function MyImages({ user }) {
                                 imageUrl: painting.image_url,
                                 price: painting.price,
                                 artistName: user.name,
-                                likes: painting.likes || 0,
+                                likes: (painting.likes ?? painting.Likes ?? 0),
                                 artistId: user.id,
                                 category: painting.Category,
                                 style: painting.style

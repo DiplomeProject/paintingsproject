@@ -68,12 +68,26 @@ router.get('/getartists', async (req, res) => {
             imageUrl = p.imageBase64 || p.image_url;
           }
 
-          // normalize returned fields
+          // normalize returned fields, including likes
+          const likesNum = Number(p.Likes ?? p.likes) || 0;
           return {
             ...p,
-            image_url: imageUrl || null
+            image_url: imageUrl || null,
+            Likes: likesNum,
+            likes: likesNum
           };
         });
+
+        // compute aggregated likes for artist if not present
+        try {
+          const likesFromPaintings = Array.isArray(artist.paintings)
+            ? artist.paintings.reduce((sum, p) => sum + (Number(p.likes ?? p.Likes) || 0), 0)
+            : 0;
+          const normLikes = Number(artist.likesCount || artist.likes || artist.Likes || likesFromPaintings) || 0;
+          artist.likesCount = normLikes;
+        } catch (e) {
+          // ignore aggregation errors
+        }
 
         return artist;
       })
@@ -119,7 +133,8 @@ router.get('/artist/:id', async (req, res) => {
         imageUrl = filePathToDataUri(p.Image) || (p.Image.startsWith('data:') ? p.Image : null);
       }
       if (!imageUrl && (p.imageBase64 || p.image_url)) imageUrl = p.imageBase64 || p.image_url;
-      return { ...p, image_url: imageUrl || null };
+      const likesNum = Number(p.Likes ?? p.likes) || 0;
+      return { ...p, image_url: imageUrl || null, Likes: likesNum, likes: likesNum };
     });
 
     // --- Normalize creators fields for frontend convenience ---

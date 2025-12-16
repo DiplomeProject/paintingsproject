@@ -205,7 +205,7 @@ const AuthorPage = () => {
                                         imageUrl: p.image_url || p.imageBase64 || p.Image,
                                         price: p.Price || p.price,
                                         artistName: artistName,
-                                        likes: p.likes || 0,
+                                        likes: (p.likes ?? p.Likes ?? 0),
                                         artistId: artist.Creator_ID || artist.Creator_Id || artist.CreatorId || artist.id || id,
                                         category: p.Category,
                                         style: p.Style
