@@ -5,6 +5,7 @@ import AuthorPage from '../AuthorPage/AuthorPage';
 import PaintingDetailsModal from '../PaintingsDetailsModal/PaintingsDetailsModal';
 import Navbar from '../Nav/Nav';
 import Footer from '../Footer/Footer';
+import url from '../../URL';
 
 function HomePage() {
     const [paintings, setPaintings] = useState([]);
@@ -18,13 +19,13 @@ function HomePage() {
 
     const loadMainPage = () => {
         setShowAuthorPage(false);
-        axios.get('/paintings')
+        axios.get(`${url}/paintings`)
             .then(res => setPaintings(res.data))
             .catch(error => console.error('Error loading the paintings:', error));
     };
 
     const loadAuthorPage = (creatorId) => {
-        axios.get(`/artists/artist/${creatorId}`)
+        axios.get(`${url}/artists/artist/${creatorId}`)
             .then(res => {
                 setAuthorData(res.data);
                 setShowAuthorPage(true);

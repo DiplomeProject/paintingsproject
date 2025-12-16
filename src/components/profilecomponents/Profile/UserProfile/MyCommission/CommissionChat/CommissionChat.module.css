@@ -351,11 +351,13 @@
 }
 
 /* Якщо це просто картинка без тексту */
-.bubble:has(> .chatImageAttachment:only-child) {
-    background: transparent;
-    padding: 0;
-    border: none;
-    box-shadow: none;
+/* This handles the 'hiding' of the bubble immediately on the frontend */
+.bubble:has(> .chatImageAttachment:only-child),
+.bubble:has(> img:only-child) {
+    background: transparent !important;
+    padding: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
 }
 
 .chatImageAttachment {
@@ -363,6 +365,7 @@
     border-radius: 12px;
     border: 3px solid #595C64;
     margin-top: 5px;
+    display: block; /* Ensures it behaves correctly as an only-child */
 }
 
 /* --- ПОЛЕ ВВОДУ (INPUT) --- */

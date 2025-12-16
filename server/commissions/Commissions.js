@@ -439,14 +439,13 @@ router.patch('/:id/accept', async (req, res) => {
     const creatorId = user.id;
 
     try {
-        // Оновлюємо Creator_ID, а не Customer_ID!
         const sql = `
             UPDATE commissions
-            SET Status = 'in_progress',
+            SET Status = 'Sketch',
                 Creator_ID = ?
             WHERE Commission_ID = ?
               AND Status = 'open'
-              AND Customer_ID != ? -- (Опціонально) Заборона брати власні замовлення
+              AND Customer_ID != ? 
         `;
 
         // Передаємо creatorId, id комішену, і (опціонально) перевірку на власника
@@ -463,6 +462,29 @@ router.patch('/:id/accept', async (req, res) => {
     } catch (err) {
         console.error('Error accepting commission:', err);
         res.status(500).json({ success: false, message: 'Database error while accepting commission' });
+    }
+});
+
+router.patch('/:id/status', async (req, res) => {
+    const { id } = req.params;
+    const { status } = req.body;
+    const allowedStatuses = ['Open', 'Sketch', 'Edits', 'Completed', 'Cancelled'];
+
+    const normalizedStatus = allowedStatuses.find(s => s.toLowerCase() === (status || '').toLowerCase());
+
+    if (!normalizedStatus) {
+        return res.status(400).json({ success: false, message: `Invalid status. Allowed: ${allowedStatuses.join(', ')}` });
+    }
+
+    try {
+        const sql = `UPDATE commissions SET Status = ?, Updated_At = NOW() WHERE Commission_ID = ?`;
+        await db.query(sql, [normalizedStatus, id]);
+
+
+        res.json({ success: true, status: normalizedStatus });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ success: false, message: 'Database error' });
     }
 });
 

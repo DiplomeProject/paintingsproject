@@ -1,0 +1,314 @@
+const express = require('express');
+const db = require('../config/db');
+const { detectImageMime, rowToMessage } = require('../utils/chatHelpers');
+
+const router = express.Router();
+
+// Get messages for a commission
+// GET /api/commissions/chat/:commissionId/messages?limit=100
+router.get('/:commissionId/messages', async (req, res) => {
+  const { commissionId } = req.params;
+  const limit = parseInt(req.query.limit, 10) || 1000;
+
+  try {
+    const [rows] = await db.query(
+      'SELECT id, senderId, receiverId, commissionId, type, content, image, status, timestamp FROM messages WHERE commissionId = ? ORDER BY timestamp ASC LIMIT ?'
+      , [commissionId, limit]
+    );
+
+    // convert DB rows to normalized messages
+    const mapped = rows.map(rowToMessage);
+
+    res.json({ success: true, messages: mapped });
+  } catch (err) {
+    console.error('[chat] GET messages error:', err);
+    res.status(500).json({ success: false, message: 'Error fetching messages' });
+  }
+});
+
+// Submit a stage image for review (creator → customer)
+// POST /api/commissions/chat/:commissionId/submit-stage
+// body: { image: dataUrl }
+router.post('/:commissionId/submit-stage', async (req, res) => {
+  const { commissionId } = req.params;
+  const { image } = req.body || {};
+
+  if (!req.session?.user?.id) {
+    return res.status(401).json({ success: false, message: 'Not authenticated' });
+  }
+
+  const senderId = Number(req.session.user.id);
+
+  try {
+    // load commission to determine roles
+    const [commRows] = await db.query(
+      'SELECT Creator_ID, Customer_ID, Status FROM commissions WHERE Commission_ID = ?',
+      [commissionId]
+    );
+    if (!commRows || commRows.length === 0) {
+      return res.status(404).json({ success: false, code: 'NOT_FOUND', message: 'Commission not found' });
+    }
+    const creatorId = Number(commRows[0].Creator_ID);
+    const customerId = Number(commRows[0].Customer_ID);
+    const commissionStatus = String(commRows[0].Status || '').trim();
+
+    // Only creator can submit stage; receiver must be customer
+    if (senderId !== creatorId || !customerId) {
+      return res.status(403).json({ success: false, code: 'FORBIDDEN', message: 'Only creator can submit stage for review' });
+    }
+
+    // Do not allow submissions after completion
+    if (commissionStatus.toLowerCase() === 'completed') {
+      return res.status(400).json({ success: false, code: 'COMPLETED', message: 'Commission is completed. Submissions are blocked.' });
+    }
+
+    if (typeof image !== 'string' || !image.startsWith('data:')) {
+      return res.status(400).json({ success: false, code: 'BAD_IMAGE', message: 'Invalid image payload' });
+    }
+
+    const commaIndex = image.indexOf(',');
+    const base64 = image.substring(commaIndex + 1);
+    const buffer = Buffer.from(base64, 'base64');
+
+    // 10 MB server-side limit safeguard
+    const MAX_IMAGE_BYTES = 10 * 1024 * 1024;
+    if (buffer.length > MAX_IMAGE_BYTES) {
+      return res.status(413).json({ success: false, code: 'PAYLOAD_TOO_LARGE', message: 'Image is too large' });
+    }
+
+    const [result] = await db.query(
+      'INSERT INTO messages (senderId, receiverId, commissionId, type, content, image, status) VALUES (?, ?, ?, ?, ?, ?, ?)',
+      [senderId, customerId, commissionId, 'stage', null, buffer, 'unread']
+    );
+
+    const [newRows] = await db.query('SELECT id, senderId, receiverId, commissionId, type, content, image, status, timestamp FROM messages WHERE id = ?', [result.insertId]);
+    const out = rowToMessage(newRows[0]);
+
+    try {
+      const { getIO } = require('../socket');
+      const io = getIO();
+      io.to(`commission_${commissionId}`).emit('stageSubmitted', { commissionId: Number(commissionId), message: out });
+    } catch (e) {
+      console.warn('[chat] socket emit failed (stageSubmitted):', e.message);
+    }
+
+    res.status(201).json({ success: true, message: out });
+  } catch (err) {
+    console.error('[chat] submit-stage error:', err);
+    res.status(500).json({ success: false, code: 'DB_ERROR', message: 'Database error' });
+  }
+});
+
+// Review a stage (customer → creator)
+// POST /api/commissions/chat/:commissionId/review
+// body: { decision: 'approve'|'reject', messageId?: number }
+router.post('/:commissionId/review', async (req, res) => {
+  const { commissionId } = req.params;
+  const { decision, messageId } = req.body || {};
+
+  if (!req.session?.user?.id) {
+    return res.status(401).json({ success: false, message: 'Not authenticated' });
+  }
+
+  const senderId = Number(req.session.user.id);
+
+  if (decision !== 'approve' && decision !== 'reject') {
+    return res.status(400).json({ success: false, code: 'BAD_DECISION', message: 'Invalid decision' });
+  }
+
+  try {
+    const [commRows] = await db.query('SELECT Creator_ID, Customer_ID, Status FROM commissions WHERE Commission_ID = ?', [commissionId]);
+    if (!commRows || commRows.length === 0) {
+      return res.status(404).json({ success: false, code: 'NOT_FOUND', message: 'Commission not found' });
+    }
+    const creatorId = Number(commRows[0].Creator_ID);
+    const customerId = Number(commRows[0].Customer_ID);
+    const currentStatus = String(commRows[0].Status || '').trim();
+
+    if (senderId !== customerId) {
+      return res.status(403).json({ success: false, code: 'FORBIDDEN', message: 'Only customer can review stage' });
+    }
+
+    // if messageId is not provided, infer last submitted stage from creator
+    let targetMessageId = messageId;
+    if (!targetMessageId) {
+      const [rows] = await db.query('SELECT id FROM messages WHERE commissionId = ? AND senderId = ? AND type = ? ORDER BY timestamp DESC LIMIT 1', [commissionId, creatorId, 'stage']);
+      if (!rows || rows.length === 0) {
+        return res.status(400).json({ success: false, code: 'NO_STAGE', message: 'No stage submission to review' });
+      }
+      targetMessageId = rows[0].id;
+    }
+
+    // Insert a system review message that references the stage messageId in content
+    const reviewType = decision === 'approve' ? 'stage-approve' : 'stage-reject';
+    const [ins] = await db.query(
+      'INSERT INTO messages (senderId, receiverId, commissionId, type, content, status) VALUES (?, ?, ?, ?, ?, ?)',
+      [customerId, creatorId, commissionId, reviewType, String(targetMessageId), 'unread']
+    );
+
+    let nextStatus = null;
+    if (decision === 'approve') {
+      const st = currentStatus.toLowerCase();
+      if (st === 'sketch') nextStatus = 'Edits';
+      else if (st === 'edits') nextStatus = 'Completed';
+      // else keep null
+      if (nextStatus) {
+        await db.query('UPDATE commissions SET Status = ? WHERE Commission_ID = ?', [nextStatus, commissionId]);
+      }
+    }
+
+    try {
+      const { getIO } = require('../socket');
+      const io = getIO();
+      io.to(`commission_${commissionId}`).emit('stageReview', { commissionId: Number(commissionId), messageId: Number(targetMessageId), decision, nextStatus });
+    } catch (e) {
+      console.warn('[chat] socket emit failed (stageReview):', e.message);
+    }
+
+    res.status(201).json({ success: true, decision, messageId: Number(targetMessageId), nextStatus });
+  } catch (err) {
+    console.error('[chat] review error:', err);
+    res.status(500).json({ success: false, code: 'DB_ERROR', message: 'Database error' });
+  }
+});
+
+// Send a message
+// POST /api/commissions/chat/:commissionId/messages
+// body: { senderId, receiverId, type, content }
+// POST /api/commissions/chat/:commissionId/messages
+router.post('/:commissionId/messages', async (req, res) => {
+  const { commissionId } = req.params;
+  const { type = 'text', content } = req.body;
+
+  // 1. Session check
+  if (!req.session?.user?.id) {
+    return res.status(401).json({ success: false, message: 'Not authenticated' });
+  }
+
+  const senderId = Number(req.session.user.id);
+
+  try {
+    console.log(`[chat] POST /${commissionId}/messages — sender=${senderId} type=${type} contentLen=${String(content || '').length}`);
+    // 2. Fetch the commission to find the creator and customer
+    const [commRows] = await db.query(
+      'SELECT Creator_ID, Customer_ID FROM commissions WHERE Commission_ID = ?',
+      [commissionId]
+    );
+
+    console.log('[chat] commission rows:', commRows && commRows.length, commRows && commRows[0]);
+
+    if (!commRows || commRows.length === 0) {
+      return res.status(404).json({ success: false, message: 'Commission not found' });
+    }
+
+    const creatorId = Number(commRows[0].Creator_ID);
+    const customerId = Number(commRows[0].Customer_ID);
+
+    // 3. Determine who gets the message
+    let receiverId = null;
+    if (senderId === creatorId) receiverId = customerId;
+    else if (senderId === customerId) receiverId = creatorId;
+    else return res.status(403).json({ success: false, message: 'Forbidden: You are not part of this commission' });
+
+    // 4. Insert message (Letting MySQL handle the AUTO_INCREMENT ID and TIMESTAMP)
+      if (!receiverId) return res.status(400).json({ success: false, message: 'No receiver for this commission' });
+
+      console.log('[chat] inserting message: receiverId=', receiverId, 'type=', type);
+
+      // If it's an image message, convert data URI to binary for storage in `image` column
+      if (type === 'image' && typeof content === 'string' && content.startsWith('data:')) {
+        const commaIndex = content.indexOf(',');
+        const base64 = content.substring(commaIndex + 1);
+        const buffer = Buffer.from(base64, 'base64');
+        const MAX_IMAGE_BYTES = 10 * 1024 * 1024;
+        if (buffer.length > MAX_IMAGE_BYTES) {
+          return res.status(413).json({ success: false, code: 'PAYLOAD_TOO_LARGE', message: 'Image is too large' });
+        }
+
+        const [result] = await db.query(
+          'INSERT INTO messages (senderId, receiverId, commissionId, type, content, image, status) VALUES (?, ?, ?, ?, ?, ?, ?)',
+          [senderId, receiverId, commissionId, type, null, buffer, 'unread']
+        );
+        console.log('[chat] insert result:', result && { insertId: result.insertId, affectedRows: result.affectedRows });
+
+        const [newMsgRows] = await db.query('SELECT id, senderId, receiverId, commissionId, type, content, image, status, timestamp FROM messages WHERE id = ?', [result.insertId]);
+        const out = rowToMessage(newMsgRows[0]);
+          // emit realtime event to room
+          try {
+            const { getIO } = require('../socket');
+            const io = getIO();
+            io.to(`commission_${commissionId}`).emit('newMessage', out);
+          } catch (e) {
+            console.warn('[chat] socket emit failed:', e.message);
+          }
+          res.status(201).json({ success: true, message: out });
+        return;
+      }
+
+      // non-image messages (text)
+      const [result] = await db.query(
+        'INSERT INTO messages (senderId, receiverId, commissionId, type, content, status) VALUES (?, ?, ?, ?, ?, ?)',
+        [senderId, receiverId, commissionId, type, content, 'unread']
+      );
+      console.log('[chat] insert result:', result && { insertId: result.insertId, affectedRows: result.affectedRows });
+
+      const [newMsgRows] = await db.query('SELECT id, senderId, receiverId, commissionId, type, content, image, status, timestamp FROM messages WHERE id = ?', [result.insertId]);
+      const row = newMsgRows[0];
+      const out = { id: row.id, senderId: row.senderId, receiverId: row.receiverId, commissionId: row.commissionId, type: row.type, content: row.content, image: null, status: row.status, timestamp: row.timestamp };
+      try {
+        const { getIO } = require('../socket');
+        const io = getIO();
+        io.to(`commission_${commissionId}`).emit('newMessage', out);
+      } catch (e) {
+        console.warn('[chat] socket emit failed:', e.message);
+      }
+      res.status(201).json({ success: true, message: out });
+  } catch (err) {
+    console.error('[chat] INSERT ERROR:', err); // Check your terminal for this log
+    res.status(500).json({ success: false, message: 'Database error' });
+  }
+});
+
+// Mark a message as read
+// PATCH /api/commissions/chat/:commissionId/messages/:id/read
+router.patch('/:commissionId/messages/:id/read', async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const [result] = await db.query('UPDATE messages SET status = ? WHERE id = ?', ['read', id]);
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ success: false, message: 'Message not found' });
+    }
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error('[chat] PATCH read error:', err);
+    res.status(500).json({ success: false, message: 'Error updating message' });
+  }
+});
+
+// Unread count for a user (optionally filtered by commission)
+// GET /api/commissions/chat/unread-count/:userId?commissionId=123
+router.get('/unread-count/:userId', async (req, res) => {
+  const { userId } = req.params;
+  const { commissionId } = req.query;
+
+  try {
+    let sql = 'SELECT COUNT(*) AS cnt FROM messages WHERE receiverId = ? AND status = ?';
+    const params = [userId, 'unread'];
+
+    if (commissionId) {
+      sql += ' AND commissionId = ?';
+      params.push(commissionId);
+    }
+
+    const [rows] = await db.query(sql, params);
+    res.json({ success: true, unread: rows[0].cnt });
+  } catch (err) {
+    console.error('[chat] GET unread-count error:', err);
+    res.status(500).json({ success: false, message: 'Error getting unread count' });
+  }
+});
+
+module.exports = router;

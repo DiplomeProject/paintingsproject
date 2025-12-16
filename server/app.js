@@ -8,6 +8,7 @@ const paintingRoutes = require('./routes/paintingRoutes');
 const profileRoutes = require('./routes/profileRoutes');
 const searchRoutes = require('./routes/searchRoutes');
 const commissionsRoutes = require('./commissions/Commissions');
+const chatRoutes = require('./commissions/chat');
 const artistsRoutes = require('./Artists/Artists');
 
 const app = express();
@@ -29,8 +30,10 @@ app.use(cors(corsOptions));
 // This ensures the cors middleware handles the preflight check correctly
 // app.options('*', cors(corsOptions));
 
-// JSON parser
-app.use(express.json());
+// JSON parser (allow larger payloads for base64 image uploads)
+app.use(express.json({ limit: '15mb' }));
+// also accept urlencoded bodies with same limit
+app.use(express.urlencoded({ extended: true, limit: '15mb' }));
 
 // session
 app.use(session({
@@ -51,8 +54,16 @@ app.use('/api/auth', authRoutes);
 app.use('/api/paintings', paintingRoutes);
 app.use('/api/profile', profileRoutes);
 app.use('/api/search', searchRoutes);
+// Mount chat route BEFORE the generic commissions router to avoid
+// the generic `/:id` handlers capturing the `chat` segment.
+app.use('/api/commissions/chat', chatRoutes);
 app.use('/api/commissions', commissionsRoutes);
 app.use('/api/artists', artistsRoutes);
+
+// Compatibility mounts for older client paths that omit the /api prefix
+app.use('/auth', authRoutes);
+app.use('/commissions', commissionsRoutes);
+app.use('/commissions/chat', chatRoutes);
 
 // 404 handler
 app.use((req, res) => {
