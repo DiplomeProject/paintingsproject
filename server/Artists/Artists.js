@@ -122,6 +122,84 @@ router.get('/artist/:id', async (req, res) => {
       return { ...p, image_url: imageUrl || null };
     });
 
+    // --- Normalize creators fields for frontend convenience ---
+    try {
+      // id/name/email
+      const normId = artist.Creator_ID || artist.Creator_Id || artist.id;
+      const normName = artist.Name || artist.name;
+      const normEmail = artist.Email || artist.email;
+
+      // bio: prefer explicit bio field if any, else Other_Details/Description
+      const normBio = artist.bio || artist.Bio || artist.Other_Details || artist.Description || '';
+
+      // styles: can be JSON string/array/single value; fallback extract from paintings
+      let normStyles = [];
+      const rawStyles = artist.styles !== undefined ? artist.styles : (artist.Styles !== undefined ? artist.Styles : undefined);
+      if (Array.isArray(rawStyles)) {
+        normStyles = rawStyles.filter(Boolean).map(String);
+      } else if (typeof rawStyles === 'string' && rawStyles.trim()) {
+        try {
+          const parsed = JSON.parse(rawStyles);
+          if (Array.isArray(parsed)) normStyles = parsed.filter(Boolean).map(String);
+          else {
+            const split = rawStyles.split(/[;,/|]+/).map(s => s.trim()).filter(Boolean);
+            if (split.length) normStyles = split;
+          }
+        } catch {
+          const split = rawStyles.split(/[;,/|]+/).map(s => s.trim()).filter(Boolean);
+          if (split.length) normStyles = split;
+        }
+      } else if (artist.Style || artist.style) {
+        normStyles = [String(artist.Style || artist.style)];
+      }
+      if (!normStyles.length && Array.isArray(artist.paintings)) {
+        const set = new Set();
+        artist.paintings.forEach(p => {
+          const ps = p.Style || p.style || p.artistStyle;
+          if (ps) set.add(String(ps));
+        });
+        if (set.size) normStyles = Array.from(set);
+      }
+
+      // languages: JSON string/array; treat as human languages, not country
+      let normLanguages = [];
+      const rawLang = artist.languages !== undefined ? artist.languages : (artist.Languages !== undefined ? artist.Languages : undefined);
+      if (Array.isArray(rawLang)) {
+        normLanguages = rawLang.filter(Boolean).map(String);
+      } else if (typeof rawLang === 'string' && rawLang.trim()) {
+        try {
+          const parsed = JSON.parse(rawLang);
+          if (Array.isArray(parsed)) normLanguages = parsed.filter(Boolean).map(String);
+          else {
+            const split = rawLang.split(/[;,/|]+/).map(s => s.trim()).filter(Boolean);
+            if (split.length) normLanguages = split;
+          }
+        } catch {
+          const split = rawLang.split(/[;,/|]+/).map(s => s.trim()).filter(Boolean);
+          if (split.length) normLanguages = split;
+        }
+      }
+
+      // likesCount: prefer artist field if present, else sum paintings
+      const likesFromPaintings = Array.isArray(artist.paintings)
+        ? artist.paintings.reduce((sum, p) => sum + (Number(p.likes || p.Likes) || 0), 0)
+        : 0;
+      const normLikes = Number(artist.likesCount || artist.likes || artist.Likes || likesFromPaintings) || 0;
+
+      // expose normalized fields (keep original ones for compatibility)
+      artist.id = normId;
+      artist.name = normName;
+      artist.email = normEmail;
+      artist.bio = normBio;
+      artist.avatar = artist.imageBase64 || artist.avatar || null;
+      artist.stylesArray = normStyles; // additional explicit array field
+      artist.languagesArray = normLanguages; // additional explicit array field
+      artist.likesCount = normLikes;
+    } catch (e) {
+      // do not break response on normalization error
+      console.error('Artist normalization error:', e);
+    }
+
     res.json(artist);
   } catch (error) {
     console.error('Error fetching artist:', error);

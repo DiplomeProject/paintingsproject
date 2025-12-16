@@ -227,7 +227,7 @@
     margin-top: 0;
 }
 
-.formInput {
+.formInput, .sizeInputGroup input {
     background-color: #7E7E7E;
     border-radius: 7px;
     height: 33px;
@@ -281,7 +281,7 @@
     background-position: right 15px center;
 }
 
-.formInput:focus, .formSelect:focus, .priceInput:focus {
+.formInput:focus, .formSelect:focus, .priceInput:focus, .sizeInputGroup input:focus {
     outline: none;
     box-shadow: 0 0 0 2px rgba(84, 84, 254, 0.5);
 }
