@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import "./GalleryArtist.css"; // Подключаем кастомный css
-import url from '../../../URL';
+import url from '../../URL';
 
 function GalleryArtist({ user }) {
     const [paintings, setPaintings] = useState([]);

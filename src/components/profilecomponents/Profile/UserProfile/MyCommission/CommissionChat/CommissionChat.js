@@ -3,6 +3,7 @@ import axios from 'axios';
 import styles from './CommissionChat.module.css';
 import placeholderImg from '../../../../../../assets/image-placeholder-icon.svg';
 import ImageViewer from "../../../../../ArtCard/ImageViewer/ImageViewer";
+import { io } from 'socket.io-client';
 // Іконки
 const CheckIcon = () => (<svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" /></svg>);
 const CrossIcon = () => (<svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" /></svg>);
@@ -28,6 +29,7 @@ const CommissionChat = ({ commissionId, user, onBack }) => {
     const [messages, setMessages] = useState([
         { id: 1, text: "To convey the spirit of retro...", senderId: 999, avatar: placeholderImg }
     ]);
+    const [inputText, setInputText] = useState('');
 
     useEffect(() => {
         axios.get(`/commissions/${commissionId}`)
@@ -51,6 +53,53 @@ const CommissionChat = ({ commissionId, user, onBack }) => {
             .catch(err => console.error(err))
             .finally(() => setLoading(false));
     }, [commissionId]);
+
+    // Load chat messages for this commission
+    useEffect(() => {
+        if (!commissionId) return;
+
+        const loadMessages = async () => {
+            try {
+                const res = await axios.get(`/commissions/chat/${commissionId}/messages`);
+                if (res.data && res.data.messages) {
+                    // map backend message shape to frontend display shape
+                    const mapped = res.data.messages.map(m => ({
+                        id: m.id,
+                        text: m.type === 'text' ? m.content : '',
+                        image: m.type === 'image' ? m.content : null,
+                        senderId: m.senderId,
+                        avatar: m.senderId === Number(user?.id) ? (user?.profileImage || placeholderImg) : placeholderImg,
+                        timestamp: m.timestamp
+                    }));
+                    setMessages(mapped);
+                }
+            } catch (err) {
+                console.error('Failed to load chat messages:', err);
+            }
+        };
+
+        loadMessages();
+        // realtime socket
+        const serverBase = (process.env.REACT_APP_API_BASE || 'http://localhost:8080/api').replace(/\/api$/, '');
+        const socket = io(serverBase, { withCredentials: true });
+        socket.emit('join', `commission_${commissionId}`);
+        const handler = (msg) => {
+            // ignore messages for other commissions
+            if (String(msg.commissionId) !== String(commissionId)) return;
+            setMessages(prev => {
+                // avoid duplicate by id
+                if (prev.some(m => String(m.id) === String(msg.id))) return prev;
+                return [...prev, msg];
+            });
+        };
+        socket.on('newMessage', handler);
+
+        return () => {
+            socket.emit('leave', `commission_${commissionId}`);
+            socket.off('newMessage', handler);
+            socket.close();
+        };
+    }, [commissionId, user]);
 
     // Коли відомий commission і user — завантажуємо профіль співрозмовника
     useEffect(() => {
@@ -127,17 +176,82 @@ const CommissionChat = ({ commissionId, user, onBack }) => {
     const handleFileChange = (e) => {
         const file = e.target.files[0];
         if (file) {
+            // Optional: limit file size (e.g., 5MB)
+            const MAX_SIZE = 5 * 1024 * 1024;
+            if (file.size > MAX_SIZE) {
+                alert('File is too large. Max 5MB');
+                return;
+            }
+
             const previewUrl = URL.createObjectURL(file);
             setPendingStageImage(previewUrl);
 
-            // Додаємо в чат для візуалізації
+            // read file as data URL and send to server as image message
+            const reader = new FileReader();
+            reader.onload = async () => {
+                const dataUrl = reader.result;
+                try {
+                    const payload = { type: 'image', content: dataUrl };
+                    const res = await axios.post(`/commissions/chat/${commissionId}/messages`, payload);
+                    if (res.data && res.data.success) {
+                        const m = res.data.message;
+                        const realMsg = {
+                            id: m.id,
+                            text: m.type === 'text' ? m.content : '',
+                            image: m.type === 'image' ? m.content : null,
+                            senderId: m.senderId,
+                            avatar: user.profileImage || placeholderImg,
+                            timestamp: m.timestamp
+                        };
+                        // append the confirmed message to chat
+                        setMessages(prev => [...prev, realMsg]);
+                        setPendingStageImage(null);
+                    } else {
+                        console.error('Image send failed', res.data);
+                        console.error('Image send failed', res.data);
+                        alert('Failed to upload sketch');
+                    }
+                } catch (err) {
+                    console.error('Error uploading sketch:', err);
+                    alert('Error uploading sketch');
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const handleSendMessage = async () => {
+    const text = inputText.trim();
+    if (!text) return;
+
+    // We only need to send the content; the backend finds the receiver
+    const payload = {
+        type: 'text',
+        content: text
+    };
+
+    try {
+            const res = await axios.post(`/commissions/chat/${commissionId}/messages`, payload);
+        if (res.data && res.data.success) {
+            const m = res.data.message;
             setMessages(prev => [...prev, {
-                id: Date.now(),
-                text: "",
-                senderId: user.id,
-                image: previewUrl,
-                avatar: user.profileImage || placeholderImg
+                id: m.id,
+                text: m.content,
+                senderId: m.senderId,
+                avatar: user.profileImage || placeholderImg,
+                timestamp: m.timestamp
             }]);
+            setInputText('');
+        }
+    } catch (err) {
+        console.error('Error sending message:', err);
+    }
+};
+
+    const handleInputKeyDown = (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            handleSendMessage();
         }
     };
 
@@ -279,11 +393,15 @@ const CommissionChat = ({ commissionId, user, onBack }) => {
                                     className={styles.userAvatar}
                                 />
                             )}
-                            <div className={styles.bubble}>
-                                {msg.text && <div>{msg.text}</div>}
-                                {msg.image && <img src={msg.image} alt="" className={styles.chatImageAttachment} />}
-                            </div>
+                            {/* Render bubble only if there's text or image */}
+                            {(msg.text || msg.image) && (
+                                <div className={styles.bubble}>
+                                    {msg.text && <div>{msg.text}</div>}
+                                    {msg.image && <img src={msg.image} alt="" className={styles.chatImageAttachment} />}
+                                </div>
+                            )}
                         </div>
+
                     ))}
                 </div>
 
@@ -293,7 +411,9 @@ const CommissionChat = ({ commissionId, user, onBack }) => {
                             type="text"
                             placeholder="Write message"
                             className={styles.chatInput}
-                            /* Додайте обробку Enter, якщо потрібно */
+                                    value={inputText}
+                                    onChange={(e) => setInputText(e.target.value)}
+                                    onKeyDown={handleInputKeyDown}
                         />
                         {/* Іконка завантаження файлу */}
                         <div className={styles.inputIcon} onClick={handleAddSketchClick}>
@@ -301,6 +421,7 @@ const CommissionChat = ({ commissionId, user, onBack }) => {
                                 <path d="M21 19V5C21 3.9 20.1 3 19 3H5C3.9 3 3 3.9 3 5V19C3 20.1 3.9 21 5 21H19C20.1 21 21 20.1 21 19ZM8.5 13.5L11 16.51L14.5 12L19 18H5L8.5 13.5Z" fill="white"/>
                             </svg>
                         </div>
+                        <button className={styles.sendButton} onClick={handleSendMessage}>Send</button>
                     </div>
                 </div>
             </div>

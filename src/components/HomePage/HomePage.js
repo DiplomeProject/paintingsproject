@@ -5,7 +5,7 @@ import AuthorPage from '../AuthorPage/AuthorPage';
 import PaintingDetailsModal from '../PaintingsDetailsModal/PaintingsDetailsModal';
 import Navbar from '../Nav/Nav';
 import Footer from '../Footer/Footer';
-import url from '../../../URL';
+import url from '../../URL';
 
 function HomePage() {
     const [paintings, setPaintings] = useState([]);
