@@ -10,6 +10,7 @@ const searchRoutes = require('./routes/searchRoutes');
 const commissionsRoutes = require('./commissions/Commissions');
 const chatRoutes = require('./commissions/chat');
 const artistsRoutes = require('./Artists/Artists');
+const fondyRoutes = require('./routes/fondyRoutes');
 
 const app = express();
 
@@ -59,6 +60,7 @@ app.use('/api/search', searchRoutes);
 app.use('/api/commissions/chat', chatRoutes);
 app.use('/api/commissions', commissionsRoutes);
 app.use('/api/artists', artistsRoutes);
+app.use('/api/fondy', fondyRoutes);
 
 // Compatibility mounts for older client paths that omit the /api prefix
 app.use('/auth', authRoutes);

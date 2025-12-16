@@ -8,6 +8,8 @@ import Commission from "./components/Commission/Commission";
 import ArtistsPage from "./components/Artists/ArtistsPage";
 import CheckoutPage from './components/CheckoutPage/CheckoutPage';
 import AuthorPage from "./components/AuthorPage/AuthorPage";
+import PaymentSuccess from "./components/CheckoutPage/PaymentSuccess";
+import PaymentFail from "./components/CheckoutPage/PaymentFail";
 
 export default function AppRouter({ onViewArtDetails, setIsLoggedIn }) {
     return (
@@ -23,6 +25,8 @@ export default function AppRouter({ onViewArtDetails, setIsLoggedIn }) {
                 path='checkout'
                 element={<CheckoutPage onViewArtDetails={onViewArtDetails} />}
             />
+            <Route path='success' element={<PaymentSuccess />} />
+            <Route path='fail' element={<PaymentFail />} />
             <Route path='author/:id' element={<AuthorPage />} />
         </Routes>
     )

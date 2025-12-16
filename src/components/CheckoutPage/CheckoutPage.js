@@ -3,19 +3,41 @@ import styles from './CheckoutPage.module.css';
 import { useCart } from '../Cart/CartContext';
 import { useNavigate } from 'react-router-dom';
 import trash from '../../assets/trashBin.svg'
+import axios from "axios";
 
 const CheckoutPage = ({ onViewArtDetails }) => {
     const { cartItems, removeFromCart } = useCart();
     const navigate = useNavigate();
 
-    const subtotal = cartItems.reduce((acc, item) => {
+    const subtotalNumber = cartItems.reduce((acc, item) => {
         const price = parseFloat(item.price) || 0;
         return acc + price * item.quantity;
-    }, 0).toFixed(2);
+    }, 0);
 
-    const handlePay = (e) => {
+    const subtotal = subtotalNumber.toFixed(2);
+
+    const handlePay = async (e) => {
         e.preventDefault();
-        alert("Payment logic goes here!");
+        if (cartItems.length === 0) return;
+
+        try {
+            const orderId = 'order_' + Date.now();
+            const res = await axios.post('http://localhost:8080/api/fondy/create-session', {
+                order_id: orderId,
+                amount: subtotalNumber,
+            });
+
+            const url = res?.data?.response?.checkout_url;
+            if (url) {
+                window.location.href = url;
+            } else {
+                console.error('Fondy response:', res.data);
+                alert('Failed to get payment URL');
+            }
+        } catch (err) {
+            console.error('Payment error:', err);
+            alert('Error while creating payment');
+        }
     };
 
     return (
