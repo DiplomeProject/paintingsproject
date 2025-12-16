@@ -1,0 +1,202 @@
+.walletContainer {
+    width: 100%;
+    padding: 24px 28px;
+    box-sizing: border-box;
+    min-height: 100%;
+    animation: fadeIn 0.4s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Header */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 22px;
+}
+
+.title {
+    font-size: 22px;
+    font-weight: 700;
+    margin: 0;
+    color: #EDEBFF;
+}
+
+.headerActions {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.yearFilterWrapper { display: flex; }
+
+.headerTitleBlock { display: flex; align-items: center; gap: 12px; }
+
+/* Верхня область: місяці + картка категорій */
+.topGrid {
+    display: grid;
+    grid-template-columns: 1fr 360px;
+    gap: 28px;
+    /*align-items: start;*/
+    margin-bottom: 28px;
+}
+
+/* Панель місяців */
+.monthsPanel {
+    display: flex;
+    flex-direction: column;
+    gap: 19px;
+    width: 680px;
+}
+
+.monthRow {
+    display: grid;
+    /* Make the first column fit the bar width exactly so the label sits 20px from it */
+    grid-template-columns: max-content auto;
+    align-items: center;
+    gap: 20px;
+    background: transparent;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+}
+
+.monthRow:focus { outline: none; }
+
+.barTrack {
+    width: 555px;
+    height: 24px;
+    border-radius: 20px;
+    border: 2px solid rgba(255,255,255,0.25);
+    overflow: hidden;
+}
+
+.barFill {
+    height: 100%;
+    background: linear-gradient(90deg, #5AB8FF 0%, #9B5BFF 50%, #FF5994 100%);
+    border-radius: 10px;
+}
+
+.monthLabel {
+    color: #FFFFFF;
+    font-size: 18px;
+    white-space: nowrap; /* keep label on one line right next to the bar */
+}
+
+.monthActive .barTrack { border-color: #B97BFF; }
+.monthActive .monthLabel { color: #FFFFFF; }
+
+/* Права картка категорій */
+.categoryCard {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.18);
+    border-radius: 16px;
+    padding: 16px;
+}
+
+.categoryHeader {
+    font-size: 12px;
+    color: #DAD7FF;
+    text-align: center;
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+}
+
+.categoryListCompact {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.categoryLine {
+    display: flex;
+    justify-content: space-between;
+    color: #EDEBFF;
+    font-size: 14px;
+}
+
+.categoryPercent { color: #EDEBFF; }
+.categoryName { color: #EDEBFF; }
+
+/* Таблиця транзакцій */
+.transactionsSection { background: transparent; }
+
+.tableWrapper { overflow-x: auto; }
+
+.transactionTableDark {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 12px;
+}
+
+.transactionTableDark th {
+    text-align: left;
+    padding: 0 16px 0 16px;
+    color: #C9C5FF;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    opacity: 0.9;
+}
+
+.rowDark td {
+    /* Підігнано під висоту рядка ~43px */
+    padding: 10px 16px;
+    font-size: 14px;
+    color: #EDEBFF;
+    vertical-align: middle;
+}
+
+.rowDark {
+    /* Фон і бордер як на скріншоті */
+    background: rgba(70, 70, 71, 0.60);
+    border: 3px solid transparent;
+    /* градієнтний бордер */
+    border-image: linear-gradient(180deg, #595C64 0%, #474D5F 44%) 1;
+    border-radius: 8px;
+    height: 43px;
+    box-sizing: border-box;
+}
+
+.profitCell { font-weight: 700; }
+
+.status {
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.income { color: #35E59A; font-weight: 700; }
+.expense { color: #EDEBFF; }
+
+/* Хайлайт як на скріні: яскравий синій інсет-підсвіт */
+.rowDark:hover,
+.rowDark:focus,
+.rowDark:focus-within {
+    box-shadow: 0 0 0 2px rgba(84, 132, 255, 0.85) inset, 0 0 18px rgba(84, 132, 255, 0.22);
+}
+
+.noData {
+    text-align: center;
+    padding: 30px;
+    color: #C9C5FF;
+    font-style: italic;
+}
+
+.paginationWrapperDark {
+    display: flex;
+    justify-content: center;
+    padding-top: 10px;
+}
+
+/* Адаптивність */
+@media (max-width: 900px) {
+    .topGrid { grid-template-columns: 1fr; }
+}

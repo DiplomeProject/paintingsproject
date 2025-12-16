@@ -3,6 +3,7 @@ import styles from "./DigitalBrushProfile.module.css";
 import MyImages from "./MyImages/MyImages";
 import ProfileSettings from "./SettingsProfile/SettingsProfile";
 import CommissionChat from "./MyCommission/CommissionChat/CommissionChat";
+import Wallet from "./Wallet/Wallet";
 
 import infoIcon from '../../../../assets/infoIcon.svg';
 import globeIcon from '../../../../assets/icons/globeIcon.svg';
@@ -87,8 +88,8 @@ function DigitalBrushProfile({ user, onLogout }) {
                         onBack={handleBackToCommissionList}
                     />
                 );
-            case 'payment':
-                return <div className={styles.placeholder}>Payment Component (Coming Soon)</div>;
+            case 'wallet':
+                return <Wallet />;
             case 'calendar':
                 return <div className={styles.placeholder}>Calendar Component (Coming Soon)</div>;
             default:
@@ -171,8 +172,8 @@ function DigitalBrushProfile({ user, onLogout }) {
                         </button>
 
                         <button
-                            className={`${styles.paymentBtn} ${activeTab === 'payment' ? styles.active : ''}`}
-                            onClick={() => setActiveTab('payment')}
+                            className={`${styles.paymentBtn} ${activeTab === 'wallet' ? styles.active : ''}`}
+                            onClick={() => setActiveTab('wallet')}
                         >
                             <img src={walletIcon} alt="PaymentIcon" className={styles.btnicon} />
                             Payment
