@@ -3,6 +3,7 @@ import axios from 'axios';
 import styles from './CommissionChat.module.css';
 import placeholderImg from '../../../../../../assets/image-placeholder-icon.svg';
 import ImageViewer from "../../../../../ArtCard/ImageViewer/ImageViewer";
+import CommissionModalDetails from "../../../../../Commission/CommissionModals/CommissionModalDetails";
 import { io } from 'socket.io-client';
 // Іконки
 const CheckIcon = () => (<svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" /></svg>);
@@ -22,10 +23,14 @@ const CommissionChat = ({ commissionId, user, onBack }) => {
     const fileInputChatRef = useRef(null); // для картинки прямо в чат (скрепка)
 
     const [mainImage, setMainImage] = useState(null);
+    // Прев'ю нижче головного більше не відображаємо, залишаємо тільки головне зображення
     const [previewImages, setPreviewImages] = useState([]);
 
     const [isViewerOpen, setIsViewerOpen] = useState(false);
     const [viewerInitialIndex, setViewerInitialIndex] = useState(0);
+
+    // Модальне вікно деталей комісії (має бути оголошене до будь-яких ранніх return)
+    const [isDetailsOpen, setIsDetailsOpen] = useState(false);
 
     // Дані співрозмовника (ім'я + аватар)
     const [partnerName, setPartnerName] = useState('');
@@ -57,8 +62,8 @@ const CommissionChat = ({ commissionId, user, onBack }) => {
                     // --- ІНІЦІАЛІЗАЦІЯ ЗОБРАЖЕНЬ ---
                     if (commData.images && commData.images.length > 0) {
                         setMainImage(commData.images[0]);
-                        // Всі інші зображення йдуть у прев'ю
-                        setPreviewImages(commData.images.slice(1));
+                        // Логіку нижніх прев'ю прибираємо
+                        setPreviewImages([]);
                     } else {
                         setMainImage(placeholderImg);
                         setPreviewImages([]);
@@ -171,11 +176,23 @@ const CommissionChat = ({ commissionId, user, onBack }) => {
         };
         socket.on('stageReview', onStageReview);
 
+        // обновление статуса из БД (emit с сервера)
+        const onStatusUpdated = (payload) => {
+            if (!payload || String(payload.commissionId) !== String(commissionId)) return;
+            const next = payload.status;
+            if (next) {
+                setStatus(next);
+                setCommission(prev => prev ? { ...prev, Status: next, status: next } : prev);
+            }
+        };
+        socket.on('statusUpdated', onStatusUpdated);
+
         return () => {
             socket.emit('leave', room);
             socket.off('newMessage', handler);
             socket.off('stageSubmitted', onStageSubmitted);
             socket.off('stageReview', onStageReview);
+            socket.off('statusUpdated', onStatusUpdated);
             socket.off('connect', joinRoom);
             socket.close();
         };
@@ -213,28 +230,15 @@ const CommissionChat = ({ commissionId, user, onBack }) => {
             });
     }, [commission, user]);
 
-    const handlePreviewClick = (clickedImage, clickedIndex) => {
-        const currentMain = mainImage;
-        const newPreviewImages = [...previewImages];
-
-        // Міняємо місцями
-        newPreviewImages[clickedIndex] = currentMain;
-
-        setMainImage(clickedImage);
-        setPreviewImages(newPreviewImages);
-    };
+    // Нижні прев'ю вимкнені — логіка swap більше не потрібна
 
     const openImageViewer = useCallback(() => {
-        // Формуємо повний список для гортання: Головне + Прев'ю
-        const allImages = [mainImage, ...previewImages].filter(img => img && img !== placeholderImg);
-
-        // Індекс завжди 0, бо ми клікаємо по головному, яке перше у списку
-        setViewerInitialIndex(0);
-
-        if (allImages.length > 0) {
+        // Відкриваємо тільки головне зображення
+        if (mainImage && mainImage !== placeholderImg) {
+            setViewerInitialIndex(0);
             setIsViewerOpen(true);
         }
-    }, [mainImage, previewImages]);
+    }, [mainImage]);
 
     const closeImageViewer = useCallback(() => {
         setIsViewerOpen(false);
@@ -430,6 +434,14 @@ const CommissionChat = ({ commissionId, user, onBack }) => {
 
     const chatPartnerName = partnerName || (isCustomer ? "Creator" : "Customer");
 
+    // Відкриття модального вікна з деталями комісії по кліку на назві
+
+    const statusLower = String(status || '').toLowerCase();
+    const statusProgress =
+        statusLower === 'completed' ? 3 :
+        statusLower === 'edits' ? 2 :
+        statusLower === 'sketch' ? 1 : 0; // open/other → 0
+
     return (
         <div className={styles.chatContainer}>
 
@@ -445,27 +457,16 @@ const CommissionChat = ({ commissionId, user, onBack }) => {
                             className={styles.thumbImage}
                             onClick={openImageViewer} // Відкрити Viewer при кліку
                         />
-
-                        {/* Рядок прев'ю, якщо є додаткові фото */}
-                        {previewImages.length > 0 && (
-                            <div className={styles.previewRow}>
-                                {previewImages.map((img, index) => (
-                                    <img
-                                        key={index}
-                                        src={img}
-                                        alt={`preview ${index}`}
-                                        className={styles.previewImg}
-                                        onClick={() => handlePreviewClick(img, index)} // Swap при кліку
-                                    />
-                                ))}
-                            </div>
-                        )}
                     </div>
 
                     <div className={styles.textInfo}>
-                        {/* Заголовок Uppercase */}
-                        <h4 className={styles.categoryTitle}>
-                            {commission?.category || "FOREST EMBER RETREAT"}
+                        {/* Назва комісії (клікабельна для відкриття деталей) */}
+                        <h4
+                            className={styles.categoryTitle}
+                            onClick={() => setIsDetailsOpen(true)}
+                            style={{ cursor: 'pointer' }}
+                        >
+                            {commission?.Title || commission?.title || 'COMMISSION'}
                         </h4>
 
                         {/* Опис */}
@@ -480,19 +481,18 @@ const CommissionChat = ({ commissionId, user, onBack }) => {
                     </div>
                 </div>
 
-                {/* 2. Статус бар (Sketch O O) */}
+                {/* 2. Статус бар (динамічні кружки) */}
                 <div className={styles.statusContainer}>
                     <div className={styles.statusHeader}>
                         <div className={styles.statusTitleBlock}>
-                            <div className={styles.bigDot}></div>
+                            <div className={statusProgress > 0 ? styles.bigDot : styles.bigDotHollow}></div>
                             <span className={styles.statusName}>{status}</span>
                         </div>
 
-                        {/* Пусті круги праворуч */}
+                        {/* Пусті/заповнені круги праворуч */}
                         <div className={styles.dotsRow}>
-                            {/* Просто декоративні круги, як на макеті */}
-                            <div className={styles.hollowDot}></div>
-                            <div className={styles.hollowDot}></div>
+                            <div className={`${styles.hollowDot} ${statusProgress > 1 ? styles.hollowDotFilled : ''}`}></div>
+                            <div className={`${styles.hollowDot} ${statusProgress > 2 ? styles.hollowDotFilled : ''}`}></div>
                         </div>
                     </div>
 
@@ -607,9 +607,16 @@ const CommissionChat = ({ commissionId, user, onBack }) => {
             </div>
             {isViewerOpen && (
                 <ImageViewer
-                    images={[mainImage, ...previewImages].filter(img => img && img !== placeholderImg)}
+                    images={[mainImage].filter(img => img && img !== placeholderImg)}
                     initialImageIndex={viewerInitialIndex}
                     onClose={closeImageViewer}
+                />
+            )}
+            {isDetailsOpen && (
+                <CommissionModalDetails
+                    commission={{ id: commission?.Commission_ID || commission?.id, imageUrl: mainImage }}
+                    disableTake
+                    onClose={() => setIsDetailsOpen(false)}
                 />
             )}
         </div>

@@ -120,8 +120,16 @@ router.get('/getuserpaintings', auth, async (req, res) => {
 
     try {
         const [rows] = await db.query(
-            `SELECT Painting_ID AS id, Title AS title, Image AS image_blob, Description AS description, Price AS price, Style AS style
-             FROM paintings WHERE Creator_ID = ?`,
+            `SELECT 
+                 Painting_ID AS id,
+                 Title AS title,
+                 Image AS image_blob,
+                 Description AS description,
+                 Price AS price,
+                 Style AS style,
+                 COALESCE(Likes, 0) AS Likes
+             FROM paintings 
+             WHERE Creator_ID = ?`,
             [userId]
         );
 
@@ -130,6 +138,7 @@ router.get('/getuserpaintings', auth, async (req, res) => {
             const image_url = blob
                 ? `data:image/jpeg;base64,${Buffer.from(blob).toString('base64')}`
                 : null;
+            const likesNum = Number(row.Likes) || 0;
             return {
                 id: row.id,
                 title: row.title,
@@ -137,6 +146,9 @@ router.get('/getuserpaintings', auth, async (req, res) => {
                 price: row.price,
                 style: row.style,
                 image_url,
+                // нормализуем лайки для фронта
+                Likes: likesNum,
+                likes: likesNum,
             };
         });
 

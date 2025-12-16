@@ -151,6 +151,16 @@
     box-shadow: 0 0 15px rgba(160, 32, 240, 0.4);
 }
 
+/* Порожній великий круг (для статусу Open/ще не розпочато) */
+.bigDotHollow {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: 2px solid #D053F5;
+    background: transparent;
+    box-shadow: 0 0 10px rgba(208, 83, 245, 0.2);
+}
+
 .statusName {
     font-size: 40px; /* Розмір тексту "Sketch" */
     font-weight: 400;
@@ -171,6 +181,13 @@
     border: 2px solid #D053F5; /* Неоновий контур */
     background: transparent;
     box-shadow: 0 0 10px rgba(208, 83, 245, 0.2);
+}
+
+/* Заповнений малий круг для прогресу */
+.hollowDotFilled {
+    background-color: #A020F0;
+    border-color: #A020F0;
+    box-shadow: 0 0 15px rgba(160, 32, 240, 0.4);
 }
 
 /* --- ГОЛОВНИЙ БОКС (Main Stage Box) --- */

@@ -5,9 +5,22 @@ import axios from 'axios';
 import ImageViewer from "../../ArtCard/ImageViewer/ImageViewer";
 import logo from '../../../assets/logo.svg'
 
-const CommissionModalDetails = ({ commission, onClose }) => {
+const CommissionModalDetails = ({ commission, onClose, disableTake = false }) => {
 
     const [isLoading, setIsLoading] = useState(true);
+    const [details, setDetails] = useState(() => ({
+        id: commission?.id,
+        title: commission?.title || '',
+        description: commission?.description || '',
+        category: commission?.category || 'Unknown',
+        style: commission?.style || 'Unknown',
+        fileFormat: commission?.fileFormat || commission?.format || 'Unknown',
+        size: commission?.size || 'Unknown',
+        price: commission?.price || '',
+        status: commission?.status || 'Open',
+        Creator_ID: commission?.Creator_ID || null,
+        Customer_ID: commission?.Customer_ID || null,
+    }));
 
     // --- НОВА ЛОГІКА СТАНУ ---
     // Головне зображення (з картки)
@@ -32,17 +45,34 @@ const CommissionModalDetails = ({ commission, onClose }) => {
 
             axios.get(`/commissions/${commission.id}`)
                 .then(response => {
-                    if (response.data.success && response.data.commission && response.data.commission.images) {
+                    if (response.data?.success && response.data?.commission) {
+                        const c = response.data.commission;
 
-                        // Отримуємо ВСІ зображення з API
-                        const fetchedImages = response.data.commission.images;
+                        // Картинки
+                        if (Array.isArray(c.images)) {
+                            const fetchedImages = c.images;
+                            const newPreviewImages = fetchedImages.filter(img => img !== initialMain);
+                            setPreviewImages(newPreviewImages);
+                            // Якщо не было главной — ставим первую
+                            if (!initialMain && fetchedImages.length > 0) {
+                                setMainImage(fetchedImages[0]);
+                            }
+                        }
 
-                        // Встановлюємо в прев'ю всі зображення з API,
-                        // ОКРІМ того, яке ВЖЕ є головним
-                        const newPreviewImages = fetchedImages.filter(img => img !== initialMain);
-
-                        setPreviewImages(newPreviewImages);
-
+                        // Текстовые данные
+                        setDetails(prev => ({
+                            ...prev,
+                            title: c.title || prev.title,
+                            description: c.description || prev.description,
+                            category: c.category || prev.category,
+                            style: c.style || prev.style,
+                            fileFormat: c.format || prev.fileFormat,
+                            size: c.size || prev.size,
+                            price: c.price ?? prev.price,
+                            status: c.status || prev.status,
+                            Creator_ID: c.Creator_ID ?? prev.Creator_ID,
+                            Customer_ID: c.Customer_ID ?? prev.Customer_ID,
+                        }));
                     }
                 })
                 .catch(err => {
@@ -178,18 +208,21 @@ const CommissionModalDetails = ({ commission, onClose }) => {
 
                     {/* --- ПРАВА КОЛОНКА (Без змін) --- */}
                     <div className={styles.info}>
-                        <p className={styles.title}>{commission.title}</p>
+                        <p className={styles.title}>{details.title}</p>
                         <p className={styles.field}>
-                            <span>Category</span> {commission.category}
+                            <span>Category</span> {details.category}
                         </p>
                         <p className={styles.field}>
-                            <span>Style</span> {commission.style}
+                            <span>Style</span> {details.style}
                         </p>
                         <p className={styles.field}>
-                            <span>File format</span> {commission.fileFormat}
+                            <span>File format</span> {details.fileFormat}
                         </p>
                         <p className={styles.field}>
-                            <span>Size</span> {commission.size}
+                            <span>Size</span> {details.size}
+                        </p>
+                        <p className={styles.field}>
+                            <span>Status</span> {details.status}
                         </p>
                     </div>
                 </div>
@@ -197,12 +230,14 @@ const CommissionModalDetails = ({ commission, onClose }) => {
                 {/* --- НИЖНЯ ЧАСТИНА (Без змін) --- */}
                 <div className={styles.about}>
                     <p>About</p>
-                    <span>{commission.description}</span>
+                    <span>{details.description}</span>
                 </div>
 
                 <div className={styles.actions}>
-                    <button className={styles.priceBtn}>{commission.price}$</button>
-                    <button className={styles.takeBtn} onClick={handleAccept}>Accept</button>
+                    <button className={styles.priceBtn}>{details.price}$</button>
+                    {!(disableTake || details.Creator_ID) && (
+                        <button className={styles.takeBtn} onClick={handleAccept}>Accept</button>
+                    )}
                 </div>
 
             </div>

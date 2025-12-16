@@ -2,6 +2,7 @@ const db = require('../config/db');
 const path = require('path');
 const fs = require('fs');
 const {upload} = require('../config/multerConfig');
+const { getIO } = require('../socket');
 const express = require('express');
 const router = express.Router();
 
@@ -162,7 +163,7 @@ router.get('/public', async (req, res) => {
         FROM commissions c
                  LEFT JOIN creators cr ON c.Customer_ID = cr.Creator_ID
         WHERE c.Type = 'public'
-          AND c.Status = 'open'
+          AND LOWER(c.Status) = 'open'
         ORDER BY c.Created_At DESC
     `;
 
@@ -287,8 +288,21 @@ router.get('/my', async (req, res) => {
                 }
             }
 
+            // Нормалізуємо статус під новий enum (Title Case)
+            // Берем з поля в любом регистре (MySQL может вернуть как Status/status)
+            const sourceStatus = commission.Status ?? commission.status ?? '';
+            const rawStatus = String(sourceStatus || '').toLowerCase();
+            const normalizedStatus =
+                rawStatus === 'sketch' ? 'Sketch' :
+                rawStatus === 'edits' ? 'Edits' :
+                rawStatus === 'completed' ? 'Completed' :
+                rawStatus === 'cancelled' ? 'Cancelled' :
+                'Open';
+
             return {
                 ...commission,
+                Status: normalizedStatus,
+                status: normalizedStatus,
                 ReferenceImage: imageUrl // Оновлюємо поле для фронтенду
             };
         });
@@ -321,6 +335,7 @@ router.get('/:id', async (req, res) => {
                Image5,
                Customer_ID,
                Creator_ID,
+               Status,
                Created_At,
                Updated_At
         FROM commissions
@@ -395,6 +410,16 @@ router.get('/:id', async (req, res) => {
 
         console.log(`[GET /${id}] images normalized: ${images.length}`);
 
+        // normalize status too (source may be Status or status)
+        const sourceStatus = commission.Status ?? commission.status ?? '';
+        const rawStatus = String(sourceStatus || '').toLowerCase();
+        const normalizedStatus =
+            rawStatus === 'sketch' ? 'Sketch' :
+            rawStatus === 'edits' ? 'Edits' :
+            rawStatus === 'completed' ? 'Completed' :
+            rawStatus === 'cancelled' ? 'Cancelled' :
+            'Open';
+
         res.json({
             success: true,
             commission: {
@@ -408,7 +433,8 @@ router.get('/:id', async (req, res) => {
                 price: commission.Price,
                 Customer_ID: commission.Customer_ID,
                 Creator_ID: commission.Creator_ID,
-                status: commission.Status,
+                status: normalizedStatus,
+                Status: normalizedStatus,
                 images,   // array of normalized image sources (data: URIs or URLs)
                 image1,   // individual normalized fields (may be null)
                 image2,
@@ -444,7 +470,7 @@ router.patch('/:id/accept', async (req, res) => {
             SET Status = 'Sketch',
                 Creator_ID = ?
             WHERE Commission_ID = ?
-              AND Status = 'open'
+              AND LOWER(Status) = 'open'
               AND Customer_ID != ? 
         `;
 
@@ -456,6 +482,17 @@ router.patch('/:id/accept', async (req, res) => {
                 success: false,
                 message: 'Commission not found, already accepted, or you are trying to accept your own commission'
             });
+        }
+
+        // Эмитим событие изменения статуса/исполнителя в комнату комиссии
+        try {
+            const io = getIO();
+            const payload = { commissionId: Number(id), status: 'Sketch' };
+            io.to(`commission_${id}`).emit('statusUpdated', payload);
+            // Дополнительно широковещательно, чтобы списки пользователя обновились
+            io.emit('statusUpdated', payload);
+        } catch (e) {
+            // socket not initialized — игнорируем
         }
 
         res.json({ success: true, message: `Commission ${id} accepted by artist ${creatorId}` });
@@ -480,6 +517,16 @@ router.patch('/:id/status', async (req, res) => {
         const sql = `UPDATE commissions SET Status = ?, Updated_At = NOW() WHERE Commission_ID = ?`;
         await db.query(sql, [normalizedStatus, id]);
 
+        // уведомляем участников комнаты комиссии о смене статуса
+        try {
+            const io = getIO();
+            const payload = { commissionId: Number(id), status: normalizedStatus };
+            io.to(`commission_${id}`).emit('statusUpdated', payload);
+            // Дополнительно широковещательно
+            io.emit('statusUpdated', payload);
+        } catch (e) {
+            // socket not initialized — пропускаем
+        }
 
         res.json({ success: true, status: normalizedStatus });
     } catch (err) {

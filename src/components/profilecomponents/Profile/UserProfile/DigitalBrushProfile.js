@@ -43,7 +43,7 @@ function DigitalBrushProfile({ user, onLogout }) {
     const [showAddCommissionModal, setShowAddCommissionModal] = useState(false);
     const [activeChatCommissionId, setActiveChatCommissionId] = useState(null);
 
-    const totalLikes = "0"; // Можна потім брати з user
+    const [totalLikes, setTotalLikes] = useState(0);
 
     const handleOpenChat = (commissionId) => {
         setActiveChatCommissionId(commissionId);
@@ -77,7 +77,7 @@ function DigitalBrushProfile({ user, onLogout }) {
             case 'settings':
                 return <ProfileSettings user={user} />;
             case 'images':
-                return <MyImages user={user} />;
+                return <MyImages user={user} onTotalLikesChange={setTotalLikes} />;
             case 'commission':
                 return <MyCommission user={user} onOpenChat={handleOpenChat} />;
             case 'chat':
@@ -131,8 +131,8 @@ function DigitalBrushProfile({ user, onLogout }) {
                         </div>
                         <div className={styles.metaRow}>
                             <img src={heartIcon} alt="Likes" className={styles.socialicon} />
-                            {/* Відображаємо лайки з об'єкта user */}
-                            <span>{user.likes || 0}</span>
+                            {/* Показуємо сумарні лайки, обчислені на фронті */}
+                            <span>{totalLikes}</span>
                         </div>
                     </div>
 
