@@ -4,6 +4,7 @@ import styles from './MyCommission.module.css';
 import CategoryFilters from "../../../../CategoryFilters/CategoryFilters";
 import CommissionModalDetails from "../../../../Commission/CommissionModals/CommissionModalDetails";
 import logo from '../../../../../assets/logo.svg'
+import { io } from 'socket.io-client';
 
 const commissionFilters = ['MY ORDERS', 'MY TASKS'];
 
@@ -120,14 +121,12 @@ function MyCommission({ user, onOpenChat}) {
     });
 
     const getFilledDotsCount = (status) => {
-        switch (status?.toLowerCase()) {
-            case 'in_progress': return 1;
-            case 'completed': return 2;
-            case 'cancelled': return 3;
-            case 'search': return 0;
-            case 'open': return 0;
-            default: return 0;
-        }
+        const s = String(status || '').toLowerCase();
+        // Новый enum: open -> 0, sketch -> 1, edits -> 2, completed -> 3, cancelled -> 0 (без прогресса)
+        if (s === 'sketch') return 1;
+        if (s === 'edits') return 2;
+        if (s === 'completed') return 3;
+        return 0; // open/cancelled/unknown
     };
 
     // ОНОВЛЕНА ФУНКЦІЯ RENDER DOTS
@@ -166,6 +165,27 @@ function MyCommission({ user, onOpenChat}) {
             status: item.Status
         };
     };
+
+    // Live-обновление статусов через сокет
+    useEffect(() => {
+        const serverBase = (process.env.REACT_APP_API_BASE || 'http://localhost:8080/api').replace(/\/api$/, '');
+        const socket = io(serverBase, { withCredentials: true, autoConnect: true, reconnection: true });
+
+        const onStatusUpdated = (payload) => {
+            if (!payload || !payload.commissionId) return;
+            setCommissions(prev => prev.map(c =>
+                Number(c.Commission_ID) === Number(payload.commissionId)
+                    ? { ...c, Status: payload.status, status: payload.status }
+                    : c
+            ));
+        };
+
+        socket.on('statusUpdated', onStatusUpdated);
+        return () => {
+            socket.off('statusUpdated', onStatusUpdated);
+            socket.close();
+        };
+    }, []);
 
     if (isLoading) {
         return (
@@ -216,9 +236,9 @@ function MyCommission({ user, onOpenChat}) {
 
                                 <div className={styles.statusRow}>
                                     <span className={styles.statusLabel}>
-                                        {item.Status || "Unknown"}
+                                        {item.Status || item.status || "Unknown"}
                                     </span>
-                                    {renderDots(item.Status)}
+                                    {renderDots(item.Status || item.status)}
                                 </div>
                             </div>
                         </div>
@@ -235,6 +255,7 @@ function MyCommission({ user, onOpenChat}) {
             {selectedCommission && (
                 <CommissionModalDetails
                     commission={selectedCommission}
+                    disableTake
                     onClose={() => setSelectedCommission(null)}
                 />
             )}
