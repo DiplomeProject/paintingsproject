@@ -3,7 +3,9 @@ const db = require('../config/db');
 const router = express.Router();
 
 // Поиск художников по имени или стилю
-router.get('/api/search-creators', async (req, res) => {
+// NOTE: этот роут смонтирован в app.js как app.use('/api/search', searchRoutes)
+// поэтому конечный путь здесь должен быть БЕЗ префикса /api
+router.get('/creators', async (req, res) => {
     const query = req.query.q?.trim() || '';
 
     if (!query) {

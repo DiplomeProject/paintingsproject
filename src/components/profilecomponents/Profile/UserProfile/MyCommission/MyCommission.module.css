@@ -1,0 +1,201 @@
+.container {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Обгортка для фільтрів, щоб додати відступ знизу */
+.filtersWrapper {
+    margin-bottom: 40px;
+}
+
+/* --- Сітка карток --- */
+.commissionGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(444px, 1fr));
+    gap: 14px;
+    padding-bottom: 60px;
+}
+
+.noResults {
+    text-align: center;
+    color: #888;
+    font-size: 18px;
+    margin-top: 40px;
+}
+
+/* --- Картка --- */
+.commissionCard {
+    overflow: hidden;
+    display: flex;
+    padding: 17px;
+    position: relative;
+    background: linear-gradient(rgba(70, 70, 71, 0.6), rgba(70, 70, 71, 0.6)) padding-box,
+    linear-gradient(168deg, rgba(89, 92, 100, 1), rgba(71, 77, 95, 0.44)) border-box;
+    border: 3px solid transparent;
+    border-radius: 12px;
+    height: 280px;
+    gap: 17px;
+    color: white;
+}
+
+.imagePriceWrapper {
+    width: 45%;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    border-radius: 5px;
+    background: linear-gradient(168.05deg, #595C64 1.51%, rgba(71, 77, 95, 0.44) 90.56%);
+    height: 100%;
+}
+
+.imageWrapper {
+    width: 100%;
+    height: 80%;
+    overflow: hidden;
+    border-radius: 1px 1px 0 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.cardImage {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.priceOverlay {
+    height: 20%;
+    background: #2c2c33;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(52.5px);
+}
+
+.cardPrice {
+    font-family: 'Roboto', sans-serif;
+    font-size: 20px;
+    color: white;
+}
+
+.cardContent {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    justify-content: space-between;
+}
+
+.textContent {
+    display: flex;
+    flex-direction: column;
+}
+
+.cardTitle {
+    margin: 0 0 10px 0;
+    font-family: 'Roboto', sans-serif;
+    font-size: 16px;
+    text-transform: uppercase;
+    line-height: 1.2;
+    color: #fff;
+}
+
+.cardDescription {
+    font-family: 'Roboto', sans-serif;
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.7);
+    line-height: 1.4;
+    margin: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 6;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.statusRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: auto;
+    padding-top: 10px;
+}
+
+.statusLabel {
+    font-size: 18px;
+    color: #e0e0e0;
+}
+
+.dotsContainer {
+    display: flex;
+    gap: 13px;
+}
+
+.dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: transparent;
+    border: 2px solid transparent;
+    box-sizing: border-box;
+}
+
+.dotFirst {
+    border-color: #8E40F2;
+}
+.dotFirst.filled {
+    background: linear-gradient(180deg, #8E40F2 0%, #A242EB 100%);
+    border-color: transparent;
+    box-shadow: 0 0 4px rgba(142, 64, 242, 0.4);
+}
+
+.dotSecond {
+    border-color: #B744E4;
+}
+.dotSecond.filled {
+    background: linear-gradient(180deg, #B744E4 0%, #CB46DD 100%);
+    border-color: transparent;
+    box-shadow: 0 0 4px rgba(183, 68, 228, 0.4);
+}
+
+.dotThird {
+    border-color: #E149D5;
+}
+.dotThird.filled {
+    background: linear-gradient(180deg, #E149D5 0%, #F64BCE 100%);
+    border-color: transparent;
+    box-shadow: 0 0 4px rgba(225, 73, 213, 0.4);
+}
+
+.loadingContainer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 400px;
+    width: 100%;
+}
+
+.loadingLogo {
+    width: 100px;
+    height: 100px;
+    animation: rotateLogo 2s linear infinite;
+}
+
+@keyframes rotateLogo {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+@media (max-width: 768px) {
+    .commissionGrid {
+        grid-template-columns: 1fr;
+    }
+    .commissionCard {
+        height: auto;
+        flex-direction: column;
+    }
+    .imagePriceWrapper {
+        width: 100%;
+        height: 200px;
+    }
+}

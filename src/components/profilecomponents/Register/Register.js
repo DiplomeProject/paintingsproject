@@ -1,6 +1,9 @@
 import React, {useState} from "react";
 import styles from "./Register.module.css";
 import {EyeIcon, EyeSlashIcon} from "./AuthIcons";
+import emailjs from '@emailjs/browser';
+import axios from 'axios';
+import URL from "../../../URL";
 
 function Register({toggleForm}) {
     const [showPassword, setShowPassword] = useState(false);
@@ -21,8 +24,21 @@ function Register({toggleForm}) {
 
     const sendVerificationEmail = async (name, email, code) => {
         try {
-            console.log(code);
             console.log("Attempting to send email with EmailJS...");
+                const result = await emailjs.send(
+                    "service_fv0f2qo",
+                    "template_zn93brw",
+                    {
+                    name: name,
+                    verification_code: code,
+                    to_email: email,
+                    reply_to: email,
+                    },
+                    "7Gw-RPTO7wMAtHcSb"
+                );
+                console.log("EmailJS response:", result);
+                console.log("Verification code sent successfully");
+      
             // EmailJS код здесь
             console.log("Verification code sent successfully");
             return true;
@@ -59,20 +75,14 @@ function Register({toggleForm}) {
         try {
             if (userCode.trim() !== generatedCode.trim()) {
                 alert("Невірний код підтвердження");
+                return;
             }
 
-            const response = await fetch("http://localhost:8080/register", {
-                method: "POST",
-                headers: {"Content-Type": "application/json"},
-                credentials: "include",
-                body: JSON.stringify(formData),
-            });
+            const { data } = await axios.post(`${URL}/auth/register`, formData);
 
-            const data = await response.json();
-
-            if (!response.ok) {
+            if (!data?.success) {
                 console.error("Registration error:", data);
-                alert(data.error || data.message || "Помилка реєстрації");
+                alert(data?.error || data?.message || "Помилка реєстрації");
             } else {
                 alert("Реєстрація успішна! Тепер ви можете увійти.");
                 toggleForm();

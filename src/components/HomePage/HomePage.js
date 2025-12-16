@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import Gallery from '../Gallery/Gallery';
 import AuthorPage from '../AuthorPage/AuthorPage';
 import PaintingDetailsModal from '../PaintingsDetailsModal/PaintingsDetailsModal';
 import Navbar from '../Nav/Nav';
 import Footer from '../Footer/Footer';
+import url from '../../URL';
 
 function HomePage() {
     const [paintings, setPaintings] = useState([]);
@@ -17,17 +19,15 @@ function HomePage() {
 
     const loadMainPage = () => {
         setShowAuthorPage(false);
-        fetch('http://localhost:8080/api/paintings')
-            .then(response => response.json())
-            .then(data => setPaintings(data))
+        axios.get(`${url}/paintings`)
+            .then(res => setPaintings(res.data))
             .catch(error => console.error('Error loading the paintings:', error));
     };
 
     const loadAuthorPage = (creatorId) => {
-        fetch(`http://localhost:8080/api/creator/${creatorId}`)
-            .then(response => response.json())
-            .then(data => {
-                setAuthorData(data);
+        axios.get(`${url}/artists/artist/${creatorId}`)
+            .then(res => {
+                setAuthorData(res.data);
                 setShowAuthorPage(true);
             })
             .catch(error => console.error('Error loading the author page:', error));

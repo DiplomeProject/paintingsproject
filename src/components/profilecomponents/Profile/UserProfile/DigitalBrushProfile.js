@@ -1,255 +1,221 @@
-import React, { useState, useEffect, useMemo } from "react";
-import axios from "axios";
+import React, { useState } from "react";
 import styles from "./DigitalBrushProfile.module.css";
-import ArtCard from "../../../ArtCard/ArtCard";
+import MyImages from "./MyImages/MyImages";
+import ProfileSettings from "./SettingsProfile/SettingsProfile";
+import CommissionChat from "./MyCommission/CommissionChat/CommissionChat";
+import Wallet from "./Wallet/Wallet";
 
-function DigitalBrushProfile({ user, onEditProfile, onLogout }) {
-  // === 1. State for paintings + pagination ===
-  const [paintings, setPaintings] = useState([]);
-  const [currentPage, setCurrentPage] = useState(0);
-  const itemsPerPage = 24;
+import infoIcon from '../../../../assets/infoIcon.svg';
+import globeIcon from '../../../../assets/icons/globeIcon.svg';
+import heartIcon from '../../../../assets/icons/heartIcon.svg';
+import userIcon from "../../../../assets/icons/userIcon.svg";
+import pictureIcon from "../../../../assets/icons/pictureIcon.svg";
+import calendarIcon from "../../../../assets/icons/calendarIcon.svg";
+import comissionIcon from "../../../../assets/icons/comissionIcon.svg";
+import walletIcon from "../../../../assets/icons/walletIcon.svg";
+import closeIcon from "../../../../assets/closeCross.svg";
+import plusIcon from "../../../../assets/icons/plusIcon.svg";
+import MyCommission from "./MyCommission/MyCommission";
+import AddArtModal from "../../../Shop/AddArtModal/AddArtModal";
+import AddCommissionModal from "../../../Commission/CommissionModals/AddCommissionModal";
 
-  const [showUploadModal, setShowUploadModal] = useState(false);
-  const [selectedImage, setSelectedImage] = useState(null);
-  const [imageTitle, setImageTitle] = useState("");
-  const [imageDescription, setImageDescription] = useState("");
 
-  // === 2. Fetch user paintings from backend ===
-  useEffect(() => {
-    const fetchPaintings = async () => {
-      try {
-        const response = await axios.get(
-          "http://localhost:8080/getuserpaintings",
-          { withCredentials: true }
-        );
-        if (response.data.success) {
-          setPaintings(response.data.paintings);
-        } else {
-          console.error("Failed to load paintings:", response.data.message);
-        }
-      } catch (err) {
-        console.error("Error fetching paintings:", err);
-      }
+const filterConfig = [
+    { title: "SORT BY", options: [{ name: "NONE" }, { name: "RATING" }, { name: "LATEST" }, { name: "EXPENSIVE" }, { name: "CHEAP" }]},
+    { title: "STYLE", options: [{ name: "NONE STYLE", subOptions: [
+                "Retro Futurism", "Mid-Century", "Modern, Art Deco", "Bauhaus, Y2K", "Aesthetic", "Memphis Style",
+                "Grunge", "Psychedelic Art", "Surrealism, Neo-Psychedelia, Op Art", "Dreamcore", "Weirdcore",
+                "Hyperrealism", "Social Realism", "Digital Realism", "Cinematic Realism", "Cyberpunk",
+                "Synthwave", "Vaporwave", "Minimalism", "Brutalism", "Postmodern", "Collage."
+            ] }]}
+];
+
+const categories = [
+    "2D AVATARS", "3D MODELS", "BOOKS", "ANIME", "ICONS", "GAMES", "MOCKUPS", "UI/UX",
+    "ADVERTISING", "BRENDING", "POSTER", "ARCHITECTURE", "FASHION", "SKETCH", "PHOTOGRAPHY"
+];
+
+function DigitalBrushProfile({ user, onLogout }) {
+    // Стан для відстеження поточної вкладки
+    // Можливі варіанти: 'settings', 'images', 'commission', 'payment', 'calendar'
+    const [activeTab, setActiveTab] = useState('images');
+    const [showAddArtModal, setShowAddArtModal] = useState(false);
+    const [showAddCommissionModal, setShowAddCommissionModal] = useState(false);
+    const [activeChatCommissionId, setActiveChatCommissionId] = useState(null);
+
+    const totalLikes = "0"; // Можна потім брати з user
+
+    const handleOpenChat = (commissionId) => {
+        setActiveChatCommissionId(commissionId);
+        setActiveTab('chat');
     };
 
-    fetchPaintings();
-  }, []);
+    const formatTags = (tags) => {
+        if (!tags || tags.length === 0) return "Not specified";
+        if (Array.isArray(tags)) return tags.slice(0, 2).join('/'); // Беремо перші 2
+        return tags; // Якщо це просто рядок
+    };
 
-  const handleImageUpload = async (e) => {
-    e.preventDefault();
+    const handleOpenAddArt = (e) => {
+        e.stopPropagation();
+        setShowAddArtModal(true);
+    };
 
-    const formData = new FormData();
-    formData.append("image", selectedImage);
-    formData.append("title", imageTitle);
-    formData.append("description", imageDescription);
-    setShowUploadModal(true);
+    const handleOpenAddCommission = (e) => {
+        e.stopPropagation();
+        setShowAddCommissionModal(true);
+    };
 
-    try {
-      const response = await axios.post(
-        "http://localhost:8080/upload",
-        formData,
-        { withCredentials: true }
-      );
-      if (response.data.success) {
-        //setShowUploadModal(false);
-      } else {
-        console.error("Upload failed:", response.data.message);
-      }
-    } catch (err) {
-      console.error("Error uploading image:", err);
-    }
-  };
+    const handleBackToCommissionList = () => {
+        setActiveChatCommissionId(null);
+        setActiveTab('commission');
+    };
 
-  // === 3. Pagination logic ===
-  const totalPages = Math.ceil(paintings.length / itemsPerPage);
-  const startIndex = currentPage * itemsPerPage;
-  const displayedPaintings = useMemo(
-    () => paintings.slice(startIndex, startIndex + itemsPerPage),
-    [paintings, startIndex]
-  );
+    // Функція для рендерингу правої частини
+    const renderContent = () => {
+        switch (activeTab) {
+            case 'settings':
+                return <ProfileSettings user={user} />;
+            case 'images':
+                return <MyImages user={user} />;
+            case 'commission':
+                return <MyCommission user={user} onOpenChat={handleOpenChat} />;
+            case 'chat':
+                return (
+                    <CommissionChat
+                        commissionId={activeChatCommissionId}
+                        user={user}
+                        onBack={handleBackToCommissionList}
+                    />
+                );
+            case 'wallet':
+                return <Wallet />;
+            case 'calendar':
+                return <div className={styles.placeholder}>Calendar Component (Coming Soon)</div>;
+            default:
+                return <MyImages user={user} />;
+        }
+    };
 
-  // === 4. Render pagination buttons ===
-  const renderPageNumbers = () => {
-    if (totalPages <= 5) {
-      return Array.from({ length: totalPages }, (_, i) => (
-        <button
-          key={i}
-          className={i === currentPage ? styles.activePage : ""}
-          onClick={() => setCurrentPage(i)}
-        >
-          {i + 1}
-        </button>
-      ));
-    }
+    return (
+        <div className={styles.pageContainer}>
+            <div className={styles.contentWrapper}>
 
-    const pages = [];
-    pages.push(
-      <button
-        key={0}
-        className={0 === currentPage ? styles.activePage : ""}
-        onClick={() => setCurrentPage(0)}
-      >
-        1
-      </button>
-    );
+                {/* --- ЛІВА ЧАСТИНА (SIDEBAR) --- */}
+                <aside className={styles.sidebar}>
+                    <div className={styles.avatarContainer}>
+                        <img
+                            src={user.profileImage || "/images/profileImg.jpg"}
+                            alt={user.name}
+                            className={styles.avatar}
+                        />
+                    </div>
 
-    if (currentPage > 2) {
-      pages.push(
-        <span key="dots1" className={styles.paginationDots}>
-          ...
-        </span>
-      );
-    }
+                    <div>
+                        <h1 className={styles.artistName}>
+                            {user.name || "Artist"}
+                            <span className={styles.status}>(available)</span>
+                        </h1>
+                    </div>
 
-    if (currentPage > 0 && currentPage < totalPages - 1) {
-      pages.push(
-        <button
-          key={currentPage}
-          className={styles.activePage}
-          onClick={() => setCurrentPage(currentPage)}
-        >
-          {currentPage + 1}
-        </button>
-      );
-    }
+                    <div className={styles.metaInfo}>
+                        <div className={styles.metaRow}>
+                            <img src={infoIcon} alt="Style" className={styles.socialicon} />
+                            {/* Відображаємо стилі з об'єкта user */}
+                            <span>{formatTags(user.styles)}</span>
+                        </div>
+                        <div className={styles.metaRow}>
+                            <img src={globeIcon} alt="Country" className={styles.socialicon} />
+                            {/* Відображаємо мови з об'єкта user */}
+                            <span>{formatTags(user.languages)}</span>
+                        </div>
+                        <div className={styles.metaRow}>
+                            <img src={heartIcon} alt="Likes" className={styles.socialicon} />
+                            {/* Відображаємо лайки з об'єкта user */}
+                            <span>{user.likes || 0}</span>
+                        </div>
+                    </div>
 
-    if (currentPage < totalPages - 3) {
-      pages.push(
-        <span key="dots2" className={styles.paginationDots}>
-          ...
-        </span>
-      );
-    }
+                    <p className={styles.bio}>
+                        {user.bio || "Welcome to my profile! No description provided yet."}
+                    </p>
 
-    pages.push(
-      <button
-        key={totalPages - 1}
-        className={totalPages - 1 === currentPage ? styles.activePage : ""}
-        onClick={() => setCurrentPage(totalPages - 1)}
-      >
-        {totalPages}
-      </button>
-    );
+                    {/* КНОПКИ З ЛОГІКОЮ АКТИВНОГО СТАНУ */}
+                    <div className={styles.actionButtonsContainer}>
 
-    return pages;
-  };
+                        <button
+                            className={`${styles.profileSettingsBtn} ${activeTab === 'settings' ? styles.active : ''}`}
+                            onClick={() => setActiveTab('settings')}
+                        >
+                            <img src={userIcon} alt="UserIcon" className={styles.btnicon} />
+                            Settings profile
+                        </button>
 
-  // === 5. Render component ===
-  return (
-    <div className={styles.profileView}>
-      <main className={styles.main}>
-        <aside className={styles.profileSidebar}>
-          <div className={styles.profileCard}>
-            <div className={styles.avatarContainer}>
-              <img
-                src={user.profileImage || "/images/icons/profile.jpg"}
-                alt={`${user.name} ${user.surname}`}
-                className={styles.avatar}
-              />
+                        <button
+                            className={`${styles.imagesBtn} ${activeTab === 'images' ? styles.active : ''}`}
+                            onClick={() => setActiveTab('images')}
+                        >
+                            <img src={pictureIcon} alt="PictureIcon" className={styles.btnicon} />
+                            My images
+                            <img src={plusIcon} alt="PlusIcon" className={styles.plusIcon}
+                                 onClick={handleOpenAddArt}
+                            />
+                        </button>
+
+                        <button
+                            className={`${styles.comissionBtn} ${activeTab === 'commission' ? styles.active : ''}`}
+                            onClick={() => setActiveTab('commission')}
+                        >
+                            <img src={comissionIcon} alt="ComissionIcon" className={styles.btnicon} />
+                            My Commission
+                            <img src={plusIcon} alt="PlusIcon" className={styles.plusIcon} onClick={handleOpenAddCommission}/>
+                        </button>
+
+                        <button
+                            className={`${styles.paymentBtn} ${activeTab === 'wallet' ? styles.active : ''}`}
+                            onClick={() => setActiveTab('wallet')}
+                        >
+                            <img src={walletIcon} alt="PaymentIcon" className={styles.btnicon} />
+                            Payment
+                        </button>
+
+                        <button
+                            className={`${styles.calendarBtn} ${activeTab === 'calendar' ? styles.active : ''}`}
+                            onClick={() => setActiveTab('calendar')}
+                        >
+                            <img src={calendarIcon} alt="CalendarIcon" className={styles.btnicon} />
+                            Calendar
+                        </button>
+
+                        <button className={styles.logoutBtn} onClick={onLogout}>
+                            <img src={closeIcon} alt="LogoutIcon" className={styles.btnicon} />
+                            Log out
+                        </button>
+                    </div>
+                </aside>
+
+                {/* --- ПРАВА ЧАСТИНА (ЗМІННИЙ КОНТЕНТ) --- */}
+                <main className={styles.gallerySection}>
+                    {renderContent()}
+                </main>
             </div>
-            <h2 className={styles.name}>
-              {user.name} {user.surname}{" "}
-              <span className={styles.status}>(available)</span>
-            </h2>
-            <div className={styles.info}>
-              <span>Retro/Psychedelia</span>
-              <span>En/Укр</span>
-              <span className={styles.followers}>52.5k Followers</span>
-            </div>
-            <p className={styles.description}>
-              {user.bio ||
-                "I create visual solutions that not only look good, but also work..."}
-            </p>
-            <div className={styles.buttons}>
-              <button onClick={onEditProfile}>Settings profile</button>
-              <button onClick={() => setShowUploadModal(true)}>Add image</button>
-              <button>My Commission</button>
-              <button>Payment</button>
-              <button onClick={onLogout}>Logout</button>
-            </div>
-          </div>
-        </aside>
 
-        {showUploadModal && (
-          <div className={styles.modalOverlay}>
-            <div className={styles.modalContent}>
-              <div className={styles.modalHeader}>
-                <h5>Upload New Image</h5>
-                <button type="button" className={styles.closeButton} onClick={() => setShowUploadModal(false)}>&times;</button>
-              </div>
-              <div className={styles.modalBody}>
-                <form onSubmit={handleImageUpload}>
-                  <div className={styles.formGroup}>
-                    <label htmlFor="imageTitle">Title</label>
-                    <input type="text" id="imageTitle" value={imageTitle} onChange={(e) => setImageTitle(e.target.value)} required />
-                  </div>
-                  <div className={styles.formGroup}>
-                    <label htmlFor="imageDescription">Description</label>
-                    <textarea id="imageDescription" value={imageDescription} onChange={(e) => setImageDescription(e.target.value)} required></textarea>
-                  </div>
-                  <div className={styles.formGroup}>
-                    <label htmlFor="imageUpload">Select Image</label>
-                    <input type="file" id="imageUpload" onChange={(e) => setSelectedImage(e.target.files[0])} required />
-                  </div>
-                  <button type="submit" className={styles.saveButton}>Upload Image</button>
-                </form>
-              </div>
-            </div>
-          </div>
-        )}
-
-        <section className={styles.gallerySection}>
-          <div className={styles.filters}>
-            <div className={styles.filterButtons}>
-              <button className={styles.active}>ICONS</button>
-              <button>UI/UX</button>
-              <button>ADVERTISING</button>
-              <button>BRANDING</button>
-            </div>
-            <div className={styles.additional}>ADDITIONAL FILTERS ▾</div>
-          </div>
-
-          <div className={styles.gallery}>
-            {displayedPaintings.length > 0 ? (
-              displayedPaintings.map((painting) => (
-                <ArtCard
-                  key={painting.id}
-                  imageUrl={painting.image_url}
-                  title={painting.title}
-                  artistName={user.name}
-                  artistStyle="Retro/Psychedelia"
-                  likes={painting.likes || 0}
-                  price={painting.price || ""}
+            {showAddArtModal && (
+                <AddArtModal
+                    onClose={() => setShowAddArtModal(false)}
+                    categories={categories}       // Переконайтеся, що ці дані приходять у DigitalBrushProfile
+                    filterConfig={filterConfig}   // або передайте сюди дефолтні значення
                 />
-              ))
-            ) : (
-              <p>No artworks yet.</p>
             )}
-          </div>
 
-          {totalPages > 1 && (
-            <div className={styles.pagination}>
-              <button
-                onClick={() => setCurrentPage((p) => Math.max(p - 1, 0))}
-                disabled={currentPage === 0}
-              >
-                ‹
-              </button>
-              {renderPageNumbers()}
-              <button
-                onClick={() =>
-                  setCurrentPage((p) => Math.min(p + 1, totalPages - 1))
-                }
-                disabled={currentPage === totalPages - 1}
-              >
-                ›
-              </button>
-            </div>
-          )}
-        </section>
-      </main>
-    </div>
-  );
+            {showAddCommissionModal && (
+                <AddCommissionModal
+                    onClose={() => setShowAddCommissionModal(false)}
+                    targetCreatorId={null}
+                />
+            )}
+        </div>
+    );
 }
 
 export default DigitalBrushProfile;

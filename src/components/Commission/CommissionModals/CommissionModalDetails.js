@@ -30,7 +30,7 @@ const CommissionModalDetails = ({ commission, onClose }) => {
             setMainImage(initialMain);
             setPreviewImages([]); // Очищуємо прев'ю перед запитом
 
-            axios.get(`http://localhost:8080/api/commissions/${commission.id}`, { withCredentials: true })
+            axios.get(`/commissions/${commission.id}`)
                 .then(response => {
                     if (response.data.success && response.data.commission && response.data.commission.images) {
 
@@ -96,6 +96,36 @@ const CommissionModalDetails = ({ commission, onClose }) => {
             e.target.src = "/images/placeholder.png";
         }
     };
+
+    const handleAccept = async () => {
+        if (!commission?.id) return;
+        try {
+            // const userId = localStorage.getItem('userId');
+            // if (!userId) {
+            //     alert("User not logged in");
+            //     return;
+            // }
+            const response = await axios.patch(
+                `/commissions/${commission.id}/accept`,
+                {}
+            );
+
+            if (response.data.success) {
+                alert("Commission accepted successfully!");
+                onClose();
+            }
+        } catch (err) {
+            console.error(err);
+            // Якщо сесія прострочена, бекенд поверне 401, і ми це обробимо тут
+            if (err.response && err.response.status === 401) {
+                alert("Please log in to accept commissions.");
+            } else {
+                alert("Failed to accept commission: " + (err.response?.data?.message || err.message));
+            }
+        }
+    };
+
+
 
     // Перевіряємо, чи є взагалі зображення для прев'ю
     const hasMultipleImages = previewImages.length > 0;
@@ -172,8 +202,9 @@ const CommissionModalDetails = ({ commission, onClose }) => {
 
                 <div className={styles.actions}>
                     <button className={styles.priceBtn}>{commission.price}$</button>
-                    <button className={styles.takeBtn}>Take</button>
+                    <button className={styles.takeBtn} onClick={handleAccept}>Accept</button>
                 </div>
+
             </div>
 
             {isViewerOpen && (

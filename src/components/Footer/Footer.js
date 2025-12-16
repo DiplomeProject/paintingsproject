@@ -2,7 +2,7 @@ import React from 'react';
 import styles from './Footer.module.css';
 import twitterIcon from '../../assets/twitterIcon.svg';
 import instagramIcon from '../../assets/instagram-icon.svg';
-import facebookIcon from '../../assets/facebook-icon.svg';
+import facebookIcon from '../../assets/icons/facebook-icon.svg';
 
 /*
  * Цей компонент SocialIcon використовує <img> теги,

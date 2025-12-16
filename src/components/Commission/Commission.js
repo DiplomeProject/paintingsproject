@@ -1,4 +1,4 @@
-import React, {useEffect, useMemo, useState} from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import styles from './Commission.module.css';
 import CategoryFilters from "../CategoryFilters/CategoryFilters";
 import AdvancedFilters from '../AdvancedFilters/AdvancedFilters';
@@ -6,24 +6,17 @@ import Pagination from '../hooks/Pagination/Pagination';
 import CommissionModalDetails from './CommissionModals/CommissionModalDetails';
 import AddCommissionModal from './CommissionModals/AddCommissionModal';
 import axios from 'axios';
-import logo from '../../assets/logo.svg'
+import logo from '../../assets/logo.svg';
 
-// ОНОВЛЕНО: Визначаємо конфігурацію фільтрів для Commission
 const commissionFilterConfig = [
-    { title: "SORT BY", options: [
-            { name: "NONE" }, { name: "RATING" }, { name: "LATEST" }, { name: "EXPENSIVE" }, { name: "CHEAP" }
-        ]},
-    { title: "STYLE", options: [
-            { name: "NONE STYLE", subOptions: [ "Retro Futurism", "Mid-Century", "Cyberpunk", "Synthwave" ]} // Скорочений список для прикладу
-        ]},
-    { title: "FORMAT", options: [
-            { name: "NONE", subOptions: [ "PNG", "JPG", "JPEG", "SVG" ]} // Скорочений список для прикладу
-        ]}
+{ title: "SORT BY", options: [{ name: "NONE" }, { name: "RATING" }, { name: "LATEST" }, { name: "EXPENSIVE" }, { name: "CHEAP" }]},
+{ title: "STYLE", options: [{ name: "NONE STYLE", subOptions: ["Retro Futurism", "Mid-Century", "Cyberpunk", "Synthwave"]}]},
+{ title: "FORMAT", options: [{ name: "NONE", subOptions: ["PNG", "JPG", "JPEG", "SVG"]}]}
 ];
 
 const categories = [
-    "2D AVATARS", "3D MODELS", "BOOKS", "ANIME", "ICONS", "GAMES", "MOCKUPS", "UI/UX",
-    "ADVERTISING", "BRENDING", "POSTER", "ARCHITECTURE", "FASHION", "SKETCH", "PHOTOGRAPHY"
+"2D AVATARS", "3D MODELS", "BOOKS", "ANIME", "ICONS", "GAMES", "MOCKUPS", "UI/UX",
+"ADVERTISING", "BRENDING", "POSTER", "ARCHITECTURE", "FASHION", "SKETCH", "PHOTOGRAPHY"
 ];
 
 /*// Функція для отримання випадкового цілого числа
@@ -90,25 +83,24 @@ const commissionsData = Array.from({ length: 1000 }, (_, i) => {
 });*/
 
 function Commission() {
-    const [activeCategory, setActiveCategory] = useState(null);
-    const [searchQuery, setSearchQuery] = useState('');
-    const [showAdvanced, setShowAdvanced] = useState(false);
-    const itemsPerPage = 52;
-    const [selectedCommission, setSelectedCommission] = useState(null);
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+const [activeCategory, setActiveCategory] = useState(null);
+const [searchQuery, setSearchQuery] = useState('');
+const [showAdvanced, setShowAdvanced] = useState(false);
+const itemsPerPage = 52;
+const [selectedCommission, setSelectedCommission] = useState(null);
+const [isModalOpen, setIsModalOpen] = useState(false);
+const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
-    const [commissions, setCommissions] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [currentPage, setCurrentPage] = useState(0);
-    const [totalPages, setTotalPages] = useState(0);
+const [commissions, setCommissions] = useState([]);
+const [loading, setLoading] = useState(true);
+const [currentPage, setCurrentPage] = useState(0);
+const [totalPages, setTotalPages] = useState(0);
 
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
+const [isLoggedIn, setIsLoggedIn] = useState(false);
 
     useEffect(() => {
-        axios.get("http://localhost:8080/check-session", { withCredentials: true })
+        axios.get('/auth/check-session')
             .then(res => {
-                console.log('Session check (Commission):', res.data.loggedIn);
                 setIsLoggedIn(res.data.loggedIn);
             })
             .catch(() => {
@@ -120,19 +112,15 @@ function Commission() {
         const fetchCommissions = async () => {
             setLoading(true);
             try {
-                const response = await axios.get("http://localhost:8080/api/commissions/public", {
+                const response = await axios.get('/commissions/public', {
                     params: {
                         page: currentPage + 1,
                         limit: itemsPerPage
-                    },
-                    withCredentials: true
+                    }
                 });
-
-                console.log('Fetched commissions:', response.data);
 
                 if (response.data.success && Array.isArray(response.data.commissions)) {
                     const mapped = response.data.commissions.map(c => {
-                        // prefer server-normalized imageUrl
                         let imageSrc = c.imageUrl || c.Image || c.ReferenceImage || null;
 
                         if (imageSrc && typeof imageSrc === 'string') {
@@ -140,13 +128,10 @@ function Commission() {
                             if (s.startsWith('data:')) {
                                 imageSrc = s;
                             } else {
-                                // remove newlines/spaces that may break base64
                                 const cleaned = s.replace(/(\r\n|\n|\r|\s)+/gm, "");
                                 if (cleaned.length > 50 && /^[A-Za-z0-9+/=]+$/.test(cleaned)) {
-                                    // treat as raw base64 -> prefix as PNG
                                     imageSrc = `data:image/png;base64,${cleaned}`;
                                 } else {
-                                    // keep as-is (might be a public URL or filesystem path); browser will try to load it
                                     imageSrc = s;
                                 }
                             }
@@ -170,7 +155,6 @@ function Commission() {
                         };
                     });
 
-                    console.log('Mapped commissions (with imageSrc):', mapped.map(m => ({ id: m.id, imageSrcType: typeof m.imageSrc, imageSrcPreview: (m.imageSrc || '').slice(0,60) })));
                     setCommissions(mapped);
                 } else {
                     setCommissions([]);
@@ -198,10 +182,8 @@ function Commission() {
         return items;
     }, [activeCategory, searchQuery, commissions]);
 
-
-    // Effect for Modal
     useEffect(() => {
-        if (isModalOpen) {
+        if (isModalOpen || isAddModalOpen) {
             document.body.style.overflow = 'hidden';
         } else {
             document.body.style.overflow = 'auto';
@@ -209,19 +191,7 @@ function Commission() {
         return () => {
             document.body.style.overflow = 'auto';
         };
-    }, [isModalOpen]);
-
-    // Effect for AddModal
-    useEffect(() => {
-        if (isAddModalOpen) {
-            document.body.style.overflow = 'hidden';
-        } else {
-            document.body.style.overflow = 'auto';
-        }
-        return () => {
-            document.body.style.overflow = 'auto';
-        };
-    }, [isAddModalOpen]);
+    }, [isModalOpen, isAddModalOpen]);
 
     const handleCategoryClick = (category) => {
         if (activeCategory === category) {
@@ -289,24 +259,15 @@ function Commission() {
                     />
 
                     <div className={styles.filtersContainer}>
-                        <button
-                            className={`${styles.additionalFilters} ${showAdvanced ? styles.active : ''}`}
-                            onClick={() => setShowAdvanced(!showAdvanced)}
-                        >
-                            ADDITIONAL FILTERS
-                            <svg width="12" height="8" viewBox="0 0 12 8" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M1 1.5L6 6.5L11 1.5" stroke="white" strokeWidth="2"/>
-                            </svg>
-                        </button>
+                        <AdvancedFilters filterConfig={commissionFilterConfig} />
                     </div>
                 </div>
-                {showAdvanced && <AdvancedFilters filterConfig={commissionFilterConfig} />}
+
                 {loading ? (
-                <div className={styles.loadingSpinnerContainer}>
-                    <img src={logo} alt="Loading" className={styles.loadingLogo} />
-                </div>
+                    <div className={styles.loadingSpinnerContainer}>
+                        <img src={logo} alt="Loading" className={styles.loadingLogo} />
+                    </div>
                 ) : (
-                    // Стара логіка (відображення сітки або "No results")
                     displayedCommissions.length > 0 ? (
                         <>
                             <div className={styles.commissionGrid}>
@@ -318,10 +279,7 @@ function Commission() {
                                                     src={commission.imageSrc || "/images/placeholder.png"}
                                                     alt={commission.title || "Commission"}
                                                     className={styles.cardImage}
-                                                    onError={(e) => {
-                                                        console.error('Image load error for:', commission.title, 'Source:', commission.imageSrc);
-                                                        e.target.src = "/images/placeholder.png";
-                                                    }}
+                                                    onError={(e) => { e.target.src = "/images/placeholder.png"; }}
                                                 />
                                             </div>
                                             <div className={styles.priceOverlay}>
@@ -355,6 +313,7 @@ function Commission() {
                     )
                 )}
             </div>
+
             {isAddModalOpen && (
                 <AddCommissionModal onClose={handleCloseAddModal} />
             )}
