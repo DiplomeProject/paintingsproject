@@ -19,6 +19,7 @@
     "muller": "^1.1.0",
     "multer": "^2.0.2",
     "mysql2": "^3.15.1",
+    "node-fetch": "^3.3.2",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-router-dom": "^7.9.3",
@@ -37,6 +38,20 @@
     "extends": [
       "react-app",
       "react-app/jest"
+    ],
+    "overrides": [
+      {
+        "files": [
+          "server/**/*.js"
+        ],
+        "env": {
+          "node": true,
+          "es2021": true
+        },
+        "globals": {
+          "globalThis": "readonly"
+        }
+      }
     ]
   },
   "browserslist": {

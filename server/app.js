@@ -9,6 +9,7 @@ const profileRoutes = require('./routes/profileRoutes');
 const searchRoutes = require('./routes/searchRoutes');
 const commissionsRoutes = require('./commissions/Commissions');
 const artistsRoutes = require('./Artists/Artists');
+const fondyRoutes = require('./routes/fondyRoutes');
 
 const app = express();
 
@@ -53,6 +54,7 @@ app.use('/api/profile', profileRoutes);
 app.use('/api/search', searchRoutes);
 app.use('/api/commissions', commissionsRoutes);
 app.use('/api/artists', artistsRoutes);
+app.use('/api/fondy', fondyRoutes);
 
 // 404 handler
 app.use((req, res) => {
