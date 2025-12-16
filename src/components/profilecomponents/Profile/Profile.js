@@ -24,7 +24,7 @@ function Profile({ setIsLoggedIn }) {
 
     // Перевірка сесії при завантаженні
     useEffect(() => {
-        axios.get('/auth/check-session')
+        axios.get(`${url}/auth/check-session`)
             .then(response => {
                 if (response.data.loggedIn) {
                     const userData = response.data.user;
