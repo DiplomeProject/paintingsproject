@@ -75,7 +75,11 @@ app.use('/api/fondy', fondyRoutes);
 app.use('/auth', authRoutes);
 app.use('/commissions', commissionsRoutes);
 app.use('/commissions/chat', chatRoutes);
-
+app.use('/paintings', paintingRoutes);
+app.use('/profile', profileRoutes);
+app.use('/search', searchRoutes);
+app.use('/artists', artistsRoutes);
+app.use('/fondy', fondyRoutes);
 // 404 handler
 app.use((req, res) => {
     res.status(404).json({ error: 'Endpoint not found' });
