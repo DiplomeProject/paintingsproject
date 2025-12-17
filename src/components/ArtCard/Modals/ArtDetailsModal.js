@@ -16,6 +16,7 @@ const ArtDetailsModal = ({art, onClose, isLoggedIn}) => {
     const [viewerInitialIndex, setViewerInitialIndex] = useState(0);
     const [isLiked, setIsLiked] = useState(false);
     const [likes, setLikes] = useState(Number(art?.likes) || 0);
+    const [owned, setOwned] = useState(false);
 
     const leftColumnRef = useRef(null);
     const rightInfoRef = useRef(null);
@@ -45,6 +46,25 @@ const ArtDetailsModal = ({art, onClose, isLoggedIn}) => {
         setLikes(Number(art?.likes) || 0);
     }, [art]);
 
+    // Проверяем владение картиной (для замены кнопки Buy -> Download)
+    useEffect(() => {
+        const checkOwnership = async () => {
+            try {
+                if (!isLoggedIn || !art?.id) {
+                    setOwned(false);
+                    return;
+                }
+                // Relative path to honor axios.defaults.baseURL
+                const res = await axios.get(`profile/check-ownership/${art.id}`);
+                setOwned(!!res?.data?.owned);
+            } catch (e) {
+                console.error('Ownership check failed:', e);
+                setOwned(false);
+            }
+        };
+        checkOwnership();
+    }, [art?.id, isLoggedIn]);
+
     const [likeLoading, setLikeLoading] = useState(false);
     const handleLikeClick = async () => {
         if (!isLoggedIn) {
@@ -54,7 +74,7 @@ const ArtDetailsModal = ({art, onClose, isLoggedIn}) => {
         if (!art?.id || likeLoading) return;
         try {
             setLikeLoading(true);
-            const res = await axios.post(`/paintings/${art.id}/like`);
+            const res = await axios.post(`paintings/${art.id}/like`);
             if (res?.data?.success) {
                 setIsLiked(!!res.data.liked);
                 setLikes(Number(res.data.likes) || 0);
@@ -159,6 +179,49 @@ const ArtDetailsModal = ({art, onClose, isLoggedIn}) => {
         addToCart(art);
     };
 
+    const handleDownloadClick = async () => {
+        try {
+            if (!art?.id) return;
+            const response = await axios.get(`profile/download/${art.id}`, { responseType: 'blob' });
+
+            // Определяем имя файла и тип по заголовкам ответа
+            const headers = response.headers || {};
+            const disposition = headers['content-disposition'] || headers['Content-Disposition'];
+            const contentType = headers['content-type'] || headers['Content-Type'] || 'application/octet-stream';
+
+            let filename = `${art.title || 'download'}`;
+            if (disposition && typeof disposition === 'string') {
+                const match = disposition.match(/filename\*=UTF-8''([^;]+)|filename="?([^";]+)"?/i);
+                const raw = (match && (match[1] || match[2])) || null;
+                if (raw) {
+                    try { filename = decodeURIComponent(raw); } catch { filename = raw; }
+                }
+            }
+
+            // Гарантируем корректное расширение по типу контента
+            const ensureExt = (name, ext) => (name.toLowerCase().endsWith(ext) ? name : name + ext);
+            if (/application\/zip/i.test(contentType)) {
+                filename = ensureExt(filename, '.zip');
+            } else if (/image\/(png|jpeg|jpg)/i.test(contentType)) {
+                const ext = /image\/png/i.test(contentType) ? '.png' : '.jpg';
+                filename = ensureExt(filename, ext);
+            }
+
+            const blob = new Blob([response.data], { type: contentType });
+            const blobUrl = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = blobUrl;
+            link.setAttribute('download', filename);
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            window.URL.revokeObjectURL(blobUrl);
+        } catch (e) {
+            console.error('Download failed:', e);
+            alert('Failed to download file. Please try again later.');
+        }
+    };
+
     return (
         <div className={styles.overlay} onClick={handleOverlayClick}>
             <div className={styles.modal}>
@@ -229,7 +292,11 @@ const ArtDetailsModal = ({art, onClose, isLoggedIn}) => {
                             </div>
 
                             <div className={styles.buttonRow}>
-                                <button className={styles.buyBtn} onClick={handleBuyClick}>Buy</button>
+                                {owned ? (
+                                    <button className={styles.buyBtn} onClick={handleDownloadClick}>Download</button>
+                                ) : (
+                                    <button className={styles.buyBtn} onClick={handleBuyClick}>Buy</button>
+                                )}
 
                                 <button className={styles.likeBtn} onClick={handleLikeClick} disabled={likeLoading}>
                                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className={isLiked ? styles.likedHeart : styles.unlikedHeart}>

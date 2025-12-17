@@ -25,20 +25,27 @@ const profileCategories = ['ICONS', 'UI/UX', 'ADVERTISING', 'BRENDING'];
 function MyImages({ user, onTotalLikesChange }) {
     const [paintings, setPaintings] = useState([]);
     const [activeCategory, setActiveCategory] = useState(null);
+    const [viewMode, setViewMode] = useState('created'); // 'created' | 'bought'
     const itemsPerPage = 24;
+    const viewFilters = ['MyImages', 'BoughtImages'];
 
     // Логіка завантаження перенесена сюди
     useEffect(() => {
         const fetchPaintings = async () => {
             try {
-                const response = await axios.get(
-                    "/profile/getuserpaintings"
-                );
+                // Выбираем URL в зависимости от режима
+                // Use relative paths with axios.defaults.baseURL = 'http://localhost:8080/api'
+                const url = viewMode === 'created'
+                    ? "profile/getuserpaintings"
+                    : "profile/getboughtpaintings";
+
+                const response = await axios.get(url);
                 if (response.data.success) {
                     const list = response.data.paintings || [];
                     setPaintings(list);
-                    // Обновляем суммарные лайки сразу после загрузки
-                    if (typeof onTotalLikesChange === 'function') {
+
+                    // Считаем лайки только для собственных картин (опционально)
+                    if (viewMode === 'created' && typeof onTotalLikesChange === 'function') {
                         const total = list.reduce((sum, p) => sum + (Number(p.likes ?? p.Likes) || 0), 0);
                         onTotalLikesChange(total);
                     }
@@ -53,7 +60,7 @@ function MyImages({ user, onTotalLikesChange }) {
         if (user) {
             fetchPaintings();
         }
-    }, [user]);
+    }, [user, viewMode, onTotalLikesChange]);
 
     // Перераховуємо суму лайків при зміні локального списку картин
     useEffect(() => {
@@ -71,6 +78,17 @@ function MyImages({ user, onTotalLikesChange }) {
             setActiveCategory(category);
         }
         setCurrentPage(0);
+    };
+
+    // Обработчик для переключения между MyImages / BoughtImages через CategoryFilters
+    const handleViewFilterClick = (filter) => {
+        if (!filter) return; // не допускаем состояния без выбранной вкладки
+        const nextMode = filter === 'BoughtImages' ? 'bought' : 'created';
+        if (nextMode !== viewMode) {
+            setViewMode(nextMode);
+            setActiveCategory(null); // сброс категорий при смене источника
+            setCurrentPage(0);
+        }
     };
 
     const filteredPaintings = useMemo(() => {
@@ -95,15 +113,24 @@ function MyImages({ user, onTotalLikesChange }) {
 
     return (
         <div className={styles.galleryContainer}>
-            {/* Фільтри */}
-            <div className={styles.topControls}>
+            {/* Переключатель MyImages / BoughtImages через общий компонент CategoryFilters */}
+            <div className={styles.viewSwitch}>
                 <CategoryFilters
-                    categories={profileCategories}
-                    activeCategory={activeCategory}
-                    onCategoryClick={handleCategoryClick}
+                    categories={viewFilters}
+                    activeCategory={viewMode === 'created' ? 'MyImages' : 'BoughtImages'}
+                    onCategoryClick={handleViewFilterClick}
                 />
-                <AdvancedFilters filterConfig={additionalFilterConfig} />
             </div>
+
+            {/*/!* Фільтри *!/*/}
+            {/*<div className={styles.topControls}>*/}
+            {/*    <CategoryFilters*/}
+            {/*        categories={profileCategories}*/}
+            {/*        activeCategory={activeCategory}*/}
+            {/*        onCategoryClick={handleCategoryClick}*/}
+            {/*    />*/}
+            {/*    <AdvancedFilters filterConfig={additionalFilterConfig} />*/}
+            {/*</div>*/}
 
             {/* Сітка */}
             <div className={styles.artGrid}>
@@ -116,16 +143,20 @@ function MyImages({ user, onTotalLikesChange }) {
                                 title: painting.title,
                                 imageUrl: painting.image_url,
                                 price: painting.price,
-                                artistName: user.name,
+                                artistName: painting.artistName || user.name,
                                 likes: (painting.likes ?? painting.Likes ?? 0),
-                                artistId: user.id,
+                                artistId: painting.artistId || user.id,
                                 category: painting.Category,
                                 style: painting.style
                             }}
                         />
                     ))
                 ) : (
-                    <div className={styles.noArtworks}>You haven't uploaded any artworks yet.</div>
+                    <div className={styles.noArtworks}>
+                        {viewMode === 'created'
+                            ? "You haven't uploaded any artworks yet."
+                            : "You haven't bought any artworks yet."}
+                    </div>
                 )}
             </div>
 

@@ -14,6 +14,9 @@ const fondyRoutes = require('./routes/fondyRoutes');
 
 const app = express();
 
+// Disable ETag/304 for API JSON responses to prevent axios errors on 304
+app.set('etag', false);
+
 const corsOptions = {
     // FIX: Use explicit origins for security and compatibility with credentials: true
     origin: [
@@ -48,6 +51,12 @@ app.use(session({
         sameSite: 'lax'
     }
 }));
+
+// Prevent caching of API responses (avoid 304 with empty body on subsequent requests)
+app.use((req, res, next) => {
+    res.set('Cache-Control', 'no-store');
+    next();
+});
 
 
 // Routes
