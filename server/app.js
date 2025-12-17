@@ -32,7 +32,7 @@ const corsOptions = {
 // CORS MUST BE FIRST
 app.use(cors(corsOptions));
 // This ensures the cors middleware handles the preflight check correctly
-// app.options('*', cors(corsOptions));
+//app.options('*', cors(corsOptions));
 
 // JSON parser (allow larger payloads for base64 image uploads)
 app.use(express.json({ limit: '15mb' }));

@@ -6,6 +6,7 @@ function init(server, options = {}) {
   io = new Server(server, {
     cors: {
       origin: [
+        'http://172.17.3.24:8080',
         'http://localhost:3000',
         'http://localhost:8080'
       ],
