@@ -78,7 +78,7 @@ function Register({toggleForm}) {
                 return;
             }
 
-            const { data } = await axios.post(`${URL}/auth/register`, formData);
+            const { data } = await axios.post(`${URL}/api/auth/register`, formData);
 
             if (!data?.success) {
                 console.error("Registration error:", data);
