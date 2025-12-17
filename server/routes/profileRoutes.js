@@ -275,13 +275,17 @@ router.get('/download/:paintingId', auth, async (req, res) => {
             return res.status(404).send('No image data found');
         }
 
-        // Логика отдачи файла
         if (imagesToDownload.length === 1) {
             // Одно изображение - отдаем как файл
             const img = imagesToDownload[0];
             const safeName = img.name;
+
+            // ИСПРАВЛЕНИЕ: кодируем имя файла и для старого параметра filename
+            const encodedName = encodeURIComponent(safeName);
+
             res.set('Content-Type', 'image/png');
-            res.set('Content-Disposition', `attachment; filename="${safeName}"; filename*=UTF-8''${encodeURIComponent(safeName)}`);
+            // Используем encodedName в обоих местах, чтобы избежать недопустимых символов
+            res.set('Content-Disposition', `attachment; filename="${encodedName}"; filename*=UTF-8''${encodedName}`);
             return res.send(img.buffer);
         } else {
             // Несколько изображений - пакуем в ZIP
@@ -292,8 +296,13 @@ router.get('/download/:paintingId', auth, async (req, res) => {
 
             const zipBuffer = zip.toBuffer();
             const safeName = `${painting.Title}_files.zip`;
+
+            // ИСПРАВЛЕНИЕ: кодируем имя файла и для старого параметра filename
+            const encodedName = encodeURIComponent(safeName);
+
             res.set('Content-Type', 'application/zip');
-            res.set('Content-Disposition', `attachment; filename="${safeName}"; filename*=UTF-8''${encodeURIComponent(safeName)}`);
+            // Используем encodedName в обоих местах
+            res.set('Content-Disposition', `attachment; filename="${encodedName}"; filename*=UTF-8''${encodedName}`);
             return res.send(zipBuffer);
         }
 
