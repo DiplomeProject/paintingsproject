@@ -158,6 +158,13 @@ const CommissionChat = ({ commissionId, user, onBack }) => {
         };
         socket.on('newMessage', handler);
 
+        const onPaymentUpdate = (payload) => {
+            if (!payload || String(payload.commissionId) !== String(commissionId)) return;
+            // Обновляем статус оплаты в стейте
+            setCommission(prev => prev ? { ...prev, is_paid: 1 } : prev);
+        };
+        socket.on('paymentUpdate', onPaymentUpdate);
+
         // «подача на ревью» от художника
         const onStageSubmitted = (payload) => {
             if (!payload || String(payload.commissionId) !== String(commissionId)) return;
@@ -191,6 +198,7 @@ const CommissionChat = ({ commissionId, user, onBack }) => {
             socket.emit('leave', room);
             socket.off('newMessage', handler);
             socket.off('stageSubmitted', onStageSubmitted);
+            socket.off('paymentUpdate', onPaymentUpdate);
             socket.off('stageReview', onStageReview);
             socket.off('statusUpdated', onStatusUpdated);
             socket.off('connect', joinRoom);
@@ -442,6 +450,31 @@ const CommissionChat = ({ commissionId, user, onBack }) => {
         statusLower === 'edits' ? 2 :
         statusLower === 'sketch' ? 1 : 0; // open/other → 0
 
+    const handlePayClick = async () => {
+        try {
+            // Создаем сессию оплаты через ваш backend
+            const res = await axios.post('/fondy/create-session', {
+                amount: commission.price,     // Цена из объекта commission
+                commissionId: commissionId,   // ID для вебхука
+                type: 'commission'            // Указываем тип, чтобы backend понял, что это не корзина
+            });
+
+            if (res.data && res.data.response && res.data.response.checkout_url) {
+                window.location.href = res.data.response.checkout_url;
+            } else {
+                alert('Error creating payment session');
+            }
+        } catch (err) {
+            console.error('Payment error:', err);
+            alert('Failed to initiate payment');
+        }
+    };
+
+    const handleDownloadClick = () => {
+        const baseUrl = axios.defaults.baseURL || '';
+        window.open(`${baseUrl}/commissions/download/${commissionId}`, '_blank');
+    };
+
     return (
         <div className={styles.chatContainer}>
 
@@ -498,52 +531,99 @@ const CommissionChat = ({ commissionId, user, onBack }) => {
 
                     {/* 3. Основне поле (Рамка) */}
                     <div className={styles.stageBox}>
-                        {/* Вміст stageBox (картинка, кнопки) залишається тим самим, що був у вас раніше */}
                         <div className={styles.imageArea}>
+
+                            {/* --- ЛОГИКА ОТОБРАЖЕНИЯ КАРТИНКИ --- */}
+                            {/* 1. Если есть активная подача на ревью (pendingStageImage) - показываем её (приоритет) */}
                             {pendingStageImage ? (
                                 <img src={pendingStageImage} alt="Stage" className={styles.currentStageImage} />
-                            ) : null}
-
-                            {/* КНОПКИ ДЛЯ ЗАМОВНИКА (Customer) - ПОВЕРХ КАРТИНКИ */}
-                            {isCustomer && pendingStageImage && status.toLowerCase() !== 'completed' && stageDecision === null && (
-                                <div className={styles.actionsOverlay}>
-                                    <button className={`${styles.actionBtn} ${styles.crossBtn}`} onClick={handleRejectStage} disabled={reviewLoading} title={reviewLoading ? 'Processing...' : 'Reject'}>
-                                        <CrossIcon />
-                                    </button>
-                                    <button className={`${styles.actionBtn} ${styles.checkBtn}`} onClick={handleApproveStage} disabled={reviewLoading} title={reviewLoading ? 'Processing...' : 'Approve'}>
-                                        <CheckIcon />
-                                    </button>
-                                </div>
+                            ) : (
+                                /* 2. Иначе, если статус Completed - показываем финальный результат (resultImage) */
+                                statusLower === 'completed' ? (
+                                    <img
+                                        /* Берем resultImage из данных комишена, или mainImage как запасной вариант */
+                                        src={commission.resultImage || mainImage}
+                                        alt="Final Result"
+                                        className={styles.currentStageImage}
+                                    />
+                                ) : (
+                                    /* 3. Иначе (статус Open/Sketch/Edits, но нет активной подачи) - показываем референс */
+                                    <img src={mainImage} alt="Reference" className={styles.currentStageImage} style={{opacity: 0.8}} />
+                                )
                             )}
 
-                            {/* РЕЗУЛЬТАТ ДЛЯ ОБОИХ ПОЛЬЗОВАТЕЛЕЙ */}
-                            {pendingStageImage && stageDecision && (
-                                <div style={{position:'absolute', right: 8, bottom: 8, display:'flex', gap:8}}>
-                                    {stageDecision === 'approve' && (
-                                        <div className={styles.checkBtn} style={{width:32, height:32, borderRadius:16, display:'flex', alignItems:'center', justifyContent:'center'}}>
-                                            <CheckIcon />
-                                        </div>
-                                    )}
-                                    {stageDecision === 'reject' && (
-                                        <div className={styles.crossBtn} style={{width:32, height:32, borderRadius:16, display:'flex', alignItems:'center', justifyContent:'center'}}>
-                                            <CrossIcon />
-                                        </div>
+                            {/* --- ЛОГИКА ПОВЕРХ КАРТИНКИ (КНОПКИ) --- */}
+
+                            {statusLower === 'completed' ? (
+                                <div className={styles.actionsOverlay} style={{ flexDirection: 'column', gap: '10px', background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(5px)', padding: '20px', borderRadius: '12px' }}>
+
+                                    {commission.is_paid ? (
+                                        /* 1. Якщо ОПЛАЧЕНО */
+                                        <>
+                                            {/* Повідомлення про успіх (бачать усі) */}
+                                            <div style={{ color: '#4CAF50', fontWeight: 'bold', fontSize: '16px', marginBottom: '5px' }}>
+                                                Payment Successful! ✅
+                                            </div>
+
+                                            {/* Кнопка скачування (ТІЛЬКИ ДЛЯ ЗАМОВНИКА) */}
+                                            {isCustomer && (
+                                                <button
+                                                    className={styles.actionBtn}
+                                                    onClick={handleDownloadClick}
+                                                    style={{ width: 'auto', padding: '10px 20px', fontSize: '14px', borderRadius: '8px', background: '#28a745', color: '#fff', border: 'none', cursor: 'pointer' }}
+                                                >
+                                                    Download Files 📥
+                                                </button>
+                                            )}
+                                        </>
+                                    ) : (
+                                        /* 2. Якщо ЩЕ НЕ оплачено */
+                                        isCustomer ? (
+                                            <button
+                                                className={styles.actionBtn}
+                                                onClick={handlePayClick}
+                                                style={{ width: 'auto', padding: '10px 20px', fontSize: '14px', borderRadius: '8px', background: '#007BFF', color: '#fff', border: 'none', cursor: 'pointer' }}
+                                            >
+                                                Pay {commission.price}$ 💳
+                                            </button>
+                                        ) : (
+                                            /* Повідомлення для художника */
+                                            <div style={{ padding: '8px 12px', background: 'rgba(255,255,255,0.1)', color: 'white', borderRadius: 4 }}>
+                                                Waiting for payment... ⏳
+                                            </div>
+                                        )
                                     )}
                                 </div>
+                            ) : (
+                                /* ВАРИАНТ Б: ПРОЦЕСС РАБОТЫ (Approve / Reject) */
+                                <>
+                                    {isCustomer && pendingStageImage && stageDecision === null && (
+                                        <div className={styles.actionsOverlay}>
+                                            <button className={`${styles.actionBtn} ${styles.crossBtn}`} onClick={handleRejectStage} disabled={reviewLoading}>
+                                                <CrossIcon />
+                                            </button>
+                                            <button className={`${styles.actionBtn} ${styles.checkBtn}`} onClick={handleApproveStage} disabled={reviewLoading}>
+                                                <CheckIcon />
+                                            </button>
+                                        </div>
+                                    )}
+
+                                    {/* Иконки уже принятого решения (галочка/крестик в углу) */}
+                                    {pendingStageImage && stageDecision && (
+                                        <div style={{position:'absolute', right: 8, bottom: 8, display:'flex', gap:8}}>
+                                            {stageDecision === 'approve' && <div className={styles.checkBtn} style={{width:32, height:32, borderRadius:16, display:'flex', alignItems:'center', justifyContent:'center'}}><CheckIcon /></div>}
+                                            {stageDecision === 'reject' && <div className={styles.crossBtn} style={{width:32, height:32, borderRadius:16, display:'flex', alignItems:'center', justifyContent:'center'}}><CrossIcon /></div>}
+                                        </div>
+                                    )}
+                                </>
                             )}
                         </div>
 
-                        {/* КНОПКА ЗАВАНТАЖЕННЯ ДЛЯ ВИКОНАВЦЯ (Creator) - ВНИЗУ */}
-                        {isCreator && status.toLowerCase() !== 'completed' && (
+                        {/* КНОПКА ЗАГРУЗКИ СКЕТЧЕЙ (Только для автора и если не завершено) */}
+                        {isCreator && statusLower !== 'completed' && (
                             <>
-                                <input
-                                    type="file"
-                                    ref={fileInputRef}
-                                    style={{display: 'none'}}
-                                    accept="image/*"
-                                    onChange={handleFileChange}
-                                />
-                                <div className={styles.addSketchBar} onClick={() => { if (!submittingStage) handleAddSketchClick(); }} style={submittingStage ? { opacity: 0.7, pointerEvents: 'none' } : undefined}>
+                                <input type="file" ref={fileInputRef} style={{display: 'none'}} accept="image/*" onChange={handleFileChange} />
+                                <div className={styles.addSketchBar} onClick={() => { if (!submittingStage) handleAddSketchClick(); }}>
                                     {submittingStage ? 'Uploading...' : 'Add Sketch'}
                                 </div>
                             </>

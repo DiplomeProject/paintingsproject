@@ -2,6 +2,7 @@ const express = require('express');
 const crypto = require('crypto');
 const db = require('../config/db'); // Импортируем подключение к БД
 const auth = require('../middleware/authMiddleware'); // Добавляем middleware авторизации
+const { getIO } = require('../socket');
 
 // Use global fetch if available (Node 18+), otherwise lazy-load
 const fetch = (...args) =>
@@ -61,11 +62,13 @@ async function createFondySessionOnce(intAmount, uniqueOrderId) {
 // Добавляем auth middleware, чтобы знать User_ID
 router.post('/create-session', auth, async(req, res) => {
     try {
-        const { amount, paintingIds } = req.body; // Ожидаем массив paintingIds с фронта
+        // Добавляем type и commissionId в получение данных
+        const { amount, paintingIds, type, commissionId } = req.body;
         const userId = req.session.user?.Creator_ID || req.session.user?.id;
 
-        if (!amount || !paintingIds || !paintingIds.length) {
-            return res.status(400).json({ error: 'amount_or_paintings_missing' });
+        // Проверяем наличие суммы
+        if (!amount) {
+            return res.status(400).json({ error: 'amount_required' });
         }
         if (!userId) {
             return res.status(401).json({ error: 'unauthorized' });
@@ -73,42 +76,43 @@ router.post('/create-session', auth, async(req, res) => {
 
         const intAmount = Math.round(Number(amount) * 100);
 
-        // Генерируем ID заказа
+        // Определяем тип заказа (по умолчанию 'cart')
+        const orderType = type || 'cart';
+        // ID цели (если комишен, то ID комишена, иначе 0)
+        const targetId = commissionId || 0;
+
+        // Генерируем уникальный ID заказа
         const uniqueOrderId = 'order_' + crypto.randomBytes(16).toString('hex');
 
-        // Сохраняем заказ в БД перед отправкой в Fondy
-        await db.query('INSERT INTO payment_orders (Order_ID, User_ID, Status) VALUES (?, ?, ?)',
-            [uniqueOrderId, userId, 'pending']);
+        // 1. Сохраняем заказ в БД с новыми полями Type и Target_ID
+        await db.query(
+            'INSERT INTO payment_orders (Order_ID, User_ID, Status, Type, Target_ID) VALUES (?, ?, ?, ?, ?)',
+            [uniqueOrderId, userId, 'pending', orderType, targetId]
+        );
 
-        // Сохраняем состав заказа
-        const orderItemsValues = paintingIds.map(pid => [uniqueOrderId, pid]);
-        await db.query('INSERT INTO payment_order_items (Order_ID, Painting_ID) VALUES ?', [orderItemsValues]);
+        // 2. Если это корзина ('cart'), сохраняем товары как раньше
+        if (orderType === 'cart' && paintingIds && paintingIds.length > 0) {
+            const orderItemsValues = paintingIds.map(pid => [uniqueOrderId, pid]);
+            await db.query('INSERT INTO payment_order_items (Order_ID, Painting_ID) VALUES ?', [orderItemsValues]);
+        }
 
-        // Создаем сессию в Fondy
+        // 3. Создаем сессию в Fondy
         let attempts = 0;
         let fondyResponse = null;
 
         while (attempts < 3) {
             attempts += 1;
             fondyResponse = await createFondySessionOnce(intAmount, uniqueOrderId);
-            const resp = fondyResponse?.response;
+
+            const resp = fondyResponse && fondyResponse.response ? fondyResponse.response : null;
             if (!resp) break;
 
             const code = resp.error_code;
-            const msg = resp.error_message;
-
-            // 1013 — дубликат order_id, пробуем создать новый
-            if (code === 1013 || code === '1013' ||
-                (msg && typeof msg === 'string' && msg.indexOf('Duplicate order') !== -1)) {
-                console.warn(
-                    'Fondy duplicate order_id, retrying with new order_id, attempt',
-                    attempts,
-                    'of 3'
-                );
+            // Если ошибка 1013 (дубликат), пробуем снова (но по хорошему uniqueOrderId уже записан в БД, так что это редкий кейс)
+            if (code === 1013 || code === '1013') {
+                console.warn('Fondy duplicate order_id, retrying...');
                 continue;
             }
-
-            // Любая другая ошибка — выходим, не повторяем
             break;
         }
 
@@ -122,37 +126,62 @@ router.post('/create-session', auth, async(req, res) => {
 router.post('/webhook', express.urlencoded({ extended: false }), async (req, res) => {
     try {
         const data = req.body || {};
+
         const receivedSignature = data.signature;
         const dataWithoutSignature = { ...data };
         delete dataWithoutSignature.signature;
 
         const expectedSignature = createSignature(dataWithoutSignature);
         if (!receivedSignature || expectedSignature !== receivedSignature) {
+            console.warn('Fondy webhook: invalid signature');
             return res.status(400).send('invalid signature');
         }
 
         const orderId = data.order_id;
         const orderStatus = data.order_status;
 
-        console.log(`Fondy webhook: Order ${orderId} status ${orderStatus}`);
+        console.log(`✅ Fondy webhook: Order ${orderId} status ${orderStatus}`);
 
         if (orderStatus === 'approved') {
-            // 1. Обновляем статус заказа
-            await db.query('UPDATE payment_orders SET Status = ? WHERE Order_ID = ?', ['approved', orderId]);
+            // 1. Сначала получаем информацию о типе заказа из нашей БД
+            const [orders] = await db.query('SELECT * FROM payment_orders WHERE Order_ID = ?', [orderId]);
 
-            // 2. Получаем пользователя и картины из этого заказа
-            const [orderRows] = await db.query('SELECT User_ID FROM payment_orders WHERE Order_ID = ?', [orderId]);
-            const [itemRows] = await db.query('SELECT Painting_ID FROM payment_order_items WHERE Order_ID = ?', [orderId]);
+            if (orders.length > 0) {
+                const order = orders[0];
 
-            if (orderRows.length > 0 && itemRows.length > 0) {
-                const userId = orderRows[0].User_ID;
-                const paintingIds = itemRows.map(row => row.Painting_ID);
+                // Обновляем статус самого заказа в payment_orders
+                await db.query('UPDATE payment_orders SET Status = ? WHERE Order_ID = ?', ['approved', orderId]);
 
-                // 3. Добавляем в покупки пользователя (user_purchases), игнорируя дубликаты (INSERT IGNORE)
-                const values = paintingIds.map(pid => [userId, pid]);
-                await db.query('INSERT IGNORE INTO user_purchases (User_ID, Painting_ID) VALUES ?', [values]);
+                if (order.Type === 'commission') {
+                    if (order.Target_ID) {
+                        await db.query('UPDATE commissions SET is_paid = 1 WHERE Commission_ID = ?', [order.Target_ID]);
+                        console.log(`[Fondy Return] Commission #${order.Target_ID} marked as PAID.`);
 
-                console.log(`Purchases recorded for User ${userId}, Items: ${paintingIds}`);
+                        try {
+                            const io = getIO();
+                            // Отправляем событие paymentUpdate всем, кто смотрит этот комишен
+                            io.to(`commission_${order.Target_ID}`).emit('paymentUpdate', {
+                                commissionId: order.Target_ID,
+                                is_paid: 1
+                            });
+                        } catch (e) {
+                            console.warn('Socket emit error:', e.message);
+                        }
+                    }
+                } else {
+                    // --- ЭТО ОБЫЧНАЯ ПОКУПКА КАРТИН (КОРЗИНА) ---
+                    const [itemRows] = await db.query('SELECT Painting_ID FROM payment_order_items WHERE Order_ID = ?', [orderId]);
+
+                    if (itemRows.length > 0) {
+                        const userId = order.User_ID;
+                        const paintingIds = itemRows.map(r => r.Painting_ID);
+                        const values = paintingIds.map(pid => [userId, pid]);
+
+                        // Добавляем в покупки пользователя
+                        await db.query('INSERT IGNORE INTO user_purchases (User_ID, Painting_ID) VALUES ?', [values]);
+                        console.log(`Purchases recorded for User ${userId}, Items: ${paintingIds}`);
+                    }
+                }
             }
         }
 
@@ -194,20 +223,46 @@ router.all('/return', express.urlencoded({ extended: false }), (req, res) => {
         if (orderStatus === 'approved' && orderId) {
             (async () => {
                 try {
-                    await db.query('UPDATE payment_orders SET Status = ? WHERE Order_ID = ?', ['approved', orderId]);
+                    // 1. Получаем сам заказ, чтобы узнать Тип и ID цели
+                    const [orders] = await db.query('SELECT * FROM payment_orders WHERE Order_ID = ?', [orderId]);
 
-                    const [orderRows] = await db.query('SELECT User_ID FROM payment_orders WHERE Order_ID = ?', [orderId]);
-                    const [itemRows] = await db.query('SELECT Painting_ID FROM payment_order_items WHERE Order_ID = ?', [orderId]);
+                    if (orders.length > 0) {
+                        const order = orders[0];
 
-                    if (orderRows.length > 0 && itemRows.length > 0) {
-                        const userId = orderRows[0].User_ID;
-                        const paintingIds = itemRows.map(r => r.Painting_ID);
-                        const values = paintingIds.map(pid => [userId, pid]);
-                        await db.query('INSERT IGNORE INTO user_purchases (User_ID, Painting_ID) VALUES ?', [values]);
-                        console.log(`[Fondy return] Purchases recorded for User ${userId}, Items: ${paintingIds}`);
+                        // Обновляем статус заказа оплаты
+                        await db.query('UPDATE payment_orders SET Status = ? WHERE Order_ID = ?', ['approved', orderId]);
+
+                        // 2. Логика в зависимости от ТИПА
+                        if (order.Type === 'commission') {
+                            // === ЛОГИКА ДЛЯ КОМИШЕНА ===
+                            if (order.Target_ID) {
+                                await db.query('UPDATE commissions SET is_paid = 1 WHERE Commission_ID = ?', [order.Target_ID]);
+                                console.log(`[Fondy Return] Commission #${order.Target_ID} marked as PAID.`);
+
+                                try {
+                                    const io = getIO();
+                                    // Отправляем событие paymentUpdate всем, кто смотрит этот комишен
+                                    io.to(`commission_${order.Target_ID}`).emit('paymentUpdate', {
+                                        commissionId: order.Target_ID,
+                                        is_paid: 1
+                                    });
+                                } catch (e) {
+                                    console.warn('Socket emit error:', e.message);
+                                }
+                            }
+                        } else {
+                            // === ЛОГИКА ДЛЯ КОРЗИНЫ (старая) ===
+                            const [itemRows] = await db.query('SELECT Painting_ID FROM payment_order_items WHERE Order_ID = ?', [orderId]);
+                            if (itemRows.length > 0) {
+                                const userId = order.User_ID;
+                                const paintingIds = itemRows.map(r => r.Painting_ID);
+                                const values = paintingIds.map(pid => [userId, pid]);
+                                await db.query('INSERT IGNORE INTO user_purchases (User_ID, Painting_ID) VALUES ?', [values]);
+                            }
+                        }
                     }
                 } catch (e) {
-                    console.error('Fondy return: error updating purchases', e);
+                    console.error('Fondy return: error updating db', e);
                 }
             })();
         }

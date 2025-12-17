@@ -151,9 +151,25 @@ router.post('/:commissionId/review', async (req, res) => {
       const st = currentStatus.toLowerCase();
       if (st === 'sketch') nextStatus = 'Edits';
       else if (st === 'edits') nextStatus = 'Completed';
-      // else keep null
+
       if (nextStatus) {
+        // Обновляем статус
         await db.query('UPDATE commissions SET Status = ? WHERE Commission_ID = ?', [nextStatus, commissionId]);
+
+        // === НОВАЯ ЛОГИКА: Если статус стал Completed, сохраняем картинку ===
+        if (nextStatus === 'Completed') {
+          // 1. Находим сообщение, которое мы только что одобрили (там лежит картинка)
+          const [msgRows] = await db.query('SELECT image FROM messages WHERE id = ?', [targetMessageId]);
+
+          if (msgRows.length > 0 && msgRows[0].image) {
+            // 2. Копируем BLOB картинки в таблицу commissions
+            await db.query(
+                'UPDATE commissions SET ResultImage = ? WHERE Commission_ID = ?',
+                [msgRows[0].image, commissionId]
+            );
+            console.log(`[Review] Result image saved for commission ${commissionId}`);
+          }
+        }
       }
     }
 
