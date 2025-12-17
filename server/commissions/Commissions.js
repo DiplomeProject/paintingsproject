@@ -4,6 +4,7 @@ const fs = require('fs');
 const {upload} = require('../config/multerConfig');
 const { getIO } = require('../socket');
 const express = require('express');
+const AdmZip = require('adm-zip');
 const router = express.Router();
 
 // new helpers to normalize images to data URIs
@@ -337,7 +338,9 @@ router.get('/:id', async (req, res) => {
                Creator_ID,
                Status,
                Created_At,
-               Updated_At
+               Updated_At,
+               is_paid,
+               ResultImage
         FROM commissions
         WHERE Commission_ID = ?
         LIMIT 1
@@ -405,6 +408,7 @@ router.get('/:id', async (req, res) => {
         const image3 = toDataUri(commission.Image3);
         const image4 = toDataUri(commission.Image4);
         const image5 = toDataUri(commission.Image5);
+        const resultImageUri = toDataUri(commission.ResultImage);
 
         const images = [image1, image2, image3, image4, image5].filter(Boolean);
 
@@ -431,6 +435,8 @@ router.get('/:id', async (req, res) => {
                 size: commission.Size,
                 format: commission.Format,
                 price: commission.Price,
+                is_paid: commission.is_paid,
+                resultImage: resultImageUri,
                 Customer_ID: commission.Customer_ID,
                 Creator_ID: commission.Creator_ID,
                 status: normalizedStatus,
@@ -532,6 +538,100 @@ router.patch('/:id/status', async (req, res) => {
     } catch (err) {
         console.error(err);
         res.status(500).json({ success: false, message: 'Database error' });
+    }
+});
+
+// Роут для скачування файлів виконаного замовлення
+router.get('/download/:id', async (req, res) => {
+    const commissionId = req.params.id;
+    const userId = req.session.user?.Creator_ID || req.session.user?.id;
+
+    if (!userId) {
+        return res.status(401).send('Unauthorized');
+    }
+
+    try {
+        // 1. Отримуємо дані про комішн, щоб перевірити доступ та статус оплати
+        const [rows] = await db.query(
+            `SELECT * FROM commissions WHERE Commission_ID = ?`,
+            [commissionId]
+        );
+
+        if (rows.length === 0) {
+            return res.status(404).send('Commission not found');
+        }
+
+        const commission = rows[0];
+
+        // Перевіряємо, чи користувач є учасником цього замовлення
+        const isCustomer = (commission.Customer_ID === userId);
+        const isCreator = (commission.Creator_ID === userId);
+
+        if (!isCustomer && !isCreator) {
+            return res.status(403).send('Access denied');
+        }
+
+        // 2. Якщо це замовник - перевіряємо, чи замовлення оплачене
+        // (Автору дозволяємо скачувати завжди)
+        if (isCustomer && !commission.is_paid) {
+            return res.status(402).send('Payment required. Please pay to download files.');
+        }
+
+        // 3. Збираємо файли
+        const filesToZip = [];
+
+        // Допоміжна функція
+        const addFile = (buffer, filename) => {
+            if (buffer) filesToZip.push({ name: filename, buffer: buffer });
+        };
+
+        // --- ИСПРАВЛЕНИЕ: Берем ResultImage ---
+        // Если есть ResultImage (наше новое поле), берем его
+        if (commission.ResultImage) {
+            addFile(commission.ResultImage, 'Final_Result.png');
+        }
+        // Если ResultImage пустое (старые заказы), пробуем взять из Image2-Image5
+        else {
+            if (commission.Image2) addFile(commission.Image2, 'result_1.png');
+            if (commission.Image3) addFile(commission.Image3, 'result_2.png');
+            if (commission.Image4) addFile(commission.Image4, 'result_3.png');
+            if (commission.Image5) addFile(commission.Image5, 'result_4.png');
+        }
+
+        // Если все еще пусто — возможно, это просто Image (если логика сохраняла туда)
+        if (filesToZip.length === 0 && commission.Image) {
+            // Но осторожно, Image может быть референсом. Проверьте логику.
+            // Обычно для Completed ResultImage должно быть заполнено.
+        }
+
+        // Якщо нічого не знайдено
+        if (filesToZip.length === 0) {
+            return res.status(404).send('No finished files found to download (ResultImage is empty).');
+        }
+
+        // 4. Віддаємо файли
+        if (filesToZip.length === 1) {
+            // Якщо файл один - віддаємо його напряму
+            const file = filesToZip[0];
+            res.set('Content-Type', 'image/png');
+            res.set('Content-Disposition', `attachment; filename="${file.name}"`);
+            return res.send(file.buffer);
+        } else {
+            // Якщо файлів декілька - пакуємо в ZIP
+            const zip = new AdmZip();
+            filesToZip.forEach(f => {
+                zip.addFile(f.name, f.buffer);
+            });
+
+            const zipBuffer = zip.toBuffer();
+            res.set('Content-Type', 'application/zip');
+            res.set('Content-Disposition', `attachment; filename="commission_${commissionId}_files.zip"`);
+            return res.send(zipBuffer);
+        }
+
+    } catch (err) {
+        console.error('Download error:', err);
+        res.status(500).send('Server Error');
     }
 });
 
