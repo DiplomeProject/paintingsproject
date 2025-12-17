@@ -1,21 +1,18 @@
-# Stage 1: Build the React application
-FROM node:20-alpine AS builder
+FROM node:20-alpine
 
 WORKDIR /app
 
-COPY package.json ./
-COPY package-lock.json ./
-RUN npm install
+# Copy package files
+COPY package*.json ./
 
-COPY . ./
+# Install dependencies
+RUN npm ci --only=production
 
-RUN npm run build
+# Copy source code
+COPY . .
 
-# Stage 2: Serve the built application with Nginx
-FROM nginx:alpine
+# Expose backend port
+EXPOSE 8080
 
-COPY --from=builder /app/build /usr/share/nginx/html
-
-EXPOSE 80
-
-CMD ["nginx", "-g", "daemon off;"]
+# Start backend
+CMD ["node", "server.js"]
