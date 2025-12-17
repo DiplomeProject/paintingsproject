@@ -21,11 +21,17 @@ const CheckoutPage = ({ onViewArtDetails }) => {
         if (cartItems.length === 0) return;
 
         try {
-            const orderId = 'order_' + Date.now();
-            const res = await axios.post('http://localhost:8080/api/fondy/create-session', {
-                order_id: orderId,
-                amount: subtotalNumber,
-            });
+            // Build payload required by backend: { amount, paintingIds }
+            const paintingIds = cartItems.map((item) => item.id);
+
+            const res = await axios.post(
+                'http://localhost:8080/api/fondy/create-session',
+                {
+                    amount: subtotalNumber,
+                    paintingIds,
+                },
+                { withCredentials: true }
+            );
 
             const url = res?.data?.response?.checkout_url;
             if (url) {
