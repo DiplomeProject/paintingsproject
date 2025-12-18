@@ -20,6 +20,7 @@ app.set('etag', false);
 const corsOptions = {
     // FIX: Use explicit origins for security and compatibility with credentials: true
     origin: [
+        'https://bestartgallery.pp.ua',
         'http://172.17.3.24:8080',
         'http://localhost:3000',
         'http://localhost:8080'
