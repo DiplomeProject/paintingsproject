@@ -84,7 +84,21 @@ const Gallery = () => {
 
     const gridImages = useMemo(() => {
         if (paintings.length === 0) return [];
-        return [...paintings, ...paintings, ...paintings].slice(0, 32);
+
+        const ROWS = 4;
+        const COLS = 8;
+        const TOTAL_SLOTS = ROWS * COLS;
+
+        let result = [...paintings];
+
+        if (result.length < TOTAL_SLOTS) {
+            while (result.length < TOTAL_SLOTS) {
+                result = [...result, ...paintings];
+            }
+            result = result.sort(() => 0.5 - Math.random());
+        }
+
+        return result.slice(0, TOTAL_SLOTS);
     }, [paintings]);
 
     const slides = useMemo(() => {
