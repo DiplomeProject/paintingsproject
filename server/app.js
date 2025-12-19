@@ -21,8 +21,7 @@ app.set('etag', false);
 
 // ✅ CORS (ТОЛЬКО HTTPS ДОМЕН)
 const corsOptions = {
-  origin: ['https://bestartgallery.pp.ua', 'http://172.17.3.23:8080'],
-  
+  origin: 'https://bestartgallery.pp.ua',
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
   allowedHeaders: ['Content-Type', 'Authorization']
@@ -73,12 +72,8 @@ app.use((req, res) => {
 
 // error handler
 app.use((err, req, res, next) => {
-  console.error("FULL ERROR LOG:", err); // Check your server terminal/console for this!
-  res.status(500).json({ 
-    error: 'Internal server error',
-    message: err.message, // This will show you exactly what database column or connection failed
-    stack: err.stack      // This shows exactly which line of code broke
-  });
+  console.error(err);
+  res.status(500).json({ error: 'Internal server error' });
 });
 
 module.exports = app;
