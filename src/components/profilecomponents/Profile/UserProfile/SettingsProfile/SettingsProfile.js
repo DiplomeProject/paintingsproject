@@ -5,7 +5,7 @@ import deleteCrossIcon from "../../../../../assets/icons/deleteCrossIcon.svg";
 import plusIcon from "../../../../../assets/icons/plusIcon.svg";
 import arrowIcon from "../../../../../assets/icons/arrowIcon.svg";
 import uploadIconPlaceholder from "../../../../../assets/image-placeholder-icon.svg";
-import URL from "../../../../../URL";
+import url from "../../../../../URL";
 
 const AVAILABLE_STYLES = [
     "Retro", "Psychedelia", "Minimalism", "Cyberpunk", "Realism", "Abstract", "Pop Art"
@@ -133,7 +133,7 @@ function ProfileSettings({user}) {
 
         try {
             const response = await axios.post(
-                '/profile/update-profile',
+                `${url}/profile/update-profile`,
                 dataToSend,
                 {
                     headers: {"Content-Type": "multipart/form-data"}
