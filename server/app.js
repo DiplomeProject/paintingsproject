@@ -73,8 +73,12 @@ app.use((req, res) => {
 
 // error handler
 app.use((err, req, res, next) => {
-  console.error(err);
-  res.status(500).json({ error: 'Internal server error' });
+  console.error("FULL ERROR LOG:", err); // Check your server terminal/console for this!
+  res.status(500).json({ 
+    error: 'Internal server error',
+    message: err.message, // This will show you exactly what database column or connection failed
+    stack: err.stack      // This shows exactly which line of code broke
+  });
 });
 
 module.exports = app;
