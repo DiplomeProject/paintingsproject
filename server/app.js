@@ -14,6 +14,8 @@ const fondyRoutes = require('./routes/fondyRoutes');
 
 const app = express();
 
+app.set('trust proxy', 1);
+
 // отключаем ETag, чтобы не было 304
 app.set('etag', false);
 
