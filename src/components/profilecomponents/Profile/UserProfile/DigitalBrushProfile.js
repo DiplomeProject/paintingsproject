@@ -4,6 +4,8 @@ import MyImages from "./MyImages/MyImages";
 import ProfileSettings from "./SettingsProfile/SettingsProfile";
 import CommissionChat from "./MyCommission/CommissionChat/CommissionChat";
 import Wallet from "./Wallet/Wallet";
+import axios from "axios";
+import url from '../../../../URL';
 
 import infoIcon from '../../../../assets/infoIcon.svg';
 import globeIcon from '../../../../assets/icons/globeIcon.svg';

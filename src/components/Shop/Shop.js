@@ -8,6 +8,8 @@ import Pagination from '../hooks/Pagination/Pagination';
 import axios from 'axios';
 import AddArtModal from "./AddArtModal/AddArtModal";
 import logo from "../../assets/logo.svg";
+import URL from "../../URL";
+
 
 const shopFilterConfig = [
     { title: "SORT BY", options: [{ name: "NONE" }, { name: "RATING" }, { name: "LATEST" }, { name: "EXPENSIVE" }, { name: "CHEAP" }]},
@@ -53,7 +55,7 @@ const Shop = () => {
 
     // check session
     useEffect(() => {
-        axios.get('/auth/check-session')
+        axios.get(`${URL}/auth/check-session`)
             .then(res => setIsLoggedIn(!!res.data?.loggedIn))
             .catch(() => setIsLoggedIn(false));
     }, []);
@@ -62,7 +64,7 @@ const Shop = () => {
     useEffect(() => {
     let mounted = true;
         setLoading(true);
-    axios.get('/paintings')
+    axios.get(`${URL}/paintings`)
         .then(res => {
             const payload = res.data;
             const list = Array.isArray(payload) ? payload : (payload.paintings || []);
@@ -109,7 +111,7 @@ const Shop = () => {
 
 
     useEffect(() => {
-        axios.get('/auth/check-session')
+        axios.get(`${URL}/auth/check-session`)
             .then(res => {
                 console.log('Session check (Shop):', res.data.loggedIn);
                 setIsLoggedIn(res.data.loggedIn);

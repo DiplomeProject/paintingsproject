@@ -5,6 +5,7 @@ import placeholderImg from '../../../../../../assets/image-placeholder-icon.svg'
 import ImageViewer from "../../../../../ArtCard/ImageViewer/ImageViewer";
 import CommissionModalDetails from "../../../../../Commission/CommissionModals/CommissionModalDetails";
 import { io } from 'socket.io-client';
+import url from '../../../../../../URL';
 // Іконки
 const CheckIcon = () => (<svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" /></svg>);
 const CrossIcon = () => (<svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" /></svg>);
@@ -52,7 +53,7 @@ const CommissionChat = ({ commissionId, user, onBack }) => {
     }, []);
 
     useEffect(() => {
-        axios.get(`/commissions/${commissionId}`)
+        axios.get(`${url}/commissions/${commissionId}`)
             .then(res => {
                 if (res.data.success) {
                     const commData = res.data.commission;
@@ -97,7 +98,7 @@ const CommissionChat = ({ commissionId, user, onBack }) => {
 
         const loadMessages = async () => {
             try {
-                const res = await axios.get(`/commissions/chat/${commissionId}/messages`);
+                const res = await axios.get(`${url}/commissions/chat/${commissionId}/messages`);
                 if (res.data && res.data.messages) {
                     const all = res.data.messages || [];
                     // CHAT: только text/image
@@ -133,7 +134,7 @@ const CommissionChat = ({ commissionId, user, onBack }) => {
 
         loadMessages();
         // realtime socket
-        const serverBase = (process.env.REACT_APP_API_BASE || 'http://localhost:8080/api').replace(/\/api$/, '');
+        const serverBase = (process.env.REACT_APP_API_BASE || `${url}/api`).replace(/\/api$/, '');
         const room = `commission_${commissionId}`;
         const socket = io(serverBase, { withCredentials: true, autoConnect: true, reconnection: true });
 

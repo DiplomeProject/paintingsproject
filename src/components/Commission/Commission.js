@@ -7,6 +7,7 @@ import CommissionModalDetails from './CommissionModals/CommissionModalDetails';
 import AddCommissionModal from './CommissionModals/AddCommissionModal';
 import axios from 'axios';
 import logo from '../../assets/logo.svg';
+import URL from '../../URL';
 
 const commissionFilterConfig = [
 { title: "SORT BY", options: [{ name: "NONE" }, { name: "RATING" }, { name: "LATEST" }, { name: "EXPENSIVE" }, { name: "CHEAP" }]},
@@ -99,7 +100,7 @@ const [totalPages, setTotalPages] = useState(0);
 const [isLoggedIn, setIsLoggedIn] = useState(false);
 
     useEffect(() => {
-        axios.get('/auth/check-session')
+        axios.get(`${URL}/auth/check-session`)
             .then(res => {
                 setIsLoggedIn(res.data.loggedIn);
             })
@@ -112,7 +113,7 @@ const [isLoggedIn, setIsLoggedIn] = useState(false);
         const fetchCommissions = async () => {
             setLoading(true);
             try {
-                const response = await axios.get('/commissions/public', {
+                const response = await axios.get(`${URL}/commissions/public`, {
                     params: {
                         page: currentPage + 1,
                         limit: itemsPerPage

@@ -5,6 +5,7 @@ import closeIcon from '../../../assets/closeCross.svg';
 import ImageViewer from "../ImageViewer/ImageViewer";
 import { useCart } from '../../Cart/CartContext';
 import { useNavigate } from "react-router-dom";
+import URL from '../../../URL';
 
 const lerp = (current, target, factor) => {
     return current * (1 - factor) + target * factor;
@@ -55,7 +56,7 @@ const ArtDetailsModal = ({art, onClose, isLoggedIn}) => {
                     return;
                 }
                 // Relative path to honor axios.defaults.baseURL
-                const res = await axios.get(`profile/check-ownership/${art.id}`);
+                const res = await axios.get(`${URL}/profile/check-ownership/${art.id}`);
                 setOwned(!!res?.data?.owned);
             } catch (e) {
                 console.error('Ownership check failed:', e);
@@ -74,7 +75,7 @@ const ArtDetailsModal = ({art, onClose, isLoggedIn}) => {
         if (!art?.id || likeLoading) return;
         try {
             setLikeLoading(true);
-            const res = await axios.post(`paintings/${art.id}/like`);
+            const res = await axios.post(`${URL}/paintings/${art.id}/like`);
             if (res?.data?.success) {
                 setIsLiked(!!res.data.liked);
                 setLikes(Number(res.data.likes) || 0);
@@ -89,7 +90,7 @@ const ArtDetailsModal = ({art, onClose, isLoggedIn}) => {
     const handleArtistNameClick = () => {
         if (art.artistId !== undefined && art.artistId !== null) {
             onClose();
-            navigate(`/author/${art.artistId}`);
+            navigate(`${URL}/author/${art.artistId}`);
         } else {
             console.warn("Artist ID is missing for navigation");
         }

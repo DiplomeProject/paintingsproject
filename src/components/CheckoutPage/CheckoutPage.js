@@ -4,6 +4,7 @@ import { useCart } from '../Cart/CartContext';
 import { useNavigate } from 'react-router-dom';
 import trash from '../../assets/trashBin.svg'
 import axios from "axios";
+import url from '../../URL';
 
 const CheckoutPage = ({ onViewArtDetails }) => {
     const { cartItems, removeFromCart } = useCart();
@@ -25,7 +26,7 @@ const CheckoutPage = ({ onViewArtDetails }) => {
             const paintingIds = cartItems.map((item) => item.id);
 
             const res = await axios.post(
-                'http://localhost:8080/api/fondy/create-session',
+                `${url}/api/fondy/create-session`,
                 {
                     amount: subtotalNumber,
                     paintingIds,

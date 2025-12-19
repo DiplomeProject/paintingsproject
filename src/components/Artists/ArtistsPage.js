@@ -9,6 +9,7 @@ import Pagination from '../hooks/Pagination/Pagination';
 import leftArrow from '../../assets/leftArrow.svg';
 import rightArrow from '../../assets/rightArrow.svg';
 import axios from 'axios';
+import URL from "../../URL";
 
 const categories = [
     "2D AVATARS", "3D MODELS", "BOOKS", "ANIME", "ICONS", "GAMES",
@@ -33,7 +34,7 @@ export default function ArtistsPage() {
     const [artistsData, setArtistsData] = useState([]);
 
     useEffect(() => {
-        axios.get('/auth/check-session')
+        axios.get(`${URL}/auth/check-session`)
             .catch(err => console.log(err));
     }, []);
 
@@ -57,7 +58,7 @@ export default function ArtistsPage() {
     useEffect(() => {
         const fetchArtists = async () => {
             try {
-                const res = await axios.get('/artists/getartists');
+                const res = await axios.get(`${URL}/artists/getartists`);
                 const serverArtists = Array.isArray(res.data) ? res.data : (res.data.artists || []);
 
                 const mapped = serverArtists.map((a, idx) => {

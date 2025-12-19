@@ -5,6 +5,7 @@ import deleteCrossIcon from "../../../../../assets/icons/deleteCrossIcon.svg";
 import plusIcon from "../../../../../assets/icons/plusIcon.svg";
 import arrowIcon from "../../../../../assets/icons/arrowIcon.svg";
 import uploadIconPlaceholder from "../../../../../assets/image-placeholder-icon.svg";
+import URL from "../../../../../URL";
 
 const AVAILABLE_STYLES = [
     "Retro", "Psychedelia", "Minimalism", "Cyberpunk", "Realism", "Abstract", "Pop Art"

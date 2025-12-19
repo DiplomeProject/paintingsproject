@@ -11,6 +11,7 @@ import infoIcon from '../../assets/infoIcon.svg'
 import globeIcon from '../../assets/icons/globeIcon.svg'
 import heartIcon from '../../assets/icons/heartIcon.svg'
 import AddCommissionModal from '../Commission/CommissionModals/AddCommissionModal';
+import URL from '../../URL';
 
 // Конфіг
 const additionalFilterConfig = [
@@ -40,7 +41,7 @@ const AuthorPage = () => {
     useEffect(() => {
         const fetchArtist = async () => {
             try {
-                const res = await axios.get(`/artists/artist/${id}`);
+                const res = await axios.get(`${URL}/artists/artist/${id}`);
                 setArtist(res.data);
             } catch (error) {
                 console.error("Error loading artist:", error);

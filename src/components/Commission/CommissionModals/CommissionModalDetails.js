@@ -4,6 +4,7 @@ import closeIcon from '../../../assets/closeCross.svg';
 import axios from 'axios';
 import ImageViewer from "../../ArtCard/ImageViewer/ImageViewer";
 import logo from '../../../assets/logo.svg'
+import URL from "../../../URL";
 
 const CommissionModalDetails = ({ commission, onClose, disableTake = false }) => {
 
@@ -43,7 +44,7 @@ const CommissionModalDetails = ({ commission, onClose, disableTake = false }) =>
             setMainImage(initialMain);
             setPreviewImages([]); // Очищуємо прев'ю перед запитом
 
-            axios.get(`/commissions/${commission.id}`)
+            axios.get(`${URL}/commissions/${commission.id}`)
                 .then(response => {
                     if (response.data?.success && response.data?.commission) {
                         const c = response.data.commission;
@@ -136,7 +137,7 @@ const CommissionModalDetails = ({ commission, onClose, disableTake = false }) =>
             //     return;
             // }
             const response = await axios.patch(
-                `/commissions/${commission.id}/accept`,
+                `${URL}/commissions/${commission.id}/accept`,
                 {}
             );
 

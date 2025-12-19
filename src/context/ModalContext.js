@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState } from 'react';
 import axios from 'axios';
 import ArtDetailsModal from '../components/ArtCard/Modals/ArtDetailsModal';
+import URL from '../URL';
 
 const ModalContext = createContext();
 
@@ -23,7 +24,7 @@ export const ModalProvider = ({ children, isLoggedIn }) => {
         if (basicArtData.id) {
             setLoading(true);
             try {
-                const res = await axios.get(`/paintings/${basicArtData.id}`);
+                const res = await axios.get(`${URL}/paintings/${basicArtData.id}`);
 
                 if (res.data.success) {
                     const p = res.data.painting;

@@ -3,6 +3,7 @@ import styles from './AddCommissionModal.module.css';
 import closeIcon from '../../../assets/closeCross.svg';
 import addImageIcon from '../../../assets/image-placeholder-icon.svg';
 import axios from "axios";
+import url from '../../../URL';
 
 const categories = ["2D AVATARS", "3D MODELS", "BOOKS", "ANIME", "ICONS", "GAMES", "MOCKUPS", "UI/UX"];
 const mockStyles = ["Retro", "Cyberpunk", "Fantasy", "Minimalism", "3D Render"];
@@ -116,7 +117,7 @@ const AddCommissionModal = ({ onClose, targetCreatorId = null }) => {
             formData.append("price", price);
 
             // Використовуємо ЄДИНИЙ ендпоінт
-            const apiUrl = "/commissions/create";
+            const apiUrl = `${url}/commissions/create`;
 
             // Додаємо creatorId тільки якщо він існує
             if (targetCreatorId) {

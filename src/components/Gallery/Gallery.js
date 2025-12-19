@@ -3,6 +3,7 @@ import styles from "./Gallery.module.css";
 import { useNavigate } from "react-router-dom";
 import ArtCard from '../ArtCard/ArtCard';
 import axios from 'axios';
+import url from '../../URL';
 
 const placeholderFeaturedCards = [
     { id: 'card-back', imageUrl: '/images/card-center.png', className: styles.cardBack, title: "We build the", likes: "253.5k" },
@@ -49,7 +50,7 @@ const Gallery = () => {
     useEffect(() => {
         let mounted = true;
         setLoading(true);
-        axios.get('/paintings')
+        axios.get(`${url}/paintings`)
             .then(res => {
                 const payload = res.data;
                 const list = Array.isArray(payload) ? payload : (payload.paintings || []);
