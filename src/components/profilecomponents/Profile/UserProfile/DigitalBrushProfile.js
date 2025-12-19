@@ -89,7 +89,7 @@ function DigitalBrushProfile({ user, onLogout }) {
                     />
                 );
             case 'wallet':
-                return <Wallet />;
+                return <div className={styles.placeholder}>Wallet Component (Coming Soon)</div>;
             case 'calendar':
                 return <div className={styles.placeholder}>Calendar Component (Coming Soon)</div>;
             default:
