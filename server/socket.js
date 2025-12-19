@@ -5,11 +5,7 @@ function init(server, options = {}) {
   if (io) return io;
   io = new Server(server, {
     cors: {
-      origin: [
-        'http://172.17.3.24:8080',
-        'http://localhost:3000',
-        'http://localhost:8080'
-      ],
+      origin: 'https://bestartgallery.pp.ua',
       credentials: true
     },
     ...options
