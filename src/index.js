@@ -6,7 +6,7 @@ import reportWebVitals from './reportWebVitals';
 import axios from 'axios';
 
 // Configure global axios defaults
-const API_BASE = process.env.REACT_APP_API_BASE || 'http://localhost:8080/api';
+const API_BASE = process.env.REACT_APP_API_BASE || 'https://bestartgallery.pp.ua/api';
 axios.defaults.baseURL = API_BASE;
 axios.defaults.withCredentials = true;
 
