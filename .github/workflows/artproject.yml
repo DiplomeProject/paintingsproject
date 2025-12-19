@@ -44,6 +44,7 @@ jobs:
           push: true
           tags: ${{ env.REGISTRY }}/${{ env.FRONTEND_IMAGE }}:latest
 
+
       # ---------- BACKEND ----------
       - name: Build & push backend image
         uses: docker/build-push-action@v5
