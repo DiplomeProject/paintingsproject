@@ -3,7 +3,7 @@ import styles from './AddArtModal.module.css';
 import axios from "axios";
 import closeIcon from '../../../assets/closeCross.svg';
 import addImageIcon from '../../../assets/image-placeholder-icon.svg';
-import URL from '../../../URL';
+// import URL from '../../../URL';
 
 const getOptions = (config, title) => {
   const section = config.find(f => f.title === title);
@@ -123,7 +123,7 @@ const AddArtModal = ({
     const fetchPainting = async () => {
       try {
         const res = await axios.get(
-          `${URL}/paintings/${existingPaintingId}`
+          `/paintings/${existingPaintingId}`
         );
 
         if (res.data.success) {
@@ -238,7 +238,7 @@ const AddArtModal = ({
         }
       });
 
-      const endpoint = `${URL}/paintings/upload`;
+      const endpoint = `/paintings/upload`;
 
       const res = await axios.post(endpoint, formData, {
         headers: { "Content-Type": "multipart/form-data" }

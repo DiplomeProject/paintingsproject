@@ -18,7 +18,7 @@ function GalleryArtist({ user }) {
     useEffect(() => {
         const loadPaintings = async () => {
             try {
-                const response = await axios.get(`${url}/profile/getuserpaintings`);
+                const response = await axios.get(`/profile/getuserpaintings`);
                 setPaintings(response.data);
             } catch (error) {
                 console.error('Error loading the paintings:', error);
@@ -73,7 +73,7 @@ const handleAddNewPainting = async (e) => {
     if (formData.image) formDataToSend.append('image', formData.image);
 
     console.log('Sending upload request with:', formDataToSend);
-    const response = await axios.post(`${url}/paintings/upload`, formDataToSend, {
+    const response = await axios.post(`/paintings/upload`, formDataToSend, {
       headers: { 'Content-Type': 'multipart/form-data' },
     });
     console.log('Upload response:', response);
@@ -90,7 +90,7 @@ const handleAddNewPainting = async (e) => {
     const handleDeletePainting = async (paintingId) => {
         if (!window.confirm('Видалити цю картину?')) return;
         try {
-            await axios.delete(`${url}/paintings/delete/${paintingId}`);
+            await axios.delete(`/paintings/delete/${paintingId}`);
             setPaintings(paintings.filter((p) => p.Painting_ID !== paintingId));
             alert('Картина видалена');
         } catch (error) {

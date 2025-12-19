@@ -55,7 +55,7 @@ const Shop = () => {
 
     // check session
     useEffect(() => {
-        axios.get(`${URL}/auth/check-session`)
+        axios.get(`/auth/check-session`)
             .then(res => setIsLoggedIn(!!res.data?.loggedIn))
             .catch(() => setIsLoggedIn(false));
     }, []);
@@ -64,7 +64,7 @@ const Shop = () => {
     useEffect(() => {
     let mounted = true;
         setLoading(true);
-    axios.get(`${URL}/paintings`)
+    axios.get(`/paintings`)
         .then(res => {
             const payload = res.data;
             const list = Array.isArray(payload) ? payload : (payload.paintings || []);
@@ -111,7 +111,7 @@ const Shop = () => {
 
 
     useEffect(() => {
-        axios.get(`${URL}/auth/check-session`)
+        axios.get(`/auth/check-session`)
             .then(res => {
                 console.log('Session check (Shop):', res.data.loggedIn);
                 setIsLoggedIn(res.data.loggedIn);

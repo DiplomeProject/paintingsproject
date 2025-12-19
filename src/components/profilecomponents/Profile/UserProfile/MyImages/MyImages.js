@@ -3,24 +3,8 @@ import axios from "axios";
 import styles from "./MyImages.module.css";
 import ArtCard from "../../../../ArtCard/ArtCard";
 import CategoryFilters from "../../../../CategoryFilters/CategoryFilters";
-import AdvancedFilters from "../../../../AdvancedFilters/AdvancedFilters";
 import Pagination from "../../../../hooks/Pagination/Pagination";
 import { usePagination } from "../../../../hooks/Pagination/usePagination";
-
-const additionalFilterConfig = [
-    {
-        title: "SORT BY",
-        options: [
-            { name: "LATEST" },
-            { name: "POPULAR" },
-            { name: "OLDEST" },
-            { name: "PRICE: LOW TO HIGH" },
-            { name: "PRICE: HIGH TO LOW" }
-        ]
-    }
-];
-
-const profileCategories = ['ICONS', 'UI/UX', 'ADVERTISING', 'BRENDING'];
 
 function MyImages({ user, onTotalLikesChange }) {
     const [paintings, setPaintings] = useState([]);
@@ -36,8 +20,8 @@ function MyImages({ user, onTotalLikesChange }) {
                 // Выбираем URL в зависимости от режима
                 // Use relative paths with axios.defaults.baseURL = 'http://localhost:8080/api'
                 const url = viewMode === 'created'
-                    ? "profile/getuserpaintings"
-                    : "profile/getboughtpaintings";
+                    ? "/profile/getuserpaintings"
+                    : "/profile/getboughtpaintings";
 
                 const response = await axios.get(url);
                 if (response.data.success) {

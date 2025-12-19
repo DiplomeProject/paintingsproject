@@ -53,7 +53,7 @@ const CommissionChat = ({ commissionId, user, onBack }) => {
     }, []);
 
     useEffect(() => {
-        axios.get(`${url}/commissions/${commissionId}`)
+        axios.get(`/commissions/${commissionId}`)
             .then(res => {
                 if (res.data.success) {
                     const commData = res.data.commission;
@@ -98,7 +98,7 @@ const CommissionChat = ({ commissionId, user, onBack }) => {
 
         const loadMessages = async () => {
             try {
-                const res = await axios.get(`${url}/commissions/chat/${commissionId}/messages`);
+                const res = await axios.get(`/commissions/chat/${commissionId}/messages`);
                 if (res.data && res.data.messages) {
                     const all = res.data.messages || [];
                     // CHAT: только text/image
@@ -134,7 +134,7 @@ const CommissionChat = ({ commissionId, user, onBack }) => {
 
         loadMessages();
         // realtime socket
-        const serverBase = (process.env.REACT_APP_API_BASE || `${url}/api`).replace(/\/api$/, '');
+        const serverBase = (process.env.REACT_APP_API_BASE || `/api`).replace(/\/api$/, '');
         const room = `commission_${commissionId}`;
         const socket = io(serverBase, { withCredentials: true, autoConnect: true, reconnection: true });
 

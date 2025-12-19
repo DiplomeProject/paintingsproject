@@ -44,7 +44,7 @@ const CommissionModalDetails = ({ commission, onClose, disableTake = false }) =>
             setMainImage(initialMain);
             setPreviewImages([]); // Очищуємо прев'ю перед запитом
 
-            axios.get(`${URL}/commissions/${commission.id}`)
+            axios.get(`/commissions/${commission.id}`)
                 .then(response => {
                     if (response.data?.success && response.data?.commission) {
                         const c = response.data.commission;
@@ -137,7 +137,7 @@ const CommissionModalDetails = ({ commission, onClose, disableTake = false }) =>
             //     return;
             // }
             const response = await axios.patch(
-                `${URL}/commissions/${commission.id}/accept`,
+                `/commissions/${commission.id}/accept`,
                 {}
             );
 

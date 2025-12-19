@@ -117,7 +117,7 @@ const AddCommissionModal = ({ onClose, targetCreatorId = null }) => {
             formData.append("price", price);
 
             // Використовуємо ЄДИНИЙ ендпоінт
-            const apiUrl = `${url}/commissions/create`;
+            const apiUrl = `/commissions/create`;
 
             // Додаємо creatorId тільки якщо він існує
             if (targetCreatorId) {

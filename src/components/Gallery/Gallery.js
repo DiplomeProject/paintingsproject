@@ -50,7 +50,7 @@ const Gallery = () => {
     useEffect(() => {
         let mounted = true;
         setLoading(true);
-        axios.get(`${url}/paintings`)
+        axios.get(`/paintings`)
             .then(res => {
                 const payload = res.data;
                 const list = Array.isArray(payload) ? payload : (payload.paintings || []);

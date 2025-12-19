@@ -100,7 +100,7 @@ const [totalPages, setTotalPages] = useState(0);
 const [isLoggedIn, setIsLoggedIn] = useState(false);
 
     useEffect(() => {
-        axios.get(`${URL}/auth/check-session`)
+        axios.get(`/auth/check-session`)
             .then(res => {
                 setIsLoggedIn(res.data.loggedIn);
             })
@@ -113,7 +113,7 @@ const [isLoggedIn, setIsLoggedIn] = useState(false);
         const fetchCommissions = async () => {
             setLoading(true);
             try {
-                const response = await axios.get(`${URL}/commissions/public`, {
+                const response = await axios.get(`/commissions/public`, {
                     params: {
                         page: currentPage + 1,
                         limit: itemsPerPage

@@ -5,55 +5,8 @@ import CategoryFilters from "../../../../CategoryFilters/CategoryFilters";
 import CommissionModalDetails from "../../../../Commission/CommissionModals/CommissionModalDetails";
 import logo from '../../../../../assets/logo.svg'
 import { io } from 'socket.io-client';
-import URL from '../../../../../URL';
 
 const commissionFilters = ['MY ORDERS', 'MY TASKS'];
-
-// ... DUMMY_DB_DATA залишається без змін ...
-// const DUMMY_DB_DATA = [
-//     {
-//         Commission_ID: 101,
-//         Title: "Retro Poster Design",
-//         Description: "Need a vintage style poster for an exhibition.",
-//         Price: 45,
-//         ReferenceImage: "/images/placeholder.png",
-//         Category: "BOOKS",
-//         Status: "Sketch",
-//         Customer_ID: 2,
-//         Creator_ID: 55
-//     },
-//     {
-//         Commission_ID: 102,
-//         Title: "Cyberpunk Character",
-//         Description: "Full body character art in cyberpunk style.",
-//         Price: 120,
-//         ReferenceImage: "/images/placeholder.png",
-//         Category: "2D AVATARS",
-//         Status: "Completed",
-//         Customer_ID: 99,
-//         Creator_ID: 2
-//     },
-//     {
-//         Commission_ID: 103,
-//         Title: "Logo for Coffee Shop",
-//         Description: "Minimalist logo design.",
-//         Price: 30,
-//         ReferenceImage: "/images/placeholder.png",
-//         Status: "Search",
-//         Customer_ID: 2,
-//         Creator_ID: null
-//     },
-//     {
-//         Commission_ID: 104,
-//         Title: "Album Cover",
-//         Description: "Abstract art for music album.",
-//         Price: 80,
-//         ReferenceImage: "/images/placeholder.png",
-//         Status: "Edits",
-//         Customer_ID: 77,
-//         Creator_ID: 2
-//     }
-// ];
 
 function MyCommission({ user, onOpenChat}) {
     const currentUserId = user?.id ? Number(user.id) : 1;
@@ -91,7 +44,7 @@ function MyCommission({ user, onOpenChat}) {
         if (!currentUserId) return;
 
         setIsLoading(true);
-        axios.get(`${URL}/commissions/my`)
+        axios.get(`/commissions/my`)
             .then(response => {
                 if (response.data.success) {
                     setCommissions(response.data.commissions);
@@ -169,7 +122,7 @@ function MyCommission({ user, onOpenChat}) {
 
     // Live-обновление статусов через сокет
     useEffect(() => {
-        const serverBase = (process.env.REACT_APP_API_BASE || `${URL}/api`).replace(/\/api$/, '');
+        const serverBase = (process.env.REACT_APP_API_BASE || `/api`).replace(/\/api$/, '');
         const socket = io(serverBase, { withCredentials: true, autoConnect: true, reconnection: true });
 
         const onStatusUpdated = (payload) => {

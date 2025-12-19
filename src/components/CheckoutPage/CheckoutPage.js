@@ -26,7 +26,7 @@ const CheckoutPage = ({ onViewArtDetails }) => {
             const paintingIds = cartItems.map((item) => item.id);
 
             const res = await axios.post(
-                `${url}/api/fondy/create-session`,
+                `/fondy/create-session`,
                 {
                     amount: subtotalNumber,
                     paintingIds,

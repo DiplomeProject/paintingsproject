@@ -24,7 +24,7 @@ export const ModalProvider = ({ children, isLoggedIn }) => {
         if (basicArtData.id) {
             setLoading(true);
             try {
-                const res = await axios.get(`${URL}/paintings/${basicArtData.id}`);
+                const res = await axios.get(`/paintings/${basicArtData.id}`);
 
                 if (res.data.success) {
                     const p = res.data.painting;

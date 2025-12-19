@@ -5,7 +5,6 @@ import Register from "../Register/Register";
 import ForgotPassword from "../Login/ForgotPassword/ForgotPassword";
 import styles from './Profile.module.css';
 import DigitalBrushProfile from "./UserProfile/DigitalBrushProfile";
-import url  from '../../../URL';
 
 function Profile({ setIsLoggedIn }) {
     const [user, setUser] = useState(null);
@@ -24,7 +23,7 @@ function Profile({ setIsLoggedIn }) {
 
     // Перевірка сесії при завантаженні
     useEffect(() => {
-        axios.get(`${url}/api/auth/check-session`)
+        axios.get(`/auth/check-session`)
             .then(response => {
                 if (response.data.loggedIn) {
                     const userData = response.data.user;
@@ -53,7 +52,7 @@ function Profile({ setIsLoggedIn }) {
     const handleLogin = async (e) => {
         e.preventDefault();
         try {
-            const response = await axios.post(`${url}/api/auth/login`, {
+            const response = await axios.post(`/auth/login`, {
                 email: formData.email,
                 password: formData.password,
             });
@@ -85,7 +84,7 @@ function Profile({ setIsLoggedIn }) {
             // Бекенд очікує: username, email, password, birthday
             // registerData приходить з компонента Register
             const response = await axios.post(
-                `${url}/api/auth/register`,
+                `/auth/register`,
                 {
                     username: registerData.name, // Мапимо name на username
                     email: registerData.email,
@@ -108,7 +107,7 @@ function Profile({ setIsLoggedIn }) {
 
     const handleLogout = async () => {
         try {
-            await axios.post(`${url}/auth/logout`, {});
+            await axios.post(`/auth/logout`, {});
             setUser(null);
             setView('login');
             if (setIsLoggedIn) setIsLoggedIn(false);
