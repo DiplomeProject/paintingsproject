@@ -97,115 +97,142 @@ const CommissionChat = ({ commissionId, user, onBack }) => {
         };
 
         const loadMessages = async () => {
-            try {
-                const res = await axios.get(`/commissions/chat/${commissionId}/messages`);
-                if (res.data && res.data.messages) {
-                    const all = res.data.messages || [];
-                    // CHAT: только text/image
-                    const mapped = all.filter(m => m.type === 'text' || m.type === 'image').map(mapServerMsg);
-                    setMessages(mapped);
+        try {
+            const res = await axios.get(`/commissions/chat/${commissionId}/messages`);
+            if (res.data && res.data.messages) {
+                const all = res.data.messages || [];
+                const mapped = all.filter(m => m.type === 'text' || m.type === 'image').map(mapServerMsg);
+                setMessages(mapped);
 
-                    // LEFT MENU: определить последнюю подачу `stage` и результат
-                    const lastStage = [...all]
-                        .filter(m => m.type === 'stage')
+                const lastStage = [...all]
+                    .filter(m => m.type === 'stage')
+                    .sort((a,b)=> new Date(a.timestamp) - new Date(b.timestamp))
+                    .pop();
+                
+                if (lastStage) {
+                    const lastId = lastStage.id;
+                    const img = lastStage.image || lastStage.content || null;
+                    setPendingStageImage(img || null);
+                    setPendingStageMessageId(lastId);
+                    
+                    const lastReview = [...all]
+                        .filter(m => (m.type === 'stage-approve' || m.type === 'stage-reject') && String(m.content) === String(lastId))
                         .sort((a,b)=> new Date(a.timestamp) - new Date(b.timestamp))
                         .pop();
-                    if (lastStage) {
-                        const lastId = lastStage.id;
-                        const img = lastStage.image || lastStage.content || null;
-                        setPendingStageImage(img || null);
-                        setPendingStageMessageId(lastId);
-                        // ищем самый поздний review для этого stage
-                        const lastReview = [...all]
-                            .filter(m => (m.type === 'stage-approve' || m.type === 'stage-reject') && String(m.content) === String(lastId))
-                            .sort((a,b)=> new Date(a.timestamp) - new Date(b.timestamp))
-                            .pop();
-                        setStageDecision(lastReview ? (lastReview.type === 'stage-approve' ? 'approve' : 'reject') : null);
-                    } else {
-                        setPendingStageImage(null);
-                        setPendingStageMessageId(null);
-                        setStageDecision(null);
-                    }
+                    
+                    setStageDecision(lastReview ? (lastReview.type === 'stage-approve' ? 'approve' : 'reject') : null);
+                } else {
+                    setPendingStageImage(null);
+                    setPendingStageMessageId(null);
+                    setStageDecision(null);
                 }
-            } catch (err) {
-                console.error('Failed to load chat messages:', err);
             }
-        };
+        } catch (err) {
+            console.error('Failed to load chat messages:', err);
+        }
+    };
 
-        loadMessages();
+    loadMessages();
         // realtime socket
-        const serverBase = (process.env.REACT_APP_API_BASE || `/api`).replace(/\/api$/, '');
-        const room = `commission_${commissionId}`;
-        const socket = io(serverBase, { withCredentials: true, autoConnect: true, reconnection: true });
+       const serverBase = (process.env.REACT_APP_API_BASE || `/api`).replace(/\/api$/, '');
+            const room = `commission_${commissionId}`;
+            const socket = io(serverBase, { 
+                withCredentials: true, 
+                autoConnect: true, 
+                reconnection: true,
+                transports: ['websocket', 'polling'] // Add fallback
+            });;
 
         // ensure we are always in the room after connects/reconnects
-        const joinRoom = () => socket.emit('join', room);
-        socket.on('connect', joinRoom);
-        joinRoom();
-        const handler = (msg) => {
-            // ignore messages for other commissions
-            if (String(msg.commissionId) !== String(commissionId)) return;
-            // ignore echo of own messages to avoid race with local append
-            const currentUid = Number(user?.id);
-            if (Number(msg.senderId) === currentUid) return;
+        const joinRoom = () => {
+        console.log('[Socket] Joining room:', room);
+        socket.emit('join', room);
+            };
 
-            const mapped = mapServerMsg(msg);
-            setMessages(prev => {
-                // avoid duplicate by id
-                if (prev.some(m => String(m.id) === String(mapped.id))) return prev;
-                return [...prev, mapped];
+            socket.on('connect', () => {
+                console.log('[Socket] Connected, ID:', socket.id);
+                joinRoom();
             });
-            scrollToBottom();
-        };
-        socket.on('newMessage', handler);
+
+            socket.on('disconnect', () => {
+                console.log('[Socket] Disconnected');
+            });
+        const handler = (msg) => {
+                console.log('[Socket] New message received:', msg);
+                
+                if (String(msg.commissionId) !== String(commissionId)) {
+                    console.log('[Socket] Message for different commission, ignoring');
+                    return;
+                }
+
+                const mapped = mapServerMsg(msg);
+                
+                setMessages(prev => {
+                    // Only check for ID duplicates, not sender
+                    if (prev.some(m => String(m.id) === String(mapped.id))) {
+                        console.log('[Socket] Duplicate message by ID, ignoring');
+                        return prev;
+                    }
+                    console.log('[Socket] Adding new message to state');
+                    return [...prev, mapped];
+                });
+                
+                scrollToBottom();
+            };
+
+            socket.on('newMessage', handler);
 
         const onPaymentUpdate = (payload) => {
-            if (!payload || String(payload.commissionId) !== String(commissionId)) return;
-            // Обновляем статус оплаты в стейте
-            setCommission(prev => prev ? { ...prev, is_paid: 1 } : prev);
-        };
-        socket.on('paymentUpdate', onPaymentUpdate);
+        console.log('[Socket] Payment update received:', payload);
+        if (!payload || String(payload.commissionId) !== String(commissionId)) return;
+        setCommission(prev => prev ? { ...prev, is_paid: 1 } : prev);
+    };
+    socket.on('paymentUpdate', onPaymentUpdate);
 
         // «подача на ревью» от художника
         const onStageSubmitted = (payload) => {
-            if (!payload || String(payload.commissionId) !== String(commissionId)) return;
-            const m = payload.message || {};
-            setPendingStageImage(m.image || m.content || null);
-            setPendingStageMessageId(m.id);
-            setStageDecision(null);
-        };
-        socket.on('stageSubmitted', onStageSubmitted);
+        console.log('[Socket] Stage submitted:', payload);
+        if (!payload || String(payload.commissionId) !== String(commissionId)) return;
+        const m = payload.message || {};
+        setPendingStageImage(m.image || m.content || null);
+        setPendingStageMessageId(m.id);
+        setStageDecision(null);
+    };
+    socket.on('stageSubmitted', onStageSubmitted);
 
-        // результат ревью от заказчика
-        const onStageReview = (payload) => {
-            if (!payload || String(payload.commissionId) !== String(commissionId)) return;
-            setStageDecision(payload.decision);
-            if (payload.nextStatus) setStatus(payload.nextStatus);
-        };
-        socket.on('stageReview', onStageReview);
+    const onStageReview = (payload) => {
+        console.log('[Socket] Stage review received:', payload);
+        if (!payload || String(payload.commissionId) !== String(commissionId)) return;
+        setStageDecision(payload.decision);
+        if (payload.nextStatus) setStatus(payload.nextStatus);
+    };
+    socket.on('stageReview', onStageReview);
 
-        // обновление статуса из БД (emit с сервера)
-        const onStatusUpdated = (payload) => {
-            if (!payload || String(payload.commissionId) !== String(commissionId)) return;
-            const next = payload.status;
-            if (next) {
-                setStatus(next);
-                setCommission(prev => prev ? { ...prev, Status: next, status: next } : prev);
-            }
-        };
-        socket.on('statusUpdated', onStatusUpdated);
+    const onStatusUpdated = (payload) => {
+        console.log('[Socket] Status updated:', payload);
+        if (!payload || String(payload.commissionId) !== String(commissionId)) return;
+        const next = payload.status;
+        if (next) {
+            setStatus(next);
+            setCommission(prev => prev ? { ...prev, Status: next, status: next } : prev);
+        }
+    };
+    socket.on('statusUpdated', onStatusUpdated);
 
         return () => {
-            socket.emit('leave', room);
-            socket.off('newMessage', handler);
-            socket.off('stageSubmitted', onStageSubmitted);
-            socket.off('paymentUpdate', onPaymentUpdate);
-            socket.off('stageReview', onStageReview);
-            socket.off('statusUpdated', onStatusUpdated);
-            socket.off('connect', joinRoom);
-            socket.close();
-        };
-    }, [commissionId, user, partnerAvatar, scrollToBottom]);
+        console.log('[Socket] Cleaning up, leaving room:', room);
+        socket.emit('leave', room);
+        socket.off('newMessage', handler);
+        socket.off('stageSubmitted', onStageSubmitted);
+        socket.off('paymentUpdate', onPaymentUpdate);
+        socket.off('stageReview', onStageReview);
+        socket.off('statusUpdated', onStatusUpdated);
+        socket.off('connect');
+        socket.off('disconnect');
+        socket.off('error');
+        socket.close();
+    };
+}, [commissionId, user, partnerAvatar, scrollToBottom]);
 
     // автопрокрутка при изменении сообщений
     useEffect(() => {
